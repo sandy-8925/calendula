@@ -353,10 +353,7 @@ public class WebViewActivity extends CalendulaActivity {
     private void enableAppCache() {
         LogUtil.d(TAG, "Enabling cache with max size " + CACHE_MAX_SIZE + " bytes");
         webView.getSettings().setDomStorageEnabled(true);
-        webView.getSettings().setAppCacheMaxSize(CACHE_MAX_SIZE);
-        webView.getSettings().setAppCachePath(getFilesDir().getPath() + "data/" + getPackageName() + "/cache");
         webView.getSettings().setAllowFileAccess(true);
-        webView.getSettings().setAppCacheEnabled(true);
         webView.getSettings().setCacheMode(WebSettings.LOAD_DEFAULT);
     }
 

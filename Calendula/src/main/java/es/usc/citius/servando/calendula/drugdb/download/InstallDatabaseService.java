@@ -212,7 +212,7 @@ public class InstallDatabaseService extends JobIntentService {
         mBuilder.setContentText(getString(R.string.install_db_notification_onfailure_content));
         mBuilder.setAutoCancel(true);
         mBuilder.setProgress(100, 100, false);
-        mBuilder.setSmallIcon(R.drawable.ic_clear_search_holo_light);
+        mBuilder.setSmallIcon(R.drawable.close_x);
         mBuilder.setContentInfo("");
         mBuilder.setContentIntent(null);
 

@@ -198,7 +198,7 @@ public class CalendarActivity extends CalendulaActivity {
 
         Paint textPaint = new Paint();
         //obviously, we have to set textSize into Paint object
-        textPaint.setTextSize(getResources().getDimensionPixelOffset(R.dimen.medium_font_size));
+        textPaint.setTextSize(getResources().getDimensionPixelOffset(com.codetroopers.betterpickers.R.dimen.medium_font_size));
         Paint.FontMetricsInt fontMetrics = textPaint.getFontMetricsInt();
 
         for (PickupInfo p : pks) {
@@ -339,7 +339,7 @@ public class CalendarActivity extends CalendulaActivity {
 
             @Override
             public void onCaldroidViewCreated() {
-                caldroidFragment.getView().findViewById(R.id.calendar_title_view).setVisibility(View.GONE);
+                caldroidFragment.getView().findViewById(com.caldroid.R.id.calendar_title_view).setVisibility(View.GONE);
                 caldroidFragment.getMonthTitleTextView().setVisibility(View.GONE);
             }
 

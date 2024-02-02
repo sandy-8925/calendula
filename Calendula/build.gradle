@@ -16,27 +16,16 @@
  *    along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-buildscript {
-    repositories {
-        mavenCentral()
-    }
+plugins {
+    id 'com.android.application'
+    id 'kotlin-kapt'
+    id 'org.jetbrains.kotlin.android'
+    id 'idea'
 }
-apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
-apply plugin: 'kotlin-kapt'
-apply plugin: 'idea'
+
+
 // build config fields
 apply from: 'config.gradle'
-
-
-repositories {
-    mavenCentral()
-    jcenter()
-    google()
-    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
-    maven { url 'https://jitpack.io' }
-}
 
 idea {
     module {
@@ -72,7 +61,9 @@ task copyTestClasses(type: Copy) {
 }
 
 android {
-    compileSdkVersion 27
+    compileSdk 34
+    namespace "es.usc.citius.servando.calendula"
+
     defaultConfig {
         minSdkVersion 18
         targetSdkVersion 26
@@ -150,18 +141,21 @@ android {
         }
     }
 
-    applicationVariants.all { variant ->
-        variant.outputs.all {
-            outputFileName = "${project.name}-${variant.name}-${variant.versionName}.apk"
-        }
+//    applicationVariants.all { variant ->
+//        variant.outputs.all {
+//            outputFileName = "${project.name}-${variant.name}-${variant.versionName}.apk"
+//        }
+//    }
+//    compileOptions.incremental = false
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
-    compileOptions.incremental = false
-}
 
-
-tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
-    kotlinOptions {
-        allWarningsAsErrors = true
+    buildFeatures {
+        viewBinding true
+        buildConfig true
     }
 }
 

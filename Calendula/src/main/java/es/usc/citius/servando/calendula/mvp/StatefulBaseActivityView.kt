@@ -19,6 +19,7 @@
 package es.usc.citius.servando.calendula.mvp
 
 import android.os.Bundle
+import android.os.Parcelable
 
 abstract class StatefulBaseActivityView<in V : IView, out P : StatefulPresenter<V>> :
     BaseActivityView<V, P>() {
@@ -27,14 +28,14 @@ abstract class StatefulBaseActivityView<in V : IView, out P : StatefulPresenter<
         private const val SAVED_STATE_KEY = "STATEFUL_BASE_ACTIVITY_VIEW_STATE_BUNDLE"
     }
 
-    override fun onSaveInstanceState(outState: Bundle?) {
-        outState?.putParcelable(SAVED_STATE_KEY, presenter.getState())
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putParcelable(SAVED_STATE_KEY, presenter.getState())
         super.onSaveInstanceState(outState)
     }
 
-    override fun onRestoreInstanceState(savedState: Bundle?) {
+    override fun onRestoreInstanceState(savedState: Bundle) {
         super.onRestoreInstanceState(savedState)
-        savedState?.let { presenter.setState(it.getParcelable(SAVED_STATE_KEY)) }
+        savedState.let { it.getParcelable<Parcelable>(SAVED_STATE_KEY)?.let { presenter.setState(it) } }
     }
 
 }

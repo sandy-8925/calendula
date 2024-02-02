@@ -1131,7 +1131,7 @@ public class ScheduleTimetableFragment extends Fragment
         });
 
         repeatTypeSpinner.setAdapter(
-                new ArrayAdapter<>(getActivity(), R.layout.support_simple_spinner_dropdown_item,
+                new ArrayAdapter<>(requireActivity(), android.support.design.R.layout.support_simple_spinner_dropdown_item,
                         getResources().getStringArray(R.array.schedule_repeat_types)));
         repeatTypeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -1147,7 +1147,7 @@ public class ScheduleTimetableFragment extends Fragment
         });
 
         freqSpinner.setAdapter(
-                new ArrayAdapter<>(getActivity(), R.layout.support_simple_spinner_dropdown_item,
+                new ArrayAdapter<>(getActivity(), android.support.design.R.layout.support_simple_spinner_dropdown_item,
                         getResources().getStringArray(R.array.schedule_repeat_frequency_units)));
         freqSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
