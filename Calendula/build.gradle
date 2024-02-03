@@ -176,7 +176,7 @@ dependencies {
 
     /********** SUPPORT **********/
     // Multidex support
-    implementation 'com.android.support:multidex:1.0.2'
+    implementation 'com.android.support:multidex:1.0.3'
 
     // Support libs
     implementation "com.android.support:appcompat-v7:$libVersions.android.support"
@@ -200,7 +200,7 @@ dependencies {
 
     /********** TESTING **********/
     // JUnit
-    testImplementation 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.13.2'
 
     // Mockito
     testImplementation "org.mockito:mockito-inline:$libVersions.mockito"
@@ -227,11 +227,11 @@ dependencies {
     implementation 'com.evernote:android-job:1.1.11'
 
     // JSON serializing-deserializing
-    implementation 'com.google.code.gson:gson:2.8.1'
+    implementation 'com.google.code.gson:gson:2.10'
 
     // Lang utilities
     //  Used for Levenshtein distance, etc
-    implementation 'org.apache.commons:commons-lang3:3.6'
+    implementation 'org.apache.commons:commons-lang3:3.14.0'
     implementation 'org.apache.commons:commons-text:1.1'
 
     // QR code scanning
