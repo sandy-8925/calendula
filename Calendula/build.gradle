@@ -230,7 +230,7 @@ dependencies {
     implementation 'com.evernote:android-job:1.1.11'
 
     // JSON serializing-deserializing
-    implementation 'com.google.code.gson:gson:2.10'
+    implementation 'com.google.code.gson:gson:2.10.1'
 
     // Lang utilities
     //  Used for Levenshtein distance, etc
