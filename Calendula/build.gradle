@@ -63,6 +63,11 @@ task copyTestClasses(type: Copy) {
 android {
     compileSdk 34
     namespace "es.usc.citius.servando.calendula"
+    packagingOptions {
+        resources {
+            excludes += ['LICENSE.txt']
+        }
+    }
 
     defaultConfig {
         minSdkVersion 18
@@ -74,9 +79,6 @@ android {
         multiDexEnabled true
     }
 
-    packagingOptions {
-        exclude 'LICENSE.txt'
-    }
 
     signingConfigs {
         release {
@@ -94,10 +96,6 @@ android {
     }
 
 
-    lintOptions {
-        abortOnError false
-        checkReleaseBuilds false
-    }
     buildTypes {
         release {
             minifyEnabled true
@@ -110,7 +108,8 @@ android {
         debug {
             debuggable true
             minifyEnabled false
-            testCoverageEnabled true
+            enableUnitTestCoverage true
+            enableAndroidTestCoverage true
         }
         beta {
             minifyEnabled false
@@ -156,6 +155,10 @@ android {
     buildFeatures {
         viewBinding true
         buildConfig true
+    }
+    lint {
+        abortOnError false
+        checkReleaseBuilds false
     }
 }
 
