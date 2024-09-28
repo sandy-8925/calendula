@@ -9,7 +9,7 @@ buildscript {
 
     ext {
         gradle_plugin_version = '8.6.1'
-        kotlin_version = '1.9.10'
+        kotlin_version = '1.9.25'
         libVersions = [
                 android: [
                         espresso:'3.0.2',
