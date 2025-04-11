@@ -129,7 +129,7 @@ public class CalendulaApp extends Application {
             }
 
             //initialize LeakCanary
-            LeakCanary.install(CalendulaApp.this);
+//            LeakCanary.install(CalendulaApp.this);
         }
 
         final Context applicationContext = getApplicationContext();
