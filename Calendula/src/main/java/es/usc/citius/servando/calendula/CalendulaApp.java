@@ -153,12 +153,6 @@ public class CalendulaApp extends MultiDexApplication {
 
     }
 
-    @Override
-    public void onTerminate() {
-        DB.dispose();
-        super.onTerminate();
-    }
-
     private void forceLocale(Locale l) {
         Locale locale = new Locale(l.getLanguage());
         Locale.setDefault(locale);

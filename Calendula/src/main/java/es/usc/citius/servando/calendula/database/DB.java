@@ -94,16 +94,6 @@ public class DB {
 
     }
 
-    /**
-     * Dispose DB and DAOs
-     */
-    public synchronized static void dispose() {
-        initialized = false;
-        db.close();
-        manager.releaseHelper(db);
-        LogUtil.v(TAG, "DB disposed");
-    }
-
     public static DatabaseHelper helper() {
         return db;
     }
