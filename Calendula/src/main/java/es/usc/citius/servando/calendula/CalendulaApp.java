@@ -18,6 +18,7 @@
 
 package es.usc.citius.servando.calendula;
 
+import android.app.Application;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Build;
@@ -42,7 +43,7 @@ import es.usc.citius.servando.calendula.util.CloseableUtil;
 import es.usc.citius.servando.calendula.util.LogUtil;
 import es.usc.citius.servando.calendula.util.debug.StethoHelper;
 
-public class CalendulaApp extends MultiDexApplication {
+public class CalendulaApp extends Application {
 
     // INTENTS
     public static final String INTENT_EXTRA_ACTION = "action";
