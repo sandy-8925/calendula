@@ -74,15 +74,10 @@ public class CalendulaApp extends Application {
     private static final String TAG = "CalendulaApp";
     public static boolean disableReceivers = false;
 
-    private static WeakReference<EventBus> eventBusRef;
     private static Context mContext;
 
-
     public static EventBus eventBus() {
-        if (eventBusRef == null || eventBusRef.get() == null) {
-            eventBusRef = new WeakReference<>(EventBus.getDefault());
-        }
-        return eventBusRef.get();
+        return EventBus.getDefault();
     }
 
     public static Context getContext() {
