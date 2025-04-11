@@ -164,9 +164,6 @@ android {
 dependencies {
 
     /********** DEBUGGING **********/
-    // Chrome debug bridge
-    debugImplementation 'com.facebook.stetho:stetho:1.5.0'
-
     // Memory leak debugging
     //  1.5.2 held back because of a bug with gradle 3.0
     debugImplementation "com.squareup.leakcanary:leakcanary-android:$libVersions.leakcanary"

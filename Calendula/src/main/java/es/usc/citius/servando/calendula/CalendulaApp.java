@@ -41,7 +41,6 @@ import es.usc.citius.servando.calendula.database.DB;
 import es.usc.citius.servando.calendula.modules.ModuleManager;
 import es.usc.citius.servando.calendula.util.CloseableUtil;
 import es.usc.citius.servando.calendula.util.LogUtil;
-import es.usc.citius.servando.calendula.util.debug.StethoHelper;
 
 public class CalendulaApp extends Application {
 
@@ -119,10 +118,6 @@ public class CalendulaApp extends Application {
         super.onCreate();
 
         if (!Build.FINGERPRINT.equals("robolectric")) {
-            if (BuildConfig.DEBUG) {
-                new StethoHelper().init(this);
-            }
-
             if (LeakCanary.isInAnalyzerProcess(CalendulaApp.this)) {
                 // This process is dedicated to LeakCanary for heap analysis.
                 return;
