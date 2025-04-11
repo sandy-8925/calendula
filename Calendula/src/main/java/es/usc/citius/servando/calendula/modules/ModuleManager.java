@@ -27,24 +27,15 @@ import java.util.Map;
 
 import es.usc.citius.servando.calendula.util.LogUtil;
 
-import static java.util.Collections.addAll;
-
 public class ModuleManager {
 
     private static final String TAG = "ModuleManager";
     private static ModuleManager theInstance = null;
-    private Map<String, CalendulaModule> modules;
+    private final Map<String, CalendulaModule> modules = new ArrayMap<>();
 
-    private ModuleManager() {
-        modules = new ArrayMap<>();
-    }
+    private ModuleManager() {}
 
-    private ModuleManager(Collection<CalendulaModule> modules) {
-        this();
-        addAll(modules);
-    }
-
-    public static ModuleManager getInstance() {
+    public static synchronized ModuleManager getInstance() {
         if (theInstance == null) {
             LogUtil.d(TAG, "getInstance: ModuleManager initialized");
             theInstance = new ModuleManager();
@@ -87,12 +78,10 @@ public class ModuleManager {
     public void runModules(final String configName, Context ctx) {
         final List<CalendulaModule> modules = ModuleRegistry.getModulesForConfig(configName);
         LogUtil.d(TAG, "runModules: Loading module configuration: " + configName);
-        if (modules == null)
-            throw new IllegalArgumentException("Module config " + configName + "does not exist or is empty");
         run(modules, ctx);
     }
 
     public boolean isModuleEnabled(String moduleID) {
-        return modules.keySet().contains(moduleID);
+        return modules.containsKey(moduleID);
     }
 }
