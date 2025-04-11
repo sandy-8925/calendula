@@ -32,6 +32,7 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.util.concurrent.Callable;
 
+import es.usc.citius.servando.calendula.CalendulaApp;
 import es.usc.citius.servando.calendula.database.DB;
 import es.usc.citius.servando.calendula.drugdb.model.persistence.Prescription;
 import es.usc.citius.servando.calendula.events.PersistenceEvents;
@@ -175,7 +176,7 @@ public class USPrescriptionDBMgr extends PrescriptionDBMgr {
             }
         });
 
-        EventBus.getDefault().post(new PersistenceEvents.DatabaseInstalledEvent());
+        CalendulaApp.eventBus().post(new PersistenceEvents.DatabaseInstalledEvent());
 
         LogUtil.d(TAG, "setup: cleaning up...");
         try {

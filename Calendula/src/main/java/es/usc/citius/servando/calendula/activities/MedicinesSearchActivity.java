@@ -382,14 +382,14 @@ public class MedicinesSearchActivity extends CalendulaActivity implements Medici
     @Override
     protected void onResume() {
         super.onResume();
-        EventBus.getDefault().register(this);
+        CalendulaApp.eventBus().register(this);
         refreshViews();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        EventBus.getDefault().unregister(this);
+        CalendulaApp.eventBus().unregister(this);
     }
 
     private Prescription getPrescriptionFromBarcode(String barcode) {
