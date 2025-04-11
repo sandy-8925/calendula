@@ -72,8 +72,8 @@ android {
     defaultConfig {
         minSdkVersion 21
         targetSdkVersion 26
-        versionCode 42
-        versionName "2.5.11"
+        versionCode 43
+        versionName "3.0-alpha"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         applicationId "es.usc.citius.servando.calendula"
         multiDexEnabled true
