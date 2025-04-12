@@ -48,7 +48,6 @@ import es.usc.citius.servando.calendula.util.LogUtil;
 import es.usc.citius.servando.calendula.util.PreferenceKeys;
 import es.usc.citius.servando.calendula.util.PreferenceUtils;
 import es.usc.citius.servando.calendula.util.PresentationsTypeface;
-import es.usc.citius.servando.calendula.util.security.SecuredVault;
 import es.usc.citius.servando.calendula.util.security.SecurityProvider;
 
 
@@ -96,8 +95,6 @@ public class BaseModule extends CalendulaModule {
 
     @Override
     protected void onApplicationStartup(Context ctx) {
-        PreferenceUtils.init(ctx);
-
         // initialize secured vault
         if (!Build.FINGERPRINT.equals("robolectric")) {
             SecurityProvider.init(ctx);

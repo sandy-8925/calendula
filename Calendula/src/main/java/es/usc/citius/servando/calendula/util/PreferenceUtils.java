@@ -18,12 +18,14 @@
 
 package es.usc.citius.servando.calendula.util;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
 import java.util.Set;
 
+import es.usc.citius.servando.calendula.CalendulaApp;
 import es.usc.citius.servando.calendula.R;
 
 /**
@@ -31,7 +33,8 @@ import es.usc.citius.servando.calendula.R;
  */
 public class PreferenceUtils {
 
-    private static PreferenceUtils instance;
+    @SuppressLint("StaticFieldLeak")
+    private static volatile PreferenceUtils instance;
     private final Context context;
 
     private PreferenceUtils(Context context) {
@@ -39,12 +42,10 @@ public class PreferenceUtils {
     }
 
     /**
-     * Initializes this object and the default preferences.
-     * MUST be called on app startup, preferably before launching any activity.
-     *
-     * @param context a {@link Context} for the appplication
+     * @return a singleton instance of this class
      */
-    public synchronized static void init(Context context) {
+    public static synchronized PreferenceUtils instance() {
+        Context context = CalendulaApp.Companion.getContext();
         if (instance == null) {
             instance = new PreferenceUtils(context);
             if (!getBoolean(PreferenceKeys.SETTINGS_DEFAULTS_LOADED, false)) {
@@ -55,15 +56,6 @@ public class PreferenceUtils {
                 edit().putBoolean(PreferenceKeys.SETTINGS_DEFAULTS_LOADED.key(), true).apply();
             }
         }
-    }
-
-    /**
-     * @return a singleton instance of this class
-     * @throws IllegalStateException if {@link #init(Context)} hasn't been called yet
-     */
-    public static PreferenceUtils instance() throws IllegalStateException {
-        if (instance == null)
-            throw new IllegalStateException("PreferenceUtils must be initialized before use!");
         return instance;
     }
 
