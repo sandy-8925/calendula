@@ -41,7 +41,6 @@ import es.usc.citius.servando.calendula.util.LogUtil
 import es.usc.citius.servando.calendula.util.PreferenceKeys
 import es.usc.citius.servando.calendula.util.PreferenceUtils
 import es.usc.citius.servando.calendula.util.PresentationsTypeface
-import es.usc.citius.servando.calendula.util.security.SecurityProvider
 import org.joda.time.LocalTime
 
 class BaseModule : CalendulaModule() {
@@ -75,11 +74,6 @@ class BaseModule : CalendulaModule() {
     }
 
     override fun onApplicationStartup(ctx: Context) {
-        // initialize secured vault
-        if (Build.FINGERPRINT != "robolectric") {
-            SecurityProvider.init(ctx)
-        }
-
         // initialize SQLite engine
         initializeDatabase(ctx)
 
