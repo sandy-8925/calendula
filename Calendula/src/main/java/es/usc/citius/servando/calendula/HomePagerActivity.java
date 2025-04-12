@@ -28,13 +28,11 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.ColorInt;
-import android.support.annotation.MenuRes;
+import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
-import android.support.annotation.StringRes;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.CoordinatorLayout;
-import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -91,7 +89,6 @@ import es.usc.citius.servando.calendula.util.IconUtils;
 import es.usc.citius.servando.calendula.util.LogUtil;
 import es.usc.citius.servando.calendula.util.PreferenceKeys;
 import es.usc.citius.servando.calendula.util.PreferenceUtils;
-import es.usc.citius.servando.calendula.util.Snack;
 import es.usc.citius.servando.calendula.util.stock.StockDisplayUtils;
 import es.usc.citius.servando.calendula.util.view.DisableableAppBarLayoutBehavior;
 import es.usc.citius.servando.calendula.util.view.ExpandableFAB;
@@ -104,11 +101,10 @@ public class HomePagerActivity extends CalendulaActivity implements
     public static final int REQ_CODE_EXTERNAL_STORAGE = 10;
     private static final String TAG = "HomePagerActivity";
 
-    @MenuRes
+    @IdRes
     private static final int[] MENU_ITEMS = {
             R.id.action_sort, R.id.action_expand, R.id.action_calendar, R.id.action_schedules_help
     };
-
 
     @BindView(R.id.appbar)
     public AppBarLayout appBarLayout;
@@ -162,7 +158,6 @@ public class HomePagerActivity extends CalendulaActivity implements
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.home, menu);
         menuItems = new SparseArray<>(menu.size());
@@ -175,7 +170,6 @@ public class HomePagerActivity extends CalendulaActivity implements
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-
         final int pageNum = mViewPager.getCurrentItem();
         final HomePages page = HomePages.getPage(pageNum);
 
@@ -203,26 +197,15 @@ public class HomePagerActivity extends CalendulaActivity implements
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-
         switch (item.getItemId()) {
             case R.id.action_calendar:
                 startActivity(new Intent(this, CalendarActivity.class));
                 return true;
             case R.id.action_expand:
-
                 final boolean expanded = ((DailyAgendaFragment) getViewPagerFragment(HomePages.HOME)).isExpanded();
                 appBarLayout.setExpanded(expanded);
-
-
                 boolean delay = appBarLayoutExpanded && !expanded || !appBarLayoutExpanded && expanded;
-
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        ((DailyAgendaFragment) getViewPagerFragment(HomePages.HOME)).toggleViewMode();
-                    }
-                }, delay ? 500 : 0);
-
+                new Handler().postDelayed(() -> ((DailyAgendaFragment) getViewPagerFragment(HomePages.HOME)).toggleViewMode(), delay ? 500 : 0);
                 item.setIcon(expanded ? icAgendaMore : icAgendaLess);
                 return true;
             case R.id.action_schedules_help:
@@ -231,20 +214,15 @@ public class HomePagerActivity extends CalendulaActivity implements
             case R.id.action_sort:
                 ((MedicinesListFragment) getViewPagerFragment(HomePages.MEDICINES)).toggleSort();
                 return true;
-
         }
         return super.onOptionsItemSelected(item);
     }
 
     public void launchActivityDelayed(final Class<?> activityClazz, int delay) {
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                startActivity(new Intent(HomePagerActivity.this, activityClazz));
-                overridePendingTransition(0, 0);
-            }
+        new Handler().postDelayed(() -> {
+            startActivity(new Intent(HomePagerActivity.this, activityClazz));
+            overridePendingTransition(0, 0);
         }, delay);
-
     }
 
     @Override
@@ -288,59 +266,55 @@ public class HomePagerActivity extends CalendulaActivity implements
     @Subscribe
     public void handleEvent(final Object event) {
         if (active) {
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-
-                    if (event instanceof PersistenceEvents.ModelCreateOrUpdateEvent) {
-                        PersistenceEvents.ModelCreateOrUpdateEvent modelCreateOrUpdateEvent = (PersistenceEvents.ModelCreateOrUpdateEvent) event;
-                        LogUtil.d(TAG, "handleEvent: " + modelCreateOrUpdateEvent.clazz.getName());
-                        ((DailyAgendaFragment) getViewPagerFragment(HomePages.HOME)).notifyDataChange();
-                        ((RoutinesListFragment) getViewPagerFragment(HomePages.ROUTINES)).notifyDataChange();
-                        ((MedicinesListFragment) getViewPagerFragment(HomePages.MEDICINES)).notifyDataChange();
-                        ((ScheduleListFragment) getViewPagerFragment(HomePages.SCHEDULES)).notifyDataChange();
-                    } else if (event instanceof PersistenceEvents.IntakeConfirmedEvent) {
-                        // dismiss "take all" button, update checkboxes
-                        ((DailyAgendaFragment) getViewPagerFragment(HomePages.HOME)).notifyDataChange();
-                        // stock info may need to be updated
-                        ((MedicinesListFragment) getViewPagerFragment(HomePages.MEDICINES)).notifyDataChange();
-                    } else if (event instanceof PersistenceEvents.ActiveUserChangeEvent) {
-                        activePatient = ((PersistenceEvents.ActiveUserChangeEvent) event).patient;
+            handler.post(() -> {
+                if (event instanceof PersistenceEvents.ModelCreateOrUpdateEvent) {
+                    PersistenceEvents.ModelCreateOrUpdateEvent modelCreateOrUpdateEvent = (PersistenceEvents.ModelCreateOrUpdateEvent) event;
+                    LogUtil.d(TAG, "handleEvent: " + modelCreateOrUpdateEvent.clazz.getName());
+                    ((DailyAgendaFragment) getViewPagerFragment(HomePages.HOME)).notifyDataChange();
+                    ((RoutinesListFragment) getViewPagerFragment(HomePages.ROUTINES)).notifyDataChange();
+                    ((MedicinesListFragment) getViewPagerFragment(HomePages.MEDICINES)).notifyDataChange();
+                    ((ScheduleListFragment) getViewPagerFragment(HomePages.SCHEDULES)).notifyDataChange();
+                } else if (event instanceof PersistenceEvents.IntakeConfirmedEvent) {
+                    // dismiss "take all" button, update checkboxes
+                    ((DailyAgendaFragment) getViewPagerFragment(HomePages.HOME)).notifyDataChange();
+                    // stock info may need to be updated
+                    ((MedicinesListFragment) getViewPagerFragment(HomePages.MEDICINES)).notifyDataChange();
+                } else if (event instanceof PersistenceEvents.ActiveUserChangeEvent) {
+                    activePatient = ((PersistenceEvents.ActiveUserChangeEvent) event).patient;
+                    updateTitle(mViewPager.getCurrentItem());
+                    toolbarLayout.setContentScrimColor(activePatient.getColor());
+                    fabMgr.onPatientUpdate(activePatient);
+                } else if (event instanceof PersistenceEvents.UserUpdateEvent) {
+                    Patient p = ((PersistenceEvents.UserUpdateEvent) event).patient;
+                    ((DailyAgendaFragment) getViewPagerFragment(HomePages.HOME)).onUserUpdate();
+                    drawerMgr.onPatientUpdated(p);
+                    if (DB.patients().isActive(p, HomePagerActivity.this)) {
+                        activePatient = p;
                         updateTitle(mViewPager.getCurrentItem());
                         toolbarLayout.setContentScrimColor(activePatient.getColor());
                         fabMgr.onPatientUpdate(activePatient);
-                    } else if (event instanceof PersistenceEvents.UserUpdateEvent) {
-                        Patient p = ((PersistenceEvents.UserUpdateEvent) event).patient;
-                        ((DailyAgendaFragment) getViewPagerFragment(HomePages.HOME)).onUserUpdate();
-                        drawerMgr.onPatientUpdated(p);
-                        if (DB.patients().isActive(p, HomePagerActivity.this)) {
-                            activePatient = p;
-                            updateTitle(mViewPager.getCurrentItem());
-                            toolbarLayout.setContentScrimColor(activePatient.getColor());
-                            fabMgr.onPatientUpdate(activePatient);
-                        }
-                    } else if (event instanceof PersistenceEvents.UserCreateEvent) {
-                        Patient created = ((PersistenceEvents.UserCreateEvent) event).patient;
-                        drawerMgr.onPatientCreated(created);
-                    } else if (event instanceof HomeProfileMgr.BackgroundUpdatedEvent) {
-                        ((DailyAgendaFragment) getViewPagerFragment(HomePages.HOME)).refresh();
-                    } else if (event instanceof ConfirmActivity.ConfirmStateChangeEvent) {
-                        pendingRefresh = ((ConfirmActivity.ConfirmStateChangeEvent) event).position;
-                        ((DailyAgendaFragment) getViewPagerFragment(HomePages.HOME)).refreshPosition(pendingRefresh);
-                    } else if (event instanceof DailyAgenda.AgendaUpdatedEvent) {
-                        ((DailyAgendaFragment) getViewPagerFragment(HomePages.HOME)).notifyDataChange();
-                        homeProfileMgr.updateDate();
-                    } else if (event instanceof StockRunningOutEvent) {
-                        final StockRunningOutEvent sro = (StockRunningOutEvent) event;
-                        handler.postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                StockDisplayUtils.showStockRunningOutDialog(HomePagerActivity.this, sro.m, sro.days);
-                            }
-                        }, 1000);
-                    } else if (event instanceof PersistenceEvents.DatabaseUpdateEvent) {
-                        checkDatabaseUpdateNeeded();
                     }
+                } else if (event instanceof PersistenceEvents.UserCreateEvent) {
+                    Patient created = ((PersistenceEvents.UserCreateEvent) event).patient;
+                    drawerMgr.onPatientCreated(created);
+                } else if (event instanceof HomeProfileMgr.BackgroundUpdatedEvent) {
+                    ((DailyAgendaFragment) getViewPagerFragment(HomePages.HOME)).refresh();
+                } else if (event instanceof ConfirmActivity.ConfirmStateChangeEvent) {
+                    pendingRefresh = ((ConfirmActivity.ConfirmStateChangeEvent) event).position;
+                    ((DailyAgendaFragment) getViewPagerFragment(HomePages.HOME)).refreshPosition(pendingRefresh);
+                } else if (event instanceof DailyAgenda.AgendaUpdatedEvent) {
+                    ((DailyAgendaFragment) getViewPagerFragment(HomePages.HOME)).notifyDataChange();
+                    homeProfileMgr.updateDate();
+                } else if (event instanceof StockRunningOutEvent) {
+                    final StockRunningOutEvent sro = (StockRunningOutEvent) event;
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            StockDisplayUtils.showStockRunningOutDialog(HomePagerActivity.this, sro.m, sro.days);
+                        }
+                    }, 1000);
+                } else if (event instanceof PersistenceEvents.DatabaseUpdateEvent) {
+                    checkDatabaseUpdateNeeded();
                 }
             });
         } else {
@@ -383,10 +357,6 @@ public class HomePagerActivity extends CalendulaActivity implements
                     .show();
         }
 
-    }
-
-    public void showSnackbar(@StringRes final int text) {
-        Snack.show(text, coordinatorLayout, Snackbar.LENGTH_SHORT);
     }
 
     Fragment getViewPagerFragment(HomePages page) {
