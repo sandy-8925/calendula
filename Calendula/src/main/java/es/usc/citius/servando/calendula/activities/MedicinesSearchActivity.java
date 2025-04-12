@@ -191,8 +191,8 @@ public class MedicinesSearchActivity extends CalendulaActivity implements Medici
 
     private void refreshViews() {
         // TODO: 23/02/18 the current DBVersionMgr should tell us if the DB can handle barcodes
-        if (!PreferenceUtils.getString(PreferenceKeys.DRUGDB_CURRENT_DB, CalendulaApp.getContext().getString(R.string.database_none_id))
-                .equals(CalendulaApp.getContext().getString(R.string.database_none_id))) {
+        if (!PreferenceUtils.getString(PreferenceKeys.DRUGDB_CURRENT_DB, getString(R.string.database_none_id))
+                .equals(getString(R.string.database_none_id))) {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -305,8 +305,8 @@ public class MedicinesSearchActivity extends CalendulaActivity implements Medici
                 .colorRes(R.color.white)
                 .actionBar();
 
-        if (!PreferenceUtils.getString(PreferenceKeys.DRUGDB_CURRENT_DB, CalendulaApp.getContext().getString(R.string.database_none_id))
-                .equals(CalendulaApp.getContext().getString(R.string.database_none_id))) {
+        if (!PreferenceUtils.getString(PreferenceKeys.DRUGDB_CURRENT_DB, getString(R.string.database_none_id))
+                .equals(getString(R.string.database_none_id))) {
             enableBarcodeScan();
         } else if (!PreferenceUtils.getBoolean(PreferenceKeys.MEDICINES_USE_PRESCRIPTIONS_SHOWN, false)) {
             askForDatabase();

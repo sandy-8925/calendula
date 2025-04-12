@@ -97,6 +97,6 @@ public enum PreferenceKeys {
 
     @Override
     public String toString() {
-        return CalendulaApp.getContext().getString(stringId);
+        return CalendulaApp.Companion.getContext().getString(stringId);
     }
 }

@@ -47,7 +47,7 @@ public class MedicineSortUtil {
 
         @Override
         public String toString() {
-            return CalendulaApp.getContext().getString(displayName);
+            return CalendulaApp.Companion.getContext().getString(displayName);
         }
 
         public Comparator<Medicine> comparator() {
