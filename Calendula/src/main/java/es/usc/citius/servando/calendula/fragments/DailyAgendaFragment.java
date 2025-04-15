@@ -107,7 +107,7 @@ public class DailyAgendaFragment extends Fragment {
         boolean expanded = PreferenceUtils.getBoolean(PreferenceKeys.HOME_DAILYAGENDA_EXPANDED, false);
         if (expanded != isExpanded()) {
             toggleViewMode();
-            ((HomePagerActivity) getActivity()).appBarLayout.setExpanded(!expanded);
+            ((HomePagerActivity) getActivity()).getAppBarLayout().setExpanded(!expanded);
         }
 
         return rootView;
