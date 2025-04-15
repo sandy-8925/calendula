@@ -46,7 +46,7 @@ import es.usc.citius.servando.calendula.util.ScreenUtils
 @SuppressLint("Registered")
 abstract class CalendulaActivity : AppCompatActivity() {
     @JvmField protected var toolbar: Toolbar? = null
-    private var permissionRequestListeners: MutableMap<Int, PermissionUtils.PermissionRequest>? = null
+    private val permissionRequestListeners = mutableMapOf<Int, PermissionUtils.PermissionRequest>()
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
@@ -136,10 +136,7 @@ abstract class CalendulaActivity : AppCompatActivity() {
                 }
             }
             if (missingPermissions && shouldAsk) {
-                if (permissionRequestListeners == null) {
-                    permissionRequestListeners = HashMap()
-                }
-                permissionRequestListeners!![req.reqCode()] = req
+                permissionRequestListeners[req.reqCode()] = req
                 PermissionUtils.requestPermissions(this, req.permissions(), req.reqCode())
             } else if (missingPermissions) {
                 showManualPermissionGrantDialog()
@@ -153,8 +150,8 @@ abstract class CalendulaActivity : AppCompatActivity() {
 
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
-        if (permissionRequestListeners!!.containsKey(requestCode)) {
-            val req = permissionRequestListeners!![requestCode]
+        if (permissionRequestListeners.containsKey(requestCode)) {
+            val req = permissionRequestListeners[requestCode]
             for (p in req!!.permissions()) {
                 PermissionUtils.markPermissionAsAsked(this, p)
             }
@@ -163,7 +160,7 @@ abstract class CalendulaActivity : AppCompatActivity() {
             } else {
                 req.onPermissionDenied()
             }
-            permissionRequestListeners!!.remove(requestCode)
+            permissionRequestListeners.remove(requestCode)
         }
     }
 
