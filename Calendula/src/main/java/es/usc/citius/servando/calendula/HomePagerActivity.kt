@@ -109,7 +109,6 @@ class HomePagerActivity : CalendulaActivity(), OnRoutineSelectedListener, OnMedi
     private var icAgendaLess: Drawable? = null
     private var fabMgr: FabMenuMgr? = null
     private var homeProfileMgr: HomeProfileMgr? = null
-    private var mSectionsPagerAdapter: HomePageAdapter? = null
     private var drawerMgr: LeftDrawerMgr? = null
     private var activePatient: Patient? = null
     private var pendingRefresh = -2
@@ -329,12 +328,8 @@ class HomePagerActivity : CalendulaActivity(), OnRoutineSelectedListener, OnMedi
         subscribeToEvents()
         handler = Handler()
 
-        // Create the adapter that will return a fragment for each of the three
-        // primary sections of the activity.
-        mSectionsPagerAdapter = HomePageAdapter(supportFragmentManager, this, this)
-
         // Set up the ViewPager with the sections adapter.
-        mViewPager.adapter = mSectionsPagerAdapter
+        mViewPager.adapter = HomePageAdapter(supportFragmentManager, this, this)
         mViewPager.addOnPageChangeListener(pageChangeListener)
         mViewPager.offscreenPageLimit = 5
 
