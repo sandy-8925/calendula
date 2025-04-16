@@ -25,6 +25,7 @@ import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.support.annotation.ColorInt
 import android.support.annotation.IdRes
 import android.support.design.widget.AppBarLayout
@@ -108,12 +109,12 @@ class HomePagerActivity : CalendulaActivity(), OnRoutineSelectedListener, OnMedi
     private var icAgendaMore: Drawable? = null
     private var icAgendaLess: Drawable? = null
     private var fabMgr: FabMenuMgr? = null
-    private var homeProfileMgr: HomeProfileMgr? = null
-    private var drawerMgr: LeftDrawerMgr? = null
+    private val homeProfileMgr by lazy { HomeProfileMgr() }
+    private val drawerMgr: LeftDrawerMgr by lazy { LeftDrawerMgr(this, toolbar) }
     private var activePatient: Patient? = null
     private var pendingRefresh = -2
     private val pendingEvents: Queue<Any> = LinkedList()
-    private var handler: Handler? = null
+    private val handler by lazy { Handler(Looper.getMainLooper()) }
 
     private lateinit var menuItems: SparseArray<MenuItem>
 
@@ -124,7 +125,7 @@ class HomePagerActivity : CalendulaActivity(), OnRoutineSelectedListener, OnMedi
         if (position >= 0 && position < mViewPager.childCount) {
             mViewPager.currentItem = position
             if (updateDrawer) {
-                drawerMgr!!.onPagerPositionChange(position)
+                drawerMgr.onPagerPositionChange(position)
             }
         }
     }
@@ -230,7 +231,7 @@ class HomePagerActivity : CalendulaActivity(), OnRoutineSelectedListener, OnMedi
     // Method called from the event bus
     @Subscribe fun handleEvent(event: Any) {
         if (active) {
-            handler!!.post {
+            handler.post {
                 if (event is ModelCreateOrUpdateEvent) {
                     LogUtil.d(TAG, "handleEvent: " + event.clazz.name)
                     (getViewPagerFragment(HomePages.HOME) as DailyAgendaFragment?)!!.notifyDataChange()
@@ -250,7 +251,7 @@ class HomePagerActivity : CalendulaActivity(), OnRoutineSelectedListener, OnMedi
                 } else if (event is UserUpdateEvent) {
                     val p = event.patient
                     (getViewPagerFragment(HomePages.HOME) as DailyAgendaFragment?)!!.onUserUpdate()
-                    drawerMgr!!.onPatientUpdated(p)
+                    drawerMgr.onPatientUpdated(p)
                     if (DB.patients().isActive(p, this@HomePagerActivity)) {
                         activePatient = p
                         updateTitle(mViewPager.currentItem)
@@ -259,7 +260,7 @@ class HomePagerActivity : CalendulaActivity(), OnRoutineSelectedListener, OnMedi
                     }
                 } else if (event is UserCreateEvent) {
                     val created = event.patient
-                    drawerMgr!!.onPatientCreated(created)
+                    drawerMgr.onPatientCreated(created)
                 } else if (event is BackgroundUpdatedEvent) {
                     (getViewPagerFragment(HomePages.HOME) as DailyAgendaFragment?)!!.refresh()
                 } else if (event is ConfirmStateChangeEvent) {
@@ -267,10 +268,10 @@ class HomePagerActivity : CalendulaActivity(), OnRoutineSelectedListener, OnMedi
                     (getViewPagerFragment(HomePages.HOME) as DailyAgendaFragment?)!!.refreshPosition(pendingRefresh)
                 } else if (event is AgendaUpdatedEvent) {
                     (getViewPagerFragment(HomePages.HOME) as DailyAgendaFragment?)!!.notifyDataChange()
-                    homeProfileMgr!!.updateDate()
+                    homeProfileMgr.updateDate()
                 } else if (event is StockRunningOutEvent) {
                     val sro = event
-                    handler!!.postDelayed(Runnable { showStockRunningOutDialog(this@HomePagerActivity, sro.m, sro.days) }, 1000)
+                    handler.postDelayed({ showStockRunningOutDialog(this@HomePagerActivity, sro.m, sro.days) }, 1000)
                 } else if (event is DatabaseUpdateEvent) {
                     checkDatabaseUpdateNeeded()
                 }
@@ -283,7 +284,7 @@ class HomePagerActivity : CalendulaActivity(), OnRoutineSelectedListener, OnMedi
     /**
      * If the app has been updated from an old Drug DB model, we need to re-install it and re-link the meds to their prescription.
      */
-    fun checkDatabaseUpdateNeeded() {
+    private fun checkDatabaseUpdateNeeded() {
         val needPrompt = PreferenceUtils.getBoolean(PreferenceKeys.DRUGDB_DB_PROMPT, false)
         if (needPrompt) {
             MaterialStyledDialog.Builder(this)
@@ -325,17 +326,16 @@ class HomePagerActivity : CalendulaActivity(), OnRoutineSelectedListener, OnMedi
         setupToolbar(null, Color.TRANSPARENT)
         initializeDrawer(savedInstanceState)
         setupStatusBar(Color.TRANSPARENT)
+
+        // Set up home profile
+        homeProfileMgr.init(userInfoFragment, this)
+
         subscribeToEvents()
-        handler = Handler()
 
         // Set up the ViewPager with the sections adapter.
         mViewPager.adapter = HomePageAdapter(supportFragmentManager, this, this)
         mViewPager.addOnPageChangeListener(pageChangeListener)
         mViewPager.offscreenPageLimit = 5
-
-        // Set up home profile
-        homeProfileMgr = HomeProfileMgr()
-        homeProfileMgr!!.init(userInfoFragment, this)
 
         activePatient = DB.patients().getActive(this)
         updateScrim(0)
@@ -353,7 +353,7 @@ class HomePagerActivity : CalendulaActivity(), OnRoutineSelectedListener, OnMedi
         val mListener =
             OnOffsetChangedListener { appBarLayout, verticalOffset -> //LogUtil.d(TAG, "Values: (" + toolbarLayout.getHeight()+ " + " +verticalOffset + ") < (2 * " + ViewCompat.getMinimumHeight(toolbarLayout) + ")");
                 if ((toolbarLayout.height + verticalOffset) < (1.8 * ViewCompat.getMinimumHeight(toolbarLayout))) {
-                    homeProfileMgr!!.onCollapse()
+                    homeProfileMgr.onCollapse()
                     toolbarTitle.animate().alpha(1f)
                     appBarLayoutExpanded = false
                     LogUtil.d(TAG, "OnCollapse")
@@ -362,7 +362,7 @@ class HomePagerActivity : CalendulaActivity(), OnRoutineSelectedListener, OnMedi
                     if (mViewPager.currentItem == 0) {
                         toolbarTitle.animate().alpha(0f)
                     }
-                    homeProfileMgr!!.onExpand()
+                    homeProfileMgr.onExpand()
                     LogUtil.d(TAG, "OnExpand")
                 }
             }
@@ -379,26 +379,22 @@ class HomePagerActivity : CalendulaActivity(), OnRoutineSelectedListener, OnMedi
             .sizeDp(24)
 
         if (!PreferenceUtils.getBoolean(PreferenceKeys.HOME_INTRO_SHOWN, false)) {
-            handler!!.postDelayed({ launchActivity(Intent(this@HomePagerActivity, MaterialIntroActivity::class.java)) }, 500)
+            handler.postDelayed({ launchActivity(Intent(this@HomePagerActivity, MaterialIntroActivity::class.java)) }, 500)
         }
 
         if (intent != null && intent.getBooleanExtra("invalid_notification_error", false)) {
             Toast.makeText(this, "Error", Toast.LENGTH_SHORT).show()
-            handler!!.postDelayed({ showInvalidNotificationError() }, 500)
+            handler.postDelayed({ showInvalidNotificationError() }, 500)
         }
 
         //check for DB update needed
         checkDatabaseUpdateNeeded()
     }
 
-    override fun onPostCreate(savedInstanceState: Bundle?) {
-        super.onPostCreate(savedInstanceState)
-    }
-
     override fun onResume() {
         super.onResume()
         val p = DB.patients().getActive(this)
-        drawerMgr!!.onActivityResume(p)
+        drawerMgr.onActivityResume(p)
         active = true
 
         // process pending events
@@ -426,10 +422,10 @@ class HomePagerActivity : CalendulaActivity(), OnRoutineSelectedListener, OnMedi
             .setPositiveButton(R.string.tutorial_understood) { dialog, which ->
                 dialog.dismiss()
                 if (!expanded) {
-                    appBarLayout.setExpanded(expanded)
-                    menuItems[R.id.action_expand].setIcon(if (expanded) icAgendaMore else icAgendaLess)
-                    handler!!.postDelayed({ (getViewPagerFragment(HomePages.HOME) as DailyAgendaFragment?)!!.toggleViewMode() }, 200)
-                    handler!!.postDelayed({ (getViewPagerFragment(HomePages.HOME) as DailyAgendaFragment?)!!.scrollTo(DateTime.now()) }, 600)
+                    appBarLayout.setExpanded(false)
+                    menuItems[R.id.action_expand].setIcon(icAgendaLess)
+                    handler.postDelayed({ (getViewPagerFragment(HomePages.HOME) as DailyAgendaFragment?)!!.toggleViewMode() }, 200)
+                    handler.postDelayed({ (getViewPagerFragment(HomePages.HOME) as DailyAgendaFragment?)!!.scrollTo(DateTime.now()) }, 600)
                 }
             }.create().show()
     }
@@ -500,8 +496,7 @@ class HomePagerActivity : CalendulaActivity(), OnRoutineSelectedListener, OnMedi
     }
 
     private fun initializeDrawer(savedInstanceState: Bundle?) {
-        drawerMgr = LeftDrawerMgr(this, toolbar)
-        drawerMgr!!.init(savedInstanceState)
+        drawerMgr.init(savedInstanceState)
     }
 
     private fun launchActivity(i: Intent) {
