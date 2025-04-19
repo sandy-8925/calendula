@@ -19,6 +19,7 @@
 package es.usc.citius.servando.calendula.fragments;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -31,10 +32,14 @@ import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import com.mikepenz.community_material_typeface_library.CommunityMaterial;
 import com.mikepenz.iconics.IconicsDrawable;
 import com.mikepenz.iconics.typeface.IIcon;
 
@@ -56,6 +61,7 @@ import es.usc.citius.servando.calendula.DailyAgendaRecyclerAdapter;
 import es.usc.citius.servando.calendula.HomePagerActivity;
 import es.usc.citius.servando.calendula.R;
 import es.usc.citius.servando.calendula.activities.ConfirmActivity;
+import es.usc.citius.servando.calendula.adapters.HomePages;
 import es.usc.citius.servando.calendula.database.DB;
 import es.usc.citius.servando.calendula.persistence.DailyScheduleItem;
 import es.usc.citius.servando.calendula.persistence.Medicine;
@@ -89,14 +95,49 @@ public class DailyAgendaFragment extends Fragment {
     IIcon emptyViewIcon = IconUtils.randomNiceIcon();
 
     @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.menu_fragment_daily_agenda, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if(item.getItemId() == R.id.action_expand) {
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        MenuItem expandMenuItem = menu.findItem(R.id.action_expand);
+
+        IconicsDrawable icAgendaLess = new IconicsDrawable(requireContext())
+                .icon(CommunityMaterial.Icon.cmd_unfold_less_horizontal)
+                .color(Color.WHITE)
+                .sizeDp(24);
+
+        IconicsDrawable icAgendaMore = new IconicsDrawable(requireContext())
+                .icon(CommunityMaterial.Icon.cmd_unfold_more_horizontal)
+                .color(Color.WHITE)
+                .sizeDp(24);
+
+        IconicsDrawable drawableToSet;
+        if(!isExpanded()) drawableToSet = icAgendaMore;
+        else drawableToSet = icAgendaLess;
+        expandMenuItem.setIcon(drawableToSet);
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
         items = new ArrayList<>();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-
         View rootView = inflater.inflate(R.layout.fragment_daily_agenda, container, false);
         rv = (RecyclerView) rootView.findViewById(R.id.rv);
         emptyView = rootView.findViewById(R.id.empty_view_placeholder);
