@@ -20,6 +20,7 @@ package es.usc.citius.servando.calendula
 import android.animation.ArgbEvaluator
 import android.animation.ValueAnimator
 import android.app.AlertDialog
+import android.arch.lifecycle.ViewModel
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.Drawable
@@ -82,6 +83,7 @@ import es.usc.citius.servando.calendula.persistence.Routine
 import es.usc.citius.servando.calendula.persistence.Schedule
 import es.usc.citius.servando.calendula.scheduling.DailyAgenda.AgendaUpdatedEvent
 import es.usc.citius.servando.calendula.settings.CalendulaSettingsActivity
+import es.usc.citius.servando.calendula.util.BooleanSharedPrefsLiveData
 import es.usc.citius.servando.calendula.util.FragmentUtils
 import es.usc.citius.servando.calendula.util.IconUtils
 import es.usc.citius.servando.calendula.util.LogUtil
@@ -96,6 +98,7 @@ import org.greenrobot.eventbus.Subscribe
 import org.joda.time.DateTime
 
 class HomePagerActivity : CalendulaActivity(), OnRoutineSelectedListener, OnMedicineSelectedListener, OnScheduleSelectedListener {
+//    private val viewModel: HomePagerActivityViewModel by viewModels()
     val appBarLayout: AppBarLayout by lazy { binding.appbar }
     private val toolbarLayout: CollapsingToolbarLayout by lazy { binding.collapsingToolbar }
     val fab: ExpandableFAB by lazy { binding.addButton }
@@ -151,11 +154,6 @@ class HomePagerActivity : CalendulaActivity(), OnRoutineSelectedListener, OnMedi
         }
 
         when (page) {
-            HomePages.HOME -> {
-                val expanded = (getViewPagerFragment(HomePages.HOME) as DailyAgendaFragment?)!!.isExpanded
-                menuItems[R.id.action_expand].setVisible(true)
-                menuItems[R.id.action_expand].setIcon(if (!expanded) icAgendaMore else icAgendaLess)
-            }
             HomePages.MEDICINES -> menuItems[R.id.action_sort].setVisible(true)
             HomePages.SCHEDULES -> menuItems[R.id.action_schedules_help].setVisible(true)
             else -> {}
@@ -509,7 +507,11 @@ class HomePagerActivity : CalendulaActivity(), OnRoutineSelectedListener, OnMedi
 
         @IdRes
         private val MENU_ITEMS = intArrayOf(
-            R.id.action_sort, R.id.action_expand, R.id.action_calendar, R.id.action_schedules_help
+            R.id.action_sort, R.id.action_calendar, R.id.action_schedules_help
         )
     }
+}
+
+internal class HomePagerActivityViewModel: ViewModel() {
+    val expandedPrefLiveData = BooleanSharedPrefsLiveData(PreferenceUtils.instance().preferences(), PreferenceKeys.HOME_DAILYAGENDA_EXPANDED.toString())
 }
