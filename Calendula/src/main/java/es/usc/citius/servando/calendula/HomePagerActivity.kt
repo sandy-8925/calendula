@@ -20,7 +20,6 @@ package es.usc.citius.servando.calendula
 import android.animation.ArgbEvaluator
 import android.animation.ValueAnimator
 import android.app.AlertDialog
-import android.arch.lifecycle.ViewModel
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.Drawable
@@ -45,6 +44,8 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.viewModels
+import androidx.lifecycle.ViewModel
 import com.github.javiersantos.materialstyleddialogs.MaterialStyledDialog
 import com.github.javiersantos.materialstyleddialogs.enums.Style
 import com.mikepenz.community_material_typeface_library.CommunityMaterial
@@ -98,7 +99,7 @@ import org.greenrobot.eventbus.Subscribe
 import org.joda.time.DateTime
 
 class HomePagerActivity : CalendulaActivity(), OnRoutineSelectedListener, OnMedicineSelectedListener, OnScheduleSelectedListener {
-//    private val viewModel: HomePagerActivityViewModel by viewModels()
+    private val viewModel: HomePagerActivityViewModel by viewModels()
     val appBarLayout: AppBarLayout by lazy { binding.appbar }
     private val toolbarLayout: CollapsingToolbarLayout by lazy { binding.collapsingToolbar }
     val fab: ExpandableFAB by lazy { binding.addButton }
