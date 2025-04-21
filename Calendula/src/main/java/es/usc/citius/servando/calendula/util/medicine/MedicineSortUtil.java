@@ -18,7 +18,7 @@
 
 package es.usc.citius.servando.calendula.util.medicine;
 
-import android.support.annotation.StringRes;
+import androidx.annotation.StringRes;
 
 import java.util.Comparator;
 import java.util.List;

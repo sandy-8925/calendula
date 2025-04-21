@@ -19,8 +19,8 @@
 package es.usc.citius.servando.calendula.pinlock.view;
 
 import android.content.Context;
-import android.support.v7.widget.AppCompatImageButton;
-import android.support.v7.widget.GridLayout;
+import androidx.appcompat.widget.AppCompatImageButton;
+import androidx.gridlayout.widget.GridLayout;
 import android.util.AttributeSet;
 import android.view.HapticFeedbackConstants;
 import android.view.View;

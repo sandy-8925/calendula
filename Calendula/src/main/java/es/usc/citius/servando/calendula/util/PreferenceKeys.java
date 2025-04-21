@@ -18,7 +18,7 @@
 
 package es.usc.citius.servando.calendula.util;
 
-import android.support.annotation.StringRes;
+import androidx.annotation.StringRes;
 
 import es.usc.citius.servando.calendula.CalendulaApp;
 import es.usc.citius.servando.calendula.R;

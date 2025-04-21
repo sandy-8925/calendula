@@ -20,8 +20,8 @@ package es.usc.citius.servando.calendula.settings
 
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.support.annotation.StringRes
-import android.support.v7.preference.PreferenceFragmentCompat
+import androidx.annotation.StringRes
+import androidx.preference.PreferenceFragmentCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup

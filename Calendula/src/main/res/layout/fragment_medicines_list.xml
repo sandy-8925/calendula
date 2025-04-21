@@ -39,7 +39,7 @@
             android:textAppearance="@style/TextAppearance.AppCompat.Button"
             android:textColor="@color/white"/>
 
-        <android.support.v7.widget.AppCompatSpinner
+        <androidx.appcompat.widget.AppCompatSpinner
             android:id="@+id/medicine_sort_spinner"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -59,7 +59,7 @@
         android:focusable="true"
         android:focusableInTouchMode="true">
 
-        <android.support.v7.widget.RecyclerView
+        <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/medicines_list"
             android:layout_width="wrap_content"
             android:layout_height="fill_parent"

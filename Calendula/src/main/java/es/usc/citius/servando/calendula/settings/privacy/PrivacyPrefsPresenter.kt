@@ -20,7 +20,7 @@ package es.usc.citius.servando.calendula.settings.privacy
 
 import android.app.Activity
 import android.content.Intent
-import android.support.annotation.VisibleForTesting
+import androidx.annotation.VisibleForTesting
 import es.usc.citius.servando.calendula.R
 import es.usc.citius.servando.calendula.mvp.BasePresenter
 import es.usc.citius.servando.calendula.pinlock.PINManager

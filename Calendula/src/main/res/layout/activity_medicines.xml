@@ -31,7 +31,7 @@
                                                                       android:layout_below="@+id/textView2"
                                                                       tools:context=".RoutinesActivity"/>
 
-    <android.support.v7.widget.Toolbar xmlns:app="http://schemas.android.com/apk/res-auto"
+    <androidx.appcompat.widget.Toolbar xmlns:app="http://schemas.android.com/apk/res-auto"
                                        android:id="@+id/toolbar"
                                        android:layout_width="match_parent"
                                        android:layout_height="56dp"
@@ -64,7 +64,7 @@
         android:textSize="24sp"/>
 
 
-    <android.support.design.widget.FloatingActionButton
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/add_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

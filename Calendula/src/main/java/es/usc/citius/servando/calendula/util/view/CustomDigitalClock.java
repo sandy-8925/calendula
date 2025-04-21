@@ -23,7 +23,7 @@ import android.database.ContentObserver;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.provider.Settings;
-import android.support.v7.widget.AppCompatTextView;
+import androidx.appcompat.widget.AppCompatTextView;
 import android.text.format.DateFormat;
 import android.util.AttributeSet;
 

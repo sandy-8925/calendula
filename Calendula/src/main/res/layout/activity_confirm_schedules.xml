@@ -25,7 +25,7 @@
     android:background="@color/android_blue_darker"
     android:paddingTop="@dimen/status_bar_height">
 
-    <android.support.v7.widget.Toolbar xmlns:app="http://schemas.android.com/apk/res-auto"
+    <androidx.appcompat.widget.Toolbar xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="65dp"
@@ -34,7 +34,7 @@
         app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
 
-    </android.support.v7.widget.Toolbar>
+    </androidx.appcompat.widget.Toolbar>
 
     <LinearLayout
         android:id="@+id/schedule_type_selector"
@@ -89,7 +89,7 @@
         tools:text="Ibuprofeno 500 dsa dsadsa dsadsadas dsadas" />
 
 
-    <android.support.v4.view.ViewPager
+    <androidx.viewpager.widget.ViewPager
         android:id="@+id/pager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -124,7 +124,7 @@
     <!--android:visibility="invisible" />-->
 
 
-    <android.support.design.widget.FloatingActionButton
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/add_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

@@ -20,7 +20,7 @@ package es.usc.citius.servando.calendula.settings.database
 
 import android.content.Context
 import android.content.Intent
-import android.support.annotation.StringRes
+import androidx.annotation.StringRes
 import es.usc.citius.servando.calendula.mvp.IPresenter
 import es.usc.citius.servando.calendula.mvp.IView
 

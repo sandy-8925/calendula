@@ -29,9 +29,9 @@ import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.StateListDrawable;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import android.text.Html;
 import android.text.Spanned;
 import android.text.format.Time;
@@ -1131,7 +1131,7 @@ public class ScheduleTimetableFragment extends Fragment
         });
 
         repeatTypeSpinner.setAdapter(
-                new ArrayAdapter<>(requireActivity(), android.support.design.R.layout.support_simple_spinner_dropdown_item,
+                new ArrayAdapter<>(requireActivity(), android.R.layout.simple_spinner_dropdown_item,
                         getResources().getStringArray(R.array.schedule_repeat_types)));
         repeatTypeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -1147,7 +1147,7 @@ public class ScheduleTimetableFragment extends Fragment
         });
 
         freqSpinner.setAdapter(
-                new ArrayAdapter<>(getActivity(), android.support.design.R.layout.support_simple_spinner_dropdown_item,
+                new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_dropdown_item,
                         getResources().getStringArray(R.array.schedule_repeat_frequency_units)));
         freqSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override

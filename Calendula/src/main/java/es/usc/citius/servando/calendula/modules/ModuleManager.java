@@ -19,7 +19,7 @@
 package es.usc.citius.servando.calendula.modules;
 
 import android.content.Context;
-import android.support.v4.util.ArrayMap;
+import androidx.collection.ArrayMap;
 
 import java.util.Collection;
 import java.util.List;

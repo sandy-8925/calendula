@@ -19,8 +19,8 @@
 package es.usc.citius.servando.calendula.persistence;
 
 import android.content.res.Resources;
-import android.support.annotation.PluralsRes;
-import android.support.annotation.StringRes;
+import androidx.annotation.PluralsRes;
+import androidx.annotation.StringRes;
 
 import com.mikepenz.iconics.typeface.IIcon;
 

@@ -27,7 +27,7 @@
                 tools:background="@color/android_blue_dark"
                 tools:context="es.usc.citius.servando.calendula.pinlock.PinLockActivity">
 
-    <android.support.v7.widget.Toolbar xmlns:app="http://schemas.android.com/apk/res-auto"
+    <androidx.appcompat.widget.Toolbar xmlns:app="http://schemas.android.com/apk/res-auto"
                                        android:id="@+id/toolbar"
                                        android:layout_width="match_parent"
                                        android:layout_height="56dp"
@@ -125,7 +125,7 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
-            <android.support.v7.widget.AppCompatButton
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/forgot_pin_btn"
                 style="@style/Widget.AppCompat.Button.Borderless"
                 android:layout_width="0dp"
@@ -146,7 +146,7 @@
                 android:visibility="gone"
                 tools:visibility="visible"/>
 
-            <android.support.v7.widget.AppCompatButton
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/use_fingerprint_btn"
                 style="@style/Widget.AppCompat.Button.Borderless"
                 android:layout_width="0dp"

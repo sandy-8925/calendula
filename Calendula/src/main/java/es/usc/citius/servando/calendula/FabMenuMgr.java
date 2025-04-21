@@ -20,7 +20,7 @@ package es.usc.citius.servando.calendula;
 
 import android.content.Intent;
 import android.content.res.ColorStateList;
-import android.support.design.widget.FloatingActionButton;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import android.view.View;
 
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;

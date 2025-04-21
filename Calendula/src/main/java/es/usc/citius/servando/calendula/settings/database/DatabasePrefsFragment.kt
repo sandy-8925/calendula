@@ -22,10 +22,10 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.support.annotation.StringRes
-import android.support.v4.app.ActivityCompat
-import android.support.v7.preference.ListPreference
-import android.support.v7.preference.Preference
+import androidx.annotation.StringRes
+import androidx.core.app.ActivityCompat
+import androidx.preference.ListPreference
+import androidx.preference.Preference
 import android.widget.Toast
 import es.usc.citius.servando.calendula.CalendulaActivity
 import es.usc.citius.servando.calendula.R

@@ -47,7 +47,7 @@ public class DBDownloadReceiver extends BroadcastReceiver {
         String dbVersion = preferences.getString(PreferenceKeys.DRUGDB_DOWNLOAD_VERSION.key(), null);
         String type = preferences.getString(PreferenceKeys.DRUGDB_DOWNLOAD_TYPE.key(), null);
 
-        android.support.v4.util.Pair<String, String> databaseInfo = new android.support.v4.util.Pair<>(downloadDb, dbVersion);
+        androidx.core.util.Pair<String, String> databaseInfo = new androidx.core.util.Pair<>(downloadDb, dbVersion);
 
         if (downloadId != -1 && downloadDb != null && id == downloadId && dbVersion != null && type != null) {
             Pair<Integer, String> status = DownloadDatabaseHelper.instance().downloadStatus(id, context);

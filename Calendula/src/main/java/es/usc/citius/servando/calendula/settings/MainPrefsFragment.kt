@@ -19,7 +19,7 @@
 package es.usc.citius.servando.calendula.settings
 
 import android.os.Bundle
-import android.support.v7.preference.PreferenceFragmentCompat
+import androidx.preference.PreferenceFragmentCompat
 import es.usc.citius.servando.calendula.CalendulaActivity
 import es.usc.citius.servando.calendula.R
 import es.usc.citius.servando.calendula.util.LogUtil

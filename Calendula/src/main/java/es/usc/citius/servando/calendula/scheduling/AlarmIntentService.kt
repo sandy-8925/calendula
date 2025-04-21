@@ -20,7 +20,7 @@ package es.usc.citius.servando.calendula.scheduling
 
 import android.content.Context
 import android.content.Intent
-import android.support.v4.app.JobIntentService
+import androidx.core.app.JobIntentService
 
 import es.usc.citius.servando.calendula.CalendulaApp
 import es.usc.citius.servando.calendula.util.LogUtil

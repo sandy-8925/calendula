@@ -17,7 +17,7 @@
   ~    along with this software.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<android.support.v7.widget.GridLayout
+<androidx.gridlayout.widget.GridLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:grid="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -28,7 +28,7 @@
     grid:columnCount="3"
     tools:ignore="HardcodedText">
 
-    <android.support.v7.widget.AppCompatButton
+    <androidx.appcompat.widget.AppCompatButton
         style="@style/KeypadButtonStyle"
         android:tag="1"
         android:text="1"
@@ -36,7 +36,7 @@
         grid:layout_gravity="fill_horizontal"
         grid:layout_rowWeight="1"/>
 
-    <android.support.v7.widget.AppCompatButton
+    <androidx.appcompat.widget.AppCompatButton
         style="@style/KeypadButtonStyle"
         android:tag="2"
         android:text="2"
@@ -44,7 +44,7 @@
         grid:layout_gravity="fill_horizontal"
         grid:layout_rowWeight="1"/>
 
-    <android.support.v7.widget.AppCompatButton
+    <androidx.appcompat.widget.AppCompatButton
         style="@style/KeypadButtonStyle"
         android:tag="3"
         android:text="3"
@@ -52,7 +52,7 @@
         grid:layout_gravity="fill_horizontal"
         grid:layout_rowWeight="1"/>
 
-    <android.support.v7.widget.AppCompatButton
+    <androidx.appcompat.widget.AppCompatButton
         style="@style/KeypadButtonStyle"
         android:tag="4"
         android:text="4"
@@ -60,7 +60,7 @@
         grid:layout_gravity="fill_horizontal"
         grid:layout_rowWeight="1"/>
 
-    <android.support.v7.widget.AppCompatButton
+    <androidx.appcompat.widget.AppCompatButton
         style="@style/KeypadButtonStyle"
         android:tag="5"
         android:text="5"
@@ -68,7 +68,7 @@
         grid:layout_gravity="fill_horizontal"
         grid:layout_rowWeight="1"/>
 
-    <android.support.v7.widget.AppCompatButton
+    <androidx.appcompat.widget.AppCompatButton
         style="@style/KeypadButtonStyle"
         android:tag="6"
         android:text="6"
@@ -76,7 +76,7 @@
         grid:layout_gravity="fill_horizontal"
         grid:layout_rowWeight="1"/>
 
-    <android.support.v7.widget.AppCompatButton
+    <androidx.appcompat.widget.AppCompatButton
         style="@style/KeypadButtonStyle"
         android:tag="7"
         android:text="7"
@@ -84,7 +84,7 @@
         grid:layout_gravity="fill_horizontal"
         grid:layout_rowWeight="1"/>
 
-    <android.support.v7.widget.AppCompatButton
+    <androidx.appcompat.widget.AppCompatButton
         style="@style/KeypadButtonStyle"
         android:tag="8"
         android:text="8"
@@ -92,7 +92,7 @@
         grid:layout_gravity="fill_horizontal"
         grid:layout_rowWeight="1"/>
 
-    <android.support.v7.widget.AppCompatButton
+    <androidx.appcompat.widget.AppCompatButton
         style="@style/KeypadButtonStyle"
         android:tag="9"
         android:text="9"
@@ -101,7 +101,7 @@
         grid:layout_rowWeight="1"/>
 
     <!--spacer-->
-    <android.support.v7.widget.AppCompatButton
+    <androidx.appcompat.widget.AppCompatButton
         android:enabled="false"
         android:tag="SPACER"
         android:visibility="invisible"
@@ -109,7 +109,7 @@
         grid:layout_gravity="fill_horizontal"
         grid:layout_rowWeight="1"/>
 
-    <android.support.v7.widget.AppCompatButton
+    <androidx.appcompat.widget.AppCompatButton
         style="@style/KeypadButtonStyle"
         android:tag="0"
         android:text="0"
@@ -117,7 +117,7 @@
         grid:layout_gravity="fill_horizontal"
         grid:layout_rowWeight="1"/>
 
-    <android.support.v7.widget.AppCompatImageButton
+    <androidx.appcompat.widget.AppCompatImageButton
         android:id="@+id/numpad_delete_btn"
         style="@style/KeypadButtonStyle"
         android:tag="DEL"
@@ -126,4 +126,4 @@
         grid:layout_rowWeight="1"/>
 
 
-</android.support.v7.widget.GridLayout>
+</androidx.gridlayout.widget.GridLayout>

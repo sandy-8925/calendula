@@ -30,9 +30,9 @@ import android.graphics.PointF;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
-import android.support.annotation.ColorInt;
-import android.support.v7.graphics.Palette;
+
+import androidx.annotation.ColorInt;
+import androidx.palette.graphics.Palette;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.Display;

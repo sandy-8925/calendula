@@ -18,6 +18,7 @@
 
 package es.usc.citius.servando.calendula.fragments;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.content.DialogInterface;
@@ -26,8 +27,8 @@ import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.StateListDrawable;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import android.text.Html;
 import android.text.Spanned;
 import android.text.format.Time;
@@ -88,6 +89,7 @@ import es.usc.citius.servando.calendula.persistence.ScheduleItem;
 import es.usc.citius.servando.calendula.persistence.ScheduleItemComparator;
 import es.usc.citius.servando.calendula.util.LogUtil;
 
+@SuppressLint("StringFormatMatches")
 public class ScheduleImportFragment extends Fragment
         implements NumberPickerDialogFragment.NumberPickerDialogHandlerV2,
         RecurrencePickerDialogFragment.OnRecurrenceSetListener, RadialTimePickerDialogFragment.OnTimeSetListener {
@@ -1123,7 +1125,7 @@ public class ScheduleImportFragment extends Fragment
         });
 
         repeatTypeSpinner.setAdapter(
-                new ArrayAdapter<>(getActivity(), android.support.design.R.layout.support_simple_spinner_dropdown_item,
+                new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_dropdown_item,
                         getResources().getStringArray(R.array.schedule_repeat_types)));
         repeatTypeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -1139,7 +1141,7 @@ public class ScheduleImportFragment extends Fragment
         });
 
         freqSpinner.setAdapter(
-                new ArrayAdapter<>(getActivity(), android.support.design.R.layout.support_simple_spinner_dropdown_item,
+                new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_dropdown_item,
                         getResources().getStringArray(R.array.schedule_repeat_frequency_units)));
         freqSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override

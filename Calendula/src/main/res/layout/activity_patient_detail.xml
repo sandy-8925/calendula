@@ -65,7 +65,7 @@
     </RelativeLayout>
 
 
-    <android.support.v7.widget.Toolbar
+    <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="56dp"
@@ -201,7 +201,7 @@
         android:background="@drawable/presentation_box_shadow_top" />
 
 
-    <android.support.design.widget.FloatingActionButton
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/avatar_change"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

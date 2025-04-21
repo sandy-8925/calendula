@@ -19,7 +19,7 @@
 package es.usc.citius.servando.calendula.util;
 
 import android.app.Activity;
-import android.support.test.espresso.Espresso;
+import androidx.test.espresso.Espresso;
 import android.view.WindowManager;
 
 public class TestUtils {

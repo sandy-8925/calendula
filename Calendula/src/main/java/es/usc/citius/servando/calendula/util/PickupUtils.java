@@ -19,7 +19,7 @@
 package es.usc.citius.servando.calendula.util;
 
 
-import android.support.v4.util.Pair;
+import androidx.core.util.Pair;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeConstants;

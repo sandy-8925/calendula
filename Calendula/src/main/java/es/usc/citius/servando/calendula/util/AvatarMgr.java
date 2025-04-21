@@ -21,7 +21,7 @@ package es.usc.citius.servando.calendula.util;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.support.v7.graphics.Palette;
+import androidx.palette.graphics.Palette;
 
 import java.util.Collections;
 import java.util.HashMap;

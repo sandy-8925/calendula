@@ -25,9 +25,9 @@ import android.hardware.fingerprint.FingerprintManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.annotation.NonNull;
-import android.support.annotation.RequiresApi;
-import android.support.v4.content.ContextCompat;
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
+import androidx.core.content.ContextCompat;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
@@ -202,7 +202,7 @@ public class PinLockActivity extends CalendulaActivity {
                 errorMessage.setVisibility(View.GONE); // indicator shows error
                 promptMessage.setText(R.string.text_pinlock_auth_prompt);
                 footer.setVisibility(View.VISIBLE);
-                toolbar = (android.support.v7.widget.Toolbar) findViewById(R.id.toolbar);
+                toolbar = (androidx.appcompat.widget.Toolbar) findViewById(R.id.toolbar);
                 toolbar.setVisibility(View.GONE);
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {

@@ -74,7 +74,7 @@ android {
         targetSdkVersion 26
         versionCode 43
         versionName "3.0-alpha"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
         applicationId "es.usc.citius.servando.calendula"
     }
 
@@ -175,27 +175,27 @@ dependencies {
 
     /********** SUPPORT **********/
     // Multidex support
-    implementation 'com.android.support:multidex:1.0.3'
+    implementation 'androidx.multidex:multidex:2.0.0'
 
     // Support libs
-    implementation "com.android.support:appcompat-v7:$libVersions.android.support"
-    implementation "com.android.support:cardview-v7:$libVersions.android.support"
-    implementation "com.android.support:design:$libVersions.android.support"
-    implementation "com.android.support:gridlayout-v7:$libVersions.android.support"
-    implementation "com.android.support:palette-v7:$libVersions.android.support"
-    implementation "com.android.support:preference-v7:$libVersions.android.support"
-    implementation "com.android.support:recyclerview-v7:$libVersions.android.support"
-    implementation "com.android.support:support-annotations:$libVersions.android.support"
-    implementation "com.android.support:support-v4:$libVersions.android.support"
-    implementation "com.android.support:preference-v14:$libVersions.android.support"
+    implementation 'androidx.appcompat:appcompat:1.0.0'
+    implementation 'androidx.cardview:cardview:1.0.0'
+    implementation 'com.google.android.material:material:1.0.0'
+    implementation 'androidx.gridlayout:gridlayout:1.0.0'
+    implementation 'androidx.palette:palette:1.0.0'
+    implementation 'androidx.preference:preference:1.0.0'
+    implementation 'androidx.recyclerview:recyclerview:1.0.0'
+    implementation 'androidx.annotation:annotation:1.0.0'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'androidx.legacy:legacy-preference-v14:1.0.0'
 
     // Testing dependencies
     //  Made explicit to avoid conflicts with other testing libs
-    androidTestImplementation "com.android.support:appcompat-v7:$libVersions.android.support"
-    androidTestImplementation "com.android.support:design:$libVersions.android.support"
-    androidTestImplementation "com.android.support:recyclerview-v7:$libVersions.android.support"
-    androidTestImplementation "com.android.support:support-annotations:$libVersions.android.support"
-    androidTestImplementation "com.android.support:support-v4:$libVersions.android.support"
+    androidTestImplementation 'androidx.appcompat:appcompat:1.0.0'
+    androidTestImplementation 'com.google.android.material:material:1.0.0'
+    androidTestImplementation 'androidx.recyclerview:recyclerview:1.0.0'
+    androidTestImplementation 'androidx.annotation:annotation:1.0.0'
+    androidTestImplementation 'androidx.legacy:legacy-support-v4:1.0.0'
 
     /********** TESTING **********/
     // JUnit
@@ -206,10 +206,10 @@ dependencies {
     androidTestImplementation "org.mockito:mockito-android:$libVersions.mockito"
 
     // Support testing
-    androidTestImplementation "com.android.support.test.espresso:espresso-contrib:$libVersions.android.espresso"
-    androidTestImplementation "com.android.support.test.espresso:espresso-core:$libVersions.android.espresso"
-    androidTestImplementation "com.android.support.test:rules:$libVersions.android.test"
-    androidTestImplementation "com.android.support.test:runner:$libVersions.android.test"
+    androidTestImplementation 'androidx.test.espresso:espresso-contrib:3.1.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0'
+    androidTestImplementation 'androidx.test:rules:1.1.1'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
 
     // Roboelectric
     testImplementation "org.robolectric:robolectric:$libVersions.robolectric"

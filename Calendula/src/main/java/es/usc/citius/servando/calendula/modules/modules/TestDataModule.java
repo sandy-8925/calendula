@@ -20,7 +20,7 @@ package es.usc.citius.servando.calendula.modules.modules;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import com.google.ical.values.Frequency;
 
