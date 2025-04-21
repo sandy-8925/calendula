@@ -60,10 +60,11 @@ class DatabasePrefsFragment :
     }
 
     private val dbPref: ListPreference by lazy {
-        findPreference(getString(R.string.prefkey_drugdb_current_db)) as ListPreference
+        findPreference<ListPreference>(getString(R.string.prefkey_drugdb_current_db)) as ListPreference
     }
+
     private val updateDBPref: Preference by lazy {
-        findPreference(getString(R.string.prefkey_settings_database_update))
+        findPreference<Preference>(getString(R.string.prefkey_settings_database_update)) as Preference
     }
 
     private val noneId by lazy { getString(R.string.database_none_id) }
@@ -109,7 +110,7 @@ class DatabasePrefsFragment :
     }
 
     override fun resolveString(@StringRes stringRes: Int): String {
-        return context!!.getString(stringRes)
+        return getString(stringRes)
     }
 
     override fun showSelectedDb(dbId: String) {
@@ -128,7 +129,7 @@ class DatabasePrefsFragment :
         Toast.makeText(context, R.string.database_update_not_available, Toast.LENGTH_SHORT).show()
     }
 
-    override fun getIntent(): Intent = activity!!.intent
+    override fun getIntent(): Intent = requireActivity().intent
 
     override fun openDatabaseSelection() {
         preferenceManager.showDialog(dbPref)
@@ -159,7 +160,7 @@ class DatabasePrefsFragment :
 
     override fun hasDownloadPermission(): Boolean {
         val hasPermission = ActivityCompat.checkSelfPermission(
-            context!!,
+            requireContext(),
             android.Manifest.permission.WRITE_EXTERNAL_STORAGE
         ) == PackageManager.PERMISSION_GRANTED
         LogUtil.d(TAG, "hasDownloadPermission: result is $hasPermission")

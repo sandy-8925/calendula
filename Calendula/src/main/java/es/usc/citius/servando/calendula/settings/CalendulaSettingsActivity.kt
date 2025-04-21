@@ -36,11 +36,11 @@ class CalendulaSettingsActivity : CalendulaActivity(),
 
 
     override fun onPreferenceStartFragment(
-        caller: PreferenceFragmentCompat?,
-        pref: Preference?
+        caller: PreferenceFragmentCompat,
+        pref: Preference
     ): Boolean {
         try {
-            pref?.let {
+            pref.let {
                 LogUtil.d(TAG, "onPreferenceStartFragment: pref fragment class is ${pref.fragment}")
                 val transaction = supportFragmentManager.beginTransaction()
                 val fragment = Class.forName(pref.fragment).newInstance() as Fragment

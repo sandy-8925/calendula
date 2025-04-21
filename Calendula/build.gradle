@@ -61,7 +61,7 @@ task copyTestClasses(type: Copy) {
 }
 
 android {
-    compileSdk 34
+    compileSdk 35
     namespace "es.usc.citius.servando.calendula"
     packagingOptions {
         resources {
@@ -175,26 +175,26 @@ dependencies {
 
     /********** SUPPORT **********/
     // Multidex support
-    implementation 'androidx.multidex:multidex:2.0.0'
+    implementation 'androidx.multidex:multidex:2.0.1'
 
     // Support libs
-    implementation 'androidx.appcompat:appcompat:1.0.0'
+    implementation 'androidx.appcompat:appcompat:1.7.0'
     implementation 'androidx.cardview:cardview:1.0.0'
-    implementation 'com.google.android.material:material:1.0.0'
-    implementation 'androidx.gridlayout:gridlayout:1.0.0'
-    implementation 'androidx.palette:palette:1.0.0'
-    implementation 'androidx.preference:preference:1.0.0'
-    implementation 'androidx.recyclerview:recyclerview:1.0.0'
-    implementation 'androidx.annotation:annotation:1.0.0'
+    implementation 'com.google.android.material:material:1.12.0'
+    implementation 'androidx.gridlayout:gridlayout:1.1.0'
+    implementation 'androidx.palette:palette-ktx:1.0.0'
+    implementation 'androidx.preference:preference-ktx:1.2.1'
+    implementation 'androidx.recyclerview:recyclerview:1.4.0'
+    implementation 'androidx.annotation:annotation:1.9.1'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.legacy:legacy-preference-v14:1.0.0'
 
     // Testing dependencies
     //  Made explicit to avoid conflicts with other testing libs
-    androidTestImplementation 'androidx.appcompat:appcompat:1.0.0'
-    androidTestImplementation 'com.google.android.material:material:1.0.0'
-    androidTestImplementation 'androidx.recyclerview:recyclerview:1.0.0'
-    androidTestImplementation 'androidx.annotation:annotation:1.0.0'
+    androidTestImplementation 'androidx.appcompat:appcompat:1.7.0'
+    androidTestImplementation 'com.google.android.material:material:1.12.0'
+    androidTestImplementation 'androidx.recyclerview:recyclerview:1.4.0'
+    androidTestImplementation 'androidx.annotation:annotation:1.9.1'
     androidTestImplementation 'androidx.legacy:legacy-support-v4:1.0.0'
 
     /********** TESTING **********/
@@ -206,10 +206,10 @@ dependencies {
     androidTestImplementation "org.mockito:mockito-android:$libVersions.mockito"
 
     // Support testing
-    androidTestImplementation 'androidx.test.espresso:espresso-contrib:3.1.0'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.0'
-    androidTestImplementation 'androidx.test:rules:1.1.1'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-contrib:3.6.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
+    androidTestImplementation 'androidx.test:rules:1.6.1'
+    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
 
     // Roboelectric
     testImplementation "org.robolectric:robolectric:$libVersions.robolectric"
@@ -283,7 +283,7 @@ dependencies {
     implementation 'com.heinrichreimersoftware:material-intro:1.5.8'
 
     // Material style utilities
-    implementation('com.mikepenz:materialize:0.2.7@aar') {
+    implementation('com.mikepenz:materialize:1.0.0@aar') {
         transitive = true
     }
 
