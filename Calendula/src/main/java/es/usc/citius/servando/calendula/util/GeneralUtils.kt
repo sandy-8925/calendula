@@ -1,8 +1,8 @@
 package es.usc.citius.servando.calendula.util
 
-import android.arch.lifecycle.LiveData
 import android.content.SharedPreferences
 import android.text.TextUtils
+import androidx.lifecycle.LiveData
 import java.io.Closeable
 
 @Suppress("LeakingThis")
