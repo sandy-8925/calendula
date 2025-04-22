@@ -99,7 +99,7 @@ import org.greenrobot.eventbus.Subscribe
 import org.joda.time.DateTime
 
 class HomePagerActivity : CalendulaActivity(), OnRoutineSelectedListener, OnMedicineSelectedListener, OnScheduleSelectedListener {
-    private val viewModel: HomePagerActivityViewModel by viewModels()
+    private val expandedPrefViewModel: ExpandedPrefViewModel by viewModels()
     val appBarLayout: AppBarLayout by lazy { binding.appbar }
     private val toolbarLayout: CollapsingToolbarLayout by lazy { binding.collapsingToolbar }
     val fab: ExpandableFAB by lazy { binding.addButton }
@@ -513,6 +513,6 @@ class HomePagerActivity : CalendulaActivity(), OnRoutineSelectedListener, OnMedi
     }
 }
 
-internal class HomePagerActivityViewModel: ViewModel() {
+internal class ExpandedPrefViewModel: ViewModel() {
     val expandedPrefLiveData = BooleanSharedPrefsLiveData(PreferenceUtils.instance().preferences(), PreferenceKeys.HOME_DAILYAGENDA_EXPANDED.toString())
 }
