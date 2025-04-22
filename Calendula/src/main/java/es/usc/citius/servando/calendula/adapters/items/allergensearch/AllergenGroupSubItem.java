@@ -20,12 +20,14 @@ package es.usc.citius.servando.calendula.adapters.items.allergensearch;
 
 import android.content.Context;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import android.text.SpannableStringBuilder;
 import android.view.View;
 import android.widget.TextView;
 
+import com.mikepenz.fastadapter.IParentItem;
 import com.mikepenz.fastadapter.ISubItem;
 import com.mikepenz.fastadapter.commons.utils.FastAdapterUIUtils;
 import com.mikepenz.fastadapter.items.AbstractItem;
@@ -39,7 +41,7 @@ import es.usc.citius.servando.calendula.R;
 import es.usc.citius.servando.calendula.allergies.AllergenVO;
 
 
-public class AllergenGroupSubItem extends AbstractItem<AllergenGroupSubItem, AllergenGroupSubItem.ViewHolder> implements Comparable<AllergenGroupSubItem>, ISubItem<AllergenGroupSubItem, AllergenGroupItem> {
+public class AllergenGroupSubItem extends AbstractItem<AllergenGroupSubItem.ViewHolder> implements Comparable<AllergenGroupSubItem>, ISubItem<AllergenGroupSubItem.ViewHolder> {
 
     private AllergenVO vo;
     private String title;
@@ -61,7 +63,7 @@ public class AllergenGroupSubItem extends AbstractItem<AllergenGroupSubItem, All
     }
 
     @Override
-    public void bindView(ViewHolder holder, List<Object> payloads) {
+    public void bindView(@NonNull ViewHolder holder, @NonNull List<?> payloads) {
         super.bindView(holder, payloads);
         final int selectedColor = ContextCompat.getColor(holder.itemView.getContext(), R.color.med_presentation_circle_bg_lighter);
         UIUtils.setBackground(holder.itemView, FastAdapterUIUtils.getSelectableBackground(holder.itemView.getContext(), selectedColor, true));
@@ -84,12 +86,6 @@ public class AllergenGroupSubItem extends AbstractItem<AllergenGroupSubItem, All
     @Override
     public AllergenGroupItem getParent() {
         return parent;
-    }
-
-    @Override
-    public AllergenGroupSubItem withParent(AllergenGroupItem parent) {
-        this.parent = parent;
-        return this;
     }
 
     @Override
@@ -117,6 +113,17 @@ public class AllergenGroupSubItem extends AbstractItem<AllergenGroupSubItem, All
 
     public String getTitle() {
         return title;
+    }
+
+    @Override
+    public void setParent(@Nullable IParentItem<?> iParentItem) {
+        this.parent = (AllergenGroupItem) iParentItem;
+    }
+
+    @NonNull
+    @Override
+    public ViewHolder getViewHolder(@NonNull View view) {
+        return new ViewHolder(view);
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {

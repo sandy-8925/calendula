@@ -20,6 +20,8 @@ package es.usc.citius.servando.calendula.adapters.items;
 
 import android.content.Context;
 import android.graphics.Color;
+
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import android.view.View;
 import android.widget.ImageView;
@@ -35,13 +37,14 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import es.usc.citius.servando.calendula.R;
+import es.usc.citius.servando.calendula.databinding.SchedulesListItemBinding;
 import es.usc.citius.servando.calendula.persistence.Schedule;
 import es.usc.citius.servando.calendula.persistence.ScheduleItem;
 import es.usc.citius.servando.calendula.scheduling.ScheduleUtils;
 import es.usc.citius.servando.calendula.util.LogUtil;
 
 
-public class ScheduleListItem extends AbstractItem<ScheduleListItem, ScheduleListItem.ScheduleViewHolder> {
+public class ScheduleListItem extends AbstractItem<ScheduleListItem.ScheduleViewHolder> {
 
     private static final String TAG = "ScheduleListItem";
     private final Schedule schedule;
@@ -71,7 +74,7 @@ public class ScheduleListItem extends AbstractItem<ScheduleListItem, ScheduleLis
     }
 
     @Override
-    public void bindView(ScheduleViewHolder holder, List<Object> payloads) {
+    public void bindView(@NonNull ScheduleViewHolder holder, @NonNull List<?> payloads) {
         super.bindView(holder, payloads);
 
         Context ctx = holder.itemView.getContext();
@@ -108,26 +111,34 @@ public class ScheduleListItem extends AbstractItem<ScheduleListItem, ScheduleLis
     }
 
     @Override
-    public void unbindView(ScheduleViewHolder holder) {
+    public void unbindView(@NonNull ScheduleViewHolder holder) {
         super.unbindView(holder);
     }
 
-    public static class ScheduleViewHolder extends RecyclerView.ViewHolder {
+    @NonNull
+    @Override
+    public ScheduleViewHolder getViewHolder(@NonNull View view) {
+        return new ScheduleViewHolder(view);
+    }
 
-        @BindView(R.id.imageButton)
+    public static class ScheduleViewHolder extends RecyclerView.ViewHolder {
         ImageView icon;
-        @BindView(R.id.imageView)
         ImageView icon2;
-        @BindView(R.id.schedules_list_item_medname)
         TextView medName;
-        @BindView(R.id.schedules_list_item_times)
         TextView itemTimes;
-        @BindView(R.id.schedules_list_item_days)
         TextView itemDays;
+
+        private final SchedulesListItemBinding binding;
 
         public ScheduleViewHolder(View view) {
             super(view);
-            ButterKnife.bind(this, view);
+            binding = SchedulesListItemBinding.bind(view);
+
+            icon = binding.imageButton;
+            icon2 = binding.imageView;
+            medName = binding.schedulesListItemMedname;
+            itemTimes = binding.schedulesListItemTimes;
+            itemDays = binding.schedulesListItemDays;
         }
     }
 }

@@ -19,6 +19,8 @@
 package es.usc.citius.servando.calendula.adapters.items;
 
 import android.content.Context;
+
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import android.view.View;
 import android.widget.ImageView;
@@ -33,6 +35,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import es.usc.citius.servando.calendula.R;
 import es.usc.citius.servando.calendula.database.DB;
+import es.usc.citius.servando.calendula.databinding.MedicinesListItemBinding;
 import es.usc.citius.servando.calendula.modules.ModuleManager;
 import es.usc.citius.servando.calendula.modules.modules.StockModule;
 import es.usc.citius.servando.calendula.persistence.Medicine;
@@ -40,7 +43,7 @@ import es.usc.citius.servando.calendula.persistence.PatientAlert;
 import es.usc.citius.servando.calendula.util.IconUtils;
 
 
-public class MedicineItem extends AbstractItem<MedicineItem, MedicineItem.MedicineViewHolder> {
+public class MedicineItem extends AbstractItem<MedicineItem.MedicineViewHolder> {
 
     private Medicine medicine;
 
@@ -69,7 +72,7 @@ public class MedicineItem extends AbstractItem<MedicineItem, MedicineItem.Medici
     }
 
     @Override
-    public void bindView(MedicineViewHolder holder, List<Object> payloads) {
+    public void bindView(@NonNull MedicineViewHolder holder, @NonNull List<?> payloads) {
         super.bindView(holder, payloads);
         Context ctx = holder.itemView.getContext();
 
@@ -121,21 +124,28 @@ public class MedicineItem extends AbstractItem<MedicineItem, MedicineItem.Medici
         super.unbindView(holder);
     }
 
-    public static class MedicineViewHolder extends RecyclerView.ViewHolder {
+    @NonNull
+    @Override
+    public MedicineViewHolder getViewHolder(@NonNull View view) {
+        return new MedicineViewHolder(view);
+    }
 
-        @BindView(R.id.imageButton)
+    public static class MedicineViewHolder extends RecyclerView.ViewHolder {
         public ImageView icon;
-        @BindView(R.id.medicines_list_item_name)
         public TextView name;
-        @BindView(R.id.imageView)
         public ImageView alertIcon;
-        @BindView(R.id.stock_info)
         public TextView stockInfo;
 
+        private final MedicinesListItemBinding binding;
 
         public MedicineViewHolder(View view) {
             super(view);
-            ButterKnife.bind(this, view);
+            binding = MedicinesListItemBinding.bind(view);
+
+            icon = binding.imageButton;
+            name = binding.medicinesListItemName;
+            alertIcon = binding.imageView;
+            stockInfo = binding.stockInfo;
         }
     }
 }

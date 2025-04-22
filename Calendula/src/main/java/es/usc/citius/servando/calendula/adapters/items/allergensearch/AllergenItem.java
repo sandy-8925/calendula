@@ -32,13 +32,11 @@ import com.mikepenz.materialize.util.UIUtils;
 
 import java.util.List;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
 import es.usc.citius.servando.calendula.R;
 import es.usc.citius.servando.calendula.allergies.AllergenVO;
 
 
-public class AllergenItem extends AbstractItem<AllergenItem, AllergenItem.ViewHolder> implements Comparable<AllergenItem> {
+public class AllergenItem extends AbstractItem<AllergenItem.AllergenViewHolder> implements Comparable<AllergenItem> {
 
     private String allergenType;
 
@@ -94,7 +92,7 @@ public class AllergenItem extends AbstractItem<AllergenItem, AllergenItem.ViewHo
     }
 
     @Override
-    public void bindView(ViewHolder viewHolder, List<Object> payloads) {
+    public void bindView(@NonNull AllergenViewHolder viewHolder, @NonNull List<?> payloads) {
         super.bindView(viewHolder, payloads);
         final int selectedColor = ContextCompat.getColor(viewHolder.itemView.getContext(), R.color.med_presentation_circle_bg);
         UIUtils.setBackground(viewHolder.itemView, FastAdapterUIUtils.getSelectableBackground(viewHolder.itemView.getContext(), selectedColor, true));
@@ -103,7 +101,7 @@ public class AllergenItem extends AbstractItem<AllergenItem, AllergenItem.ViewHo
     }
 
     @Override
-    public void unbindView(ViewHolder holder) {
+    public void unbindView(AllergenViewHolder holder) {
         super.unbindView(holder);
         holder.title.setText(null);
         holder.subtitle.setText(null);
@@ -113,17 +111,20 @@ public class AllergenItem extends AbstractItem<AllergenItem, AllergenItem.ViewHo
         this.titleSpannable = titleSpannable;
     }
 
-    static class ViewHolder extends RecyclerView.ViewHolder {
+    @NonNull
+    @Override
+    public AllergenViewHolder getViewHolder(@NonNull View view) {
+        return new AllergenViewHolder(view);
+    }
 
-        @BindView(R.id.text1)
+    public static class AllergenViewHolder extends RecyclerView.ViewHolder {
         TextView title;
-
-        @BindView(R.id.text2)
         TextView subtitle;
 
-        public ViewHolder(View view) {
+        public AllergenViewHolder(View view) {
             super(view);
-            ButterKnife.bind(this, view);
+            title = view.findViewById(R.id.text1);
+            subtitle = view.findViewById(R.id.text2);
         }
     }
 }

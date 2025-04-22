@@ -56,7 +56,7 @@ public class AllergyGroupSubItem extends AbstractExpandableItem<AllergyGroupItem
     }
 
     @Override
-    public void bindView(ViewHolder holder, List<Object> payloads) {
+    public void bindView(@NonNull ViewHolder holder, @NonNull List<?> payloads) {
         super.bindView(holder, payloads);
         holder.title.setText(title);
         holder.subtitle.setText(subtitle);

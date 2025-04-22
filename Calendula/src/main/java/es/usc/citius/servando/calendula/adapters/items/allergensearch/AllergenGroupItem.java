@@ -19,6 +19,7 @@
 package es.usc.citius.servando.calendula.adapters.items.allergensearch;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.ViewCompat;
 import androidx.recyclerview.widget.RecyclerView;
@@ -29,8 +30,11 @@ import android.widget.TextView;
 
 import com.mikepenz.fastadapter.FastAdapter;
 import com.mikepenz.fastadapter.IExpandable;
+import com.mikepenz.fastadapter.IParentItem;
+import com.mikepenz.fastadapter.ISubItem;
 import com.mikepenz.fastadapter.commons.items.AbstractExpandableItem;
 import com.mikepenz.fastadapter.commons.utils.FastAdapterUIUtils;
+import com.mikepenz.fastadapter.expandable.ExpandableExtension;
 import com.mikepenz.fastadapter.items.AbstractItem;
 import com.mikepenz.fastadapter.listeners.ClickEventHook;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
@@ -43,10 +47,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import es.usc.citius.servando.calendula.R;
 
-
 public class AllergenGroupItem extends AbstractExpandableItem<AllergenGroupItem, AllergenGroupItem.ViewHolder, AllergenGroupSubItem> implements Comparable<AllergenGroupItem> {
-
-
     @SuppressWarnings("unused")
     private static final String TAG = "AllergyGroupItem";
     private String title;
@@ -60,7 +61,7 @@ public class AllergenGroupItem extends AbstractExpandableItem<AllergenGroupItem,
     }
 
     @Override
-    public void bindView(ViewHolder holder, List<Object> payloads) {
+    public void bindView(@NonNull ViewHolder holder, @NonNull List<?> payloads) {
         super.bindView(holder, payloads);
         holder.title.setText(titleSpannable != null ? titleSpannable : title);
         holder.subtitle.setText(this.subtitle);
@@ -120,19 +121,53 @@ public class AllergenGroupItem extends AbstractExpandableItem<AllergenGroupItem,
         this.titleSpannable = titleSpannable;
     }
 
-    public static class GroupExpandClickEvent extends ClickEventHook<AbstractItem> {
-        @Override
-        public void onClick(View view, int i, FastAdapter<AbstractItem> fastAdapter, AbstractItem item) {
-            IExpandable it = (IExpandable) item;
-            if (it.isExpanded()) {
-                fastAdapter.collapse(i);
-                ViewCompat.animate(view).rotation(0);
-            } else {
-                fastAdapter.expand(i);
-                ViewCompat.animate(view).rotation(180);
-            }
-        }
+    @Override
+    public void setExpanded(boolean b) {
 
+    }
+
+    @Override
+    public void setSubItems(@NonNull List<ISubItem<?>> list) {
+
+    }
+
+    @Override
+    public void setParent(@Nullable IParentItem<?> iParentItem) {
+
+    }
+
+    @NonNull
+    @Override
+    public ViewHolder getViewHolder(@NonNull View view) {
+        return null;
+    }
+
+    @Override
+    public void bindView(@NonNull AllergenGroupItem allergenGroupItem, @NonNull List<?> list) {
+
+    }
+
+    @Override
+    public void unbindView(@NonNull AllergenGroupItem allergenGroupItem) {
+
+    }
+
+    @Override
+    public void attachToWindow(@NonNull AllergenGroupItem allergenGroupItem) {
+
+    }
+
+    @Override
+    public void detachFromWindow(@NonNull AllergenGroupItem allergenGroupItem) {
+
+    }
+
+    @Override
+    public boolean failedToRecycle(@NonNull AllergenGroupItem allergenGroupItem) {
+        return false;
+    }
+
+    public static class GroupExpandClickEvent extends ClickEventHook<AbstractItem<ViewHolder>> {
         @Override
         public View onBind(@NonNull RecyclerView.ViewHolder viewHolder) {
             if (viewHolder instanceof ViewHolder) {
@@ -141,10 +176,21 @@ public class AllergenGroupItem extends AbstractExpandableItem<AllergenGroupItem,
             return null;
         }
 
+        @Override
+        public void onClick(@NonNull View view, int i, @NonNull FastAdapter<AbstractItem<ViewHolder>> fastAdapter, @NonNull AbstractItem<ViewHolder> item) {
+            ExpandableExtension<AbstractItem<ViewHolder>> extension = fastAdapter.getOrCreateExtension(ExpandableExtension.class);
+            IExpandable it = (IExpandable) item;
+            if (it.isExpanded()) {
+                extension.collapse(i);
+                ViewCompat.animate(view).rotation(0);
+            } else {
+                extension.expand(i);
+                ViewCompat.animate(view).rotation(180);
+            }
+        }
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-
         @BindView(R.id.text1)
         TextView title;
         @BindView(R.id.text2)

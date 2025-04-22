@@ -19,7 +19,7 @@
 <resources>
 
 
-    <style name="AppTheme" parent="MaterialDrawerTheme.Light.TranslucentStatus">
+    <style name="AppTheme" parent="MaterialTheme.Light.ActionBar.TranslucentStatus">
         <!-- Set AppCompat’s actionBarStyle -->
         <!--<item name="actionBarStyle">@style/MyActionBar</item>-->
         <item name="windowActionBar">false</item>
@@ -36,6 +36,9 @@
 
         <item name="android:actionModeBackground">@color/dark_grey_home</item>
         <item name="android:windowActionModeOverlay">true</item>
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowTranslucentNavigation">true</item>
+        <item name="android:windowContentOverlay">@null</item>
     </style>
 
     <!-- Styles for pop-up dialogs -->
@@ -59,7 +62,7 @@
         <item name="android:activityCloseExitAnimation">@anim/slide_in_from_bottom</item>
     </style>
 
-    <style name="SplashTheme" parent="MaterialDrawerTheme.Light.TranslucentStatus">
+    <style name="SplashTheme" parent="MaterialTheme.Light.ActionBar.TranslucentStatus">
         <item name="android:windowBackground">@drawable/splash</item>
         <item name="android:windowAnimationStyle">@style/Animation.Splash</item>
     </style>
