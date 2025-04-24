@@ -181,7 +181,7 @@ public class AllergiesSearchActivity extends CalendulaActivity {
             switch (i.getType()) {
                 case R.id.fastadapter_allergen_group_sub_item:
                     final AllergenGroupSubItem item = (AllergenGroupSubItem) i;
-                    vos.add(new AllergenGroupWrapper(item.getVo(), item.getParent().getTitle()));
+                    vos.add(new AllergenGroupWrapper(item.getVo(), item.getParent().title));
                     break;
                 case R.id.fastadapter_allergen_item:
                     final AllergenItem item1 = (AllergenItem) i;
@@ -340,17 +340,17 @@ public class AllergiesSearchActivity extends CalendulaActivity {
     private String getTitle(AbstractItem i) {
         switch (i.getType()) {
             case R.id.fastadapter_allergen_group_item:
-                return ((AllergenGroupItem) i).getTitle();
+                return ((AllergenGroupItem) i).title;
             case R.id.fastadapter_allergen_group_sub_item:
                 return ((AllergenGroupSubItem) i).getTitle();
             case R.id.fastadapter_allergen_item:
                 return ((AllergenItem) i).getTitle();
             case R.id.fastadapter_allergy_group_item:
-                return ((AllergyGroupItem) i).getTitle();
+                return ((AllergyGroupItem) i).title;
             case R.id.fastadapter_allergy_group_sub_item:
-                return ((AllergyGroupSubItem) i).getTitle();
+                return ((AllergyGroupSubItem) i).title;
             case R.id.fastadapter_allergy_item:
-                return ((AllergyItem) i).getTitle();
+                return ((AllergyItem) i).title;
             default:
                 throw new RuntimeException("Unsupported item type");
         }

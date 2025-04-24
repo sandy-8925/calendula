@@ -330,7 +330,7 @@ public class AllergiesActivity extends CalendulaActivity {
     }
 
     private void showDeleteConfirmationDialog(final AllergyItem a) {
-        showDeleteConfirmationDialog(getString(R.string.remove_allergy_message_short, a.getAllergen().getName()), new MaterialDialog.SingleButtonCallback() {
+        showDeleteConfirmationDialog(getString(R.string.remove_allergy_message_short, a.allergen.getName()), new MaterialDialog.SingleButtonCallback() {
             @Override
             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                 new DeleteAllergyTask().execute(a);
@@ -345,7 +345,7 @@ public class AllergiesActivity extends CalendulaActivity {
     }
 
     private void showDeleteConfirmationDialog(final AllergyGroupItem a) {
-        showDeleteConfirmationDialog(getString(R.string.remove_allergy_message_short, a.getTitle()), new MaterialDialog.SingleButtonCallback() {
+        showDeleteConfirmationDialog(getString(R.string.remove_allergy_message_short, a.title), new MaterialDialog.SingleButtonCallback() {
             @Override
             public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                 new DeleteAllergyGroupTask().execute(a);
@@ -589,7 +589,7 @@ public class AllergiesActivity extends CalendulaActivity {
                 throw new IllegalArgumentException("Invalid argument length");
             }
             int index = allergiesAdapter.getAdapterPosition(params[0]);
-            store.deleteAllergen(params[0].getAllergen(), true);
+            store.deleteAllergen(params[0].allergen, true);
             return index;
         }
     }

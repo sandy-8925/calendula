@@ -29,10 +29,6 @@ import android.widget.ImageView;
 import com.mikepenz.community_material_typeface_library.CommunityMaterial;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
 import com.mikepenz.iconics.IconicsDrawable;
-import com.mikepenz.materialdrawer.AccountHeader;
-import com.mikepenz.materialdrawer.AccountHeaderBuilder;
-import com.mikepenz.materialdrawer.Drawer;
-import com.mikepenz.materialdrawer.DrawerBuilder;
 import com.mikepenz.materialdrawer.model.DividerDrawerItem;
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
 import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
@@ -56,8 +52,7 @@ import es.usc.citius.servando.calendula.util.IconUtils;
 import es.usc.citius.servando.calendula.util.LogUtil;
 import es.usc.citius.servando.calendula.util.ScreenUtils;
 
-public class LeftDrawerMgr implements Drawer.OnDrawerItemClickListener, AccountHeader.OnAccountHeaderListener {
-
+public class LeftDrawerMgr {
     public static final int HOME = 0;
     public static final int ROUTINES = 1;
     public static final int MEDICINES = 2;
@@ -90,8 +85,6 @@ public class LeftDrawerMgr implements Drawer.OnDrawerItemClickListener, AccountH
     }
 
     public void init(Bundle savedInstanceState) {
-
-
         headerResult = new AccountHeaderBuilder()
                 .withActivity(homeActivity)
                 .withHeaderBackground(R.drawable.drawer_header)
@@ -304,7 +297,7 @@ public class LeftDrawerMgr implements Drawer.OnDrawerItemClickListener, AccountH
 
         headerResult.setActiveProfile(p.getId().intValue(), false);
 
-        if (p != null && !p.equals(currentPatient) || header().getActiveProfile().getIcon().getIconRes() != AvatarMgr.res(p.getAvatar())) {
+        if (!p.equals(currentPatient) || header().getActiveProfile().getIcon().getIconRes() != AvatarMgr.res(p.getAvatar())) {
             headerResult.setActiveProfile(p.getId().intValue(), false);
             IProfile profile = headerResult.getActiveProfile();
             profile.withIcon(AvatarMgr.res(p.getAvatar()));
