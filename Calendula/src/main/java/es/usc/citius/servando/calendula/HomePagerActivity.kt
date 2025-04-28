@@ -424,7 +424,6 @@ class HomePagerActivity : CalendulaActivity(), OnRoutineSelectedListener, OnMedi
     }
 
     private fun showInvalidNotificationError() {
-        val expanded = (getViewPagerFragment(HomePages.HOME) as DailyAgendaFragment?)!!.isExpanded
 
         AlertDialog.Builder(this)
             .setTitle(R.string.notification_error_title)
@@ -433,6 +432,7 @@ class HomePagerActivity : CalendulaActivity(), OnRoutineSelectedListener, OnMedi
             .setIcon(IconUtils.icon(this, CommunityMaterial.Icon.cmd_bug, R.color.black))
             .setPositiveButton(R.string.tutorial_understood) { dialog, which ->
                 dialog.dismiss()
+//                val expanded = (getViewPagerFragment(HomePages.HOME) as DailyAgendaFragment?)!!.isExpanded
 //                if (!expanded) {
 //                    appBarLayout.setExpanded(false)
 //                    menuItems[R.id.action_expand].setIcon(icAgendaLess)
