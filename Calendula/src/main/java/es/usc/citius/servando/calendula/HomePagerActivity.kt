@@ -46,6 +46,11 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.toPublisher
+import autodispose2.AutoDispose
+import autodispose2.AutoDispose.autoDisposable
+import autodispose2.androidx.lifecycle.AndroidLifecycleScopeProvider
+import autodispose2.androidx.lifecycle.AndroidLifecycleScopeProvider.from
 import com.github.javiersantos.materialstyleddialogs.MaterialStyledDialog
 import com.github.javiersantos.materialstyleddialogs.enums.Style
 import com.mikepenz.community_material_typeface_library.CommunityMaterial
@@ -93,6 +98,10 @@ import es.usc.citius.servando.calendula.util.PreferenceUtils
 import es.usc.citius.servando.calendula.util.stock.StockDisplayUtils.showStockRunningOutDialog
 import es.usc.citius.servando.calendula.util.view.DisableableAppBarLayoutBehavior
 import es.usc.citius.servando.calendula.util.view.ExpandableFAB
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.core.Flowable
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.subjects.PublishSubject
 import java.util.LinkedList
 import java.util.Queue
 import org.greenrobot.eventbus.Subscribe
@@ -379,8 +388,20 @@ class HomePagerActivity : CalendulaActivity(), OnRoutineSelectedListener, OnMedi
         //check for DB update needed
         checkDatabaseUpdateNeeded()
 
-        viewModel.expandedPrefLiveData.observe(this) { appBarLayout.setExpanded(it) }
+        val expandedPrefObservable = Observable.fromPublisher(viewModel.expandedPrefLiveData.toPublisher(this)).startWithItem(viewModel.expandedPrefLiveData.value ?: false)
+        val pagePositionObservable = pagePositionPubSub.startWithItem(HomePages.HOME)
+
+        Observable.combineLatest(expandedPrefObservable, pagePositionObservable) { expandedPrefVal, pagePosition -> if(pagePosition == HomePages.HOME) expandedPrefVal else false }
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnNext {
+                val disableableAppBarLayoutBehavior = (appBarLayout.layoutParams as CoordinatorLayout.LayoutParams).behavior as DisableableAppBarLayoutBehavior
+                appBarLayout.setExpanded(it)
+                disableableAppBarLayoutBehavior.isEnabled = it
+            }.to(autoDisposable(from(this)))
+            .subscribe({}, {})
     }
+
+    private val pagePositionPubSub = PublishSubject.create<HomePages>()
 
     override fun onResume() {
         super.onResume()
@@ -444,14 +465,8 @@ class HomePagerActivity : CalendulaActivity(), OnRoutineSelectedListener, OnMedi
                 updateTitle(position)
                 updateScrim(position)
                 fabMgr?.onViewPagerItemChange(position)
-                val disableableAppBarLayoutBehavior = (appBarLayout.layoutParams as CoordinatorLayout.LayoutParams).behavior as DisableableAppBarLayoutBehavior
-                if (position == HomePages.HOME.ordinal && viewModel.expandedPrefLiveData.value != false) {
-                    appBarLayout.setExpanded(true)
-                    disableableAppBarLayoutBehavior.isEnabled = true
-                } else {
-                    appBarLayout.setExpanded(false)
-                    disableableAppBarLayoutBehavior.isEnabled = false
-                }
+                val homepage = HomePages.entries.find { it.ordinal == position } ?: HomePages.HOME
+                pagePositionPubSub.onNext(homepage)
                 invalidateOptionsMenu()
             }
 
