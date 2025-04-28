@@ -43,24 +43,24 @@ class NotificationPrefsFragment :
         private const val TAG = "NotificationPrefsFragm"
     }
 
-    private val applicationPackageName: String by lazy { requireContext().packageName as String }
+    private val applicationPackageName: String by lazy { activity!!.packageName as String }
     override val fragmentTitle: Int = R.string.pref_header_notifications
     override val presenter: NotificationPrefsContract.Presenter by lazy {
         NotificationPrefsPresenter(
-            RingtoneNameResolver(requireContext())
+            RingtoneNameResolver(context!!)
         )
     }
 
-    private val notificationPref by lazy { findPreference<Preference>(PreferenceKeys.SETTINGS_NOTIFICATION_TONE.key()) as Preference }
-    private val insistentNotificationPref by lazy { findPreference<Preference>(PreferenceKeys.SETTINGS_INSISTENT_NOTIFICATION_TONE.key()) as Preference }
+    private val notificationPref by lazy { findPreference(PreferenceKeys.SETTINGS_NOTIFICATION_TONE.key()) }
+    private val insistentNotificationPref by lazy { findPreference(PreferenceKeys.SETTINGS_INSISTENT_NOTIFICATION_TONE.key()) }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         LogUtil.d(TAG, "onCreatePreferences called")
         addPreferencesFromResource(R.xml.pref_notifications)
     }
 
-    override fun onPreferenceTreeClick(preference: Preference): Boolean {
-        when (preference.key) {
+    override fun onPreferenceTreeClick(preference: Preference?): Boolean {
+        when (preference?.key) {
             PreferenceKeys.SETTINGS_NOTIFICATION_TONE.key() -> {
                 presenter.selectNotificationRingtone()
                 return true
@@ -120,7 +120,7 @@ class NotificationPrefsFragment :
     }
 
     override fun hideStockPref() {
-        val preference = findPreference<Preference>(PreferenceKeys.SETTINGS_STOCK_ALERT_DAYS.key()) as Preference
+        val preference = findPreference(PreferenceKeys.SETTINGS_STOCK_ALERT_DAYS.key())
         preference.isEnabled = false
         preference.isVisible = false
     }
@@ -134,15 +134,15 @@ class NotificationPrefsFragment :
     }
 
     override fun setVisibleNotificationManagementPref(visible: Boolean){
-        findPreference<Preference>(PreferenceKeys.SETTINGS_NOTIFICATION_TONE.key())?.apply{
+        findPreference(PreferenceKeys.SETTINGS_NOTIFICATION_TONE.key()).apply{
             isEnabled = !visible
             isVisible = !visible
         }
-        findPreference<Preference>(PreferenceKeys.SETTINGS_NOTIFICATION_VIBRATION.key())?.apply{
+        findPreference(PreferenceKeys.SETTINGS_NOTIFICATION_VIBRATION.key()).apply{
             isEnabled = !visible
             isVisible = !visible
         }
-        findPreference<Preference>(PreferenceKeys.SETTINGS_NOTIFICATION_MANAGEMENT.key())?.apply{
+        findPreference(PreferenceKeys.SETTINGS_NOTIFICATION_MANAGEMENT.key()).apply{
             isEnabled = visible
             isVisible = visible
         }

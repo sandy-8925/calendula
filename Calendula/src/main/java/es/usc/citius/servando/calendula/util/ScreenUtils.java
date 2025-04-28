@@ -194,7 +194,7 @@ public class ScreenUtils {
         return new MaterializeBuilder()
                 .withActivity(activity)
                 .withTintedStatusBar(true)
-                .withTranslucentStatusBarProgrammatically(true)
+                .withTranslucentStatusBar(true)
                 .withStatusBarColorRes(colorRes)
                 .build();
     }
@@ -203,7 +203,7 @@ public class ScreenUtils {
         return new MaterializeBuilder()
                 .withActivity(activity)
                 .withTintedStatusBar(true)
-                .withTranslucentStatusBarProgrammatically(true)
+                .withTranslucentStatusBar(true)
                 .withStatusBarColor(color)
                 .build();
     }

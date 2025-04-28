@@ -8,7 +8,7 @@ buildscript {
     }
 
     ext {
-        gradle_plugin_version = '8.6.1'
+        gradle_plugin_version = '8.2.2'
         kotlin_version = '1.9.25'
         libVersions = [
                 android: [

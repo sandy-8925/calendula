@@ -58,10 +58,10 @@ class PrivacyPrefsFragment :
     override val fragmentTitle: Int = R.string.pref_header_privacy
 
 
-    private val pinPref: Preference by lazy { findPreference<Preference>(PreferenceKeys.UNLOCK_PIN.key()) as Preference }
-    private val fingerprintPref: SwitchPreference by lazy { findPreference<Preference>(PreferenceKeys.FINGERPRINT_ENABLED.key()) as SwitchPreference }
-    private val pinTimeoutPref: ListPreference by lazy { findPreference<Preference>(PreferenceKeys.UNLOCK_PIN_TIMEOUT.key()) as ListPreference }
-    private val secureWindowPref: SwitchPreference by lazy { findPreference<Preference>(PreferenceKeys.SECURE_WINDOW.key()) as SwitchPreference }
+    private val pinPref: Preference by lazy { findPreference(PreferenceKeys.UNLOCK_PIN.key()) }
+    private val fingerprintPref: SwitchPreference by lazy { findPreference(PreferenceKeys.FINGERPRINT_ENABLED.key()) as SwitchPreference }
+    private val pinTimeoutPref: ListPreference by lazy { findPreference(PreferenceKeys.UNLOCK_PIN_TIMEOUT.key()) as ListPreference }
+    private val secureWindowPref: SwitchPreference by lazy { findPreference(PreferenceKeys.SECURE_WINDOW.key()) as SwitchPreference }
 
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
