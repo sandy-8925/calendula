@@ -96,7 +96,6 @@ import es.usc.citius.servando.calendula.util.view.ExpandableFAB
 import java.util.LinkedList
 import java.util.Queue
 import org.greenrobot.eventbus.Subscribe
-import org.joda.time.DateTime
 
 class HomePagerActivity : CalendulaActivity(), OnRoutineSelectedListener, OnMedicineSelectedListener, OnScheduleSelectedListener {
     private val viewModel: HomePagerActivityViewModel by viewModels()
@@ -439,27 +438,24 @@ class HomePagerActivity : CalendulaActivity(), OnRoutineSelectedListener, OnMedi
 
     private val pageChangeListener: OnPageChangeListener
         get() = object : OnPageChangeListener {
-            override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
-            }
+            override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) = Unit
 
             override fun onPageSelected(position: Int) {
                 updateTitle(position)
                 updateScrim(position)
-                fabMgr!!.onViewPagerItemChange(position)
-                if (position == HomePages.HOME.ordinal && !(getViewPagerFragment(HomePages.HOME) as DailyAgendaFragment?)!!.isExpanded) {
+                fabMgr?.onViewPagerItemChange(position)
+                val disableableAppBarLayoutBehavior = (appBarLayout.layoutParams as CoordinatorLayout.LayoutParams).behavior as DisableableAppBarLayoutBehavior
+                if (position == HomePages.HOME.ordinal && viewModel.expandedPrefLiveData.value != false) {
                     appBarLayout.setExpanded(true)
-                    val layoutParams = appBarLayout.layoutParams as CoordinatorLayout.LayoutParams
-                    (layoutParams.behavior as DisableableAppBarLayoutBehavior?)!!.isEnabled = true
+                    disableableAppBarLayoutBehavior.isEnabled = true
                 } else {
                     appBarLayout.setExpanded(false)
-                    val layoutParams = appBarLayout.layoutParams as CoordinatorLayout.LayoutParams
-                    (layoutParams.behavior as DisableableAppBarLayoutBehavior?)!!.isEnabled = false
+                    disableableAppBarLayoutBehavior.isEnabled = false
                 }
                 invalidateOptionsMenu()
             }
 
-            override fun onPageScrollStateChanged(state: Int) {
-            }
+            override fun onPageScrollStateChanged(state: Int) = Unit
         }
 
     private fun updateScrim(position: Int) {
