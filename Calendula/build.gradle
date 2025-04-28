@@ -252,11 +252,6 @@ dependencies {
     implementation "com.jakewharton:butterknife:$libVersions.butterknife"
 
     /********** VIEWS AND VIEW UTILITIES **********/
-    // About page with libraries
-    implementation('com.mikepenz:aboutlibraries:5.2.5@aar') {
-        transitive = true
-    }
-
     // Calendar views
     implementation 'com.roomorama:caldroid:3.0.1'
     implementation 'com.squareup:android-times-square:1.6.4@aar'
@@ -271,21 +266,34 @@ dependencies {
     // GIF ImageView
     implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.3'
 
+    // About page with libraries
+    implementation('com.mikepenz:aboutlibraries:5.2.5@aar') {
+        transitive = true
+    }
     // Icons
     implementation 'com.mikepenz:community-material-typeface:1.9.32.2@aar'
     implementation 'com.mikepenz:google-material-typeface:2.1.2.1@aar'
     implementation 'com.mikepenz:iconics-core:2.7.1@aar'
+    // Material style utilities
+    implementation('com.mikepenz:materialize:0.2.7@aar') {
+        transitive = true
+    }
+    // Sliding left drawer
+    implementation('com.mikepenz:materialdrawer:4.4.1@aar') {
+        transitive = true
+    }
+    // Recyclerview adapters
+    implementation('com.mikepenz:fastadapter:2.1.5@aar') {
+        transitive = true
+    }
+    implementation 'com.mikepenz:fastadapter-commons:2.1.0@aar'
+    implementation 'com.mikepenz:fastadapter-extensions:2.1.0@aar'
 
     // Image loading
     implementation 'com.squareup.picasso:picasso:2.5.2'
 
     // Intro slides
     implementation 'com.heinrichreimersoftware:material-intro:1.5.8'
-
-    // Material style utilities
-    implementation('com.mikepenz:materialize:0.2.7@aar') {
-        transitive = true
-    }
 
     // Picker DialogFragments
     implementation 'com.code-troopers.betterpickers:library:3.1.0'
@@ -295,18 +303,6 @@ dependencies {
 
     // Tab strip
     implementation 'com.astuetz:pagerslidingtabstrip:1.0.1'
-
-    // Sliding left drawer
-    implementation('com.mikepenz:materialdrawer:4.4.1@aar') {
-        transitive = true
-    }
-
-    // Recyclerview adapters
-    implementation('com.mikepenz:fastadapter:2.1.5@aar') {
-        transitive = true
-    }
-    implementation 'com.mikepenz:fastadapter-commons:2.1.0@aar'
-    implementation 'com.mikepenz:fastadapter-extensions:2.1.0@aar'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
     // Secured preferences
