@@ -169,15 +169,6 @@ class HomePagerActivity : CalendulaActivity(), OnRoutineSelectedListener, OnMedi
                 return true
             }
 
-            R.id.action_expand -> {
-                val expanded = (getViewPagerFragment(HomePages.HOME) as DailyAgendaFragment?)!!.isExpanded
-                appBarLayout.setExpanded(expanded)
-                val delay = appBarLayoutExpanded && !expanded || !appBarLayoutExpanded && expanded
-                Handler().postDelayed({ (getViewPagerFragment(HomePages.HOME) as DailyAgendaFragment?)!!.toggleViewMode() }, (if (delay) 500 else 0).toLong())
-                item.setIcon(if (expanded) icAgendaMore else icAgendaLess)
-                return true
-            }
-
             R.id.action_schedules_help -> {
                 launchActivity(Intent(this, SchedulesHelpActivity::class.java))
                 return true
@@ -388,6 +379,8 @@ class HomePagerActivity : CalendulaActivity(), OnRoutineSelectedListener, OnMedi
 
         //check for DB update needed
         checkDatabaseUpdateNeeded()
+
+        viewModel.expandedPrefLiveData.observe(this) { appBarLayout.setExpanded(it) }
     }
 
     override fun onResume() {
@@ -420,12 +413,12 @@ class HomePagerActivity : CalendulaActivity(), OnRoutineSelectedListener, OnMedi
             .setIcon(IconUtils.icon(this, CommunityMaterial.Icon.cmd_bug, R.color.black))
             .setPositiveButton(R.string.tutorial_understood) { dialog, which ->
                 dialog.dismiss()
-                if (!expanded) {
-                    appBarLayout.setExpanded(false)
-                    menuItems[R.id.action_expand].setIcon(icAgendaLess)
-                    handler.postDelayed({ (getViewPagerFragment(HomePages.HOME) as DailyAgendaFragment?)!!.toggleViewMode() }, 200)
-                    handler.postDelayed({ (getViewPagerFragment(HomePages.HOME) as DailyAgendaFragment?)!!.scrollTo(DateTime.now()) }, 600)
-                }
+//                if (!expanded) {
+//                    appBarLayout.setExpanded(false)
+//                    menuItems[R.id.action_expand].setIcon(icAgendaLess)
+//                    handler.postDelayed({ (getViewPagerFragment(HomePages.HOME) as DailyAgendaFragment?)!!.toggleViewMode() }, 200)
+//                    handler.postDelayed({ (getViewPagerFragment(HomePages.HOME) as DailyAgendaFragment?)!!.scrollTo(DateTime.now()) }, 600)
+//                }
             }.create().show()
     }
 
@@ -462,7 +455,6 @@ class HomePagerActivity : CalendulaActivity(), OnRoutineSelectedListener, OnMedi
                     val layoutParams = appBarLayout.layoutParams as CoordinatorLayout.LayoutParams
                     (layoutParams.behavior as DisableableAppBarLayoutBehavior?)!!.isEnabled = false
                 }
-
                 invalidateOptionsMenu()
             }
 

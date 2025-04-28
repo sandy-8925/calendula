@@ -15,7 +15,8 @@ abstract class SharedPrefsLiveData<T>(protected val sharedPreferences: SharedPre
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String?) {
         if(!TextUtils.equals(watchKey, key)) return
-        value = getSharedPrefsValue(watchKey)
+        val newValue = getSharedPrefsValue(watchKey)
+        if(value != newValue) value = newValue
     }
 
     abstract fun getSharedPrefsValue(key: String): T?

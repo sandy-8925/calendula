@@ -34,6 +34,8 @@ import androidx.core.app.ActivityCompat
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.util.Pair
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.ViewModel
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -50,6 +52,7 @@ import es.usc.citius.servando.calendula.database.DB
 import es.usc.citius.servando.calendula.fragments.HomeProfileMgr.BackgroundUpdatedEvent
 import es.usc.citius.servando.calendula.persistence.Routine
 import es.usc.citius.servando.calendula.scheduling.AlarmIntentParams
+import es.usc.citius.servando.calendula.util.BooleanSharedPrefsLiveData
 import es.usc.citius.servando.calendula.util.DailyAgendaItemStub
 import es.usc.citius.servando.calendula.util.DailyAgendaItemStub.DailyAgendaItemStubElement
 import es.usc.citius.servando.calendula.util.IconUtils
@@ -66,6 +69,7 @@ import org.joda.time.LocalDate
  * Daily agenda fragment
  */
 class DailyAgendaFragment : Fragment() {
+    private val viewModel: DailyAgendaFragmentViewModel by viewModels()
     var emptyView: View? = null
 
     var llm: LinearLayoutManager? = null
@@ -124,10 +128,10 @@ class DailyAgendaFragment : Fragment() {
         setupRecyclerView()
         setupEmptyView()
 
-        val expanded = PreferenceUtils.getBoolean(PreferenceKeys.HOME_DAILYAGENDA_EXPANDED, false)
-        if (expanded != isExpanded) {
+        viewModel.expandedPrefLiveData.observe(viewLifecycleOwner) { _ ->
+            requireActivity().invalidateOptionsMenu()
             toggleViewMode()
-            (activity as HomePagerActivity?)!!.appBarLayout.setExpanded(!expanded)
+//            (activity as HomePagerActivity?)!!.appBarLayout.setExpanded(!expanded)
         }
 
         return rootView
@@ -347,7 +351,7 @@ class DailyAgendaFragment : Fragment() {
     }
 
     val isExpanded: Boolean
-        get() = rvAdapter!!.isExpanded
+        get() = viewModel.expandedPrefLiveData.value ?: true
 
     fun notifyDataChange() {
         try {
@@ -492,4 +496,8 @@ class DailyAgendaFragment : Fragment() {
     companion object {
         private const val TAG = "DailyAgendaFragment"
     }
+}
+
+internal class DailyAgendaFragmentViewModel: ViewModel() {
+    val expandedPrefLiveData = BooleanSharedPrefsLiveData(PreferenceUtils.instance().preferences(), PreferenceKeys.HOME_DAILYAGENDA_EXPANDED.toString())
 }
