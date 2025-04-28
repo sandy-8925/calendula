@@ -80,7 +80,6 @@ import es.usc.citius.servando.calendula.util.PreferenceUtils;
  * Daily agenda fragment
  */
 public class DailyAgendaFragment extends Fragment {
-
     private static final String TAG = "DailyAgendaFragment";
     View emptyView;
 
@@ -103,6 +102,8 @@ public class DailyAgendaFragment extends Fragment {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if(item.getItemId() == R.id.action_expand) {
+            boolean isExpandedPreVal = PreferenceUtils.getBoolean(PreferenceKeys.HOME_DAILYAGENDA_EXPANDED, isExpanded());
+            PreferenceUtils.edit().putBoolean(PreferenceKeys.HOME_DAILYAGENDA_EXPANDED.key(), !isExpandedPreVal).apply();
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -527,7 +528,6 @@ public class DailyAgendaFragment extends Fragment {
 
         @Override
         public void onAfterToggleCollapse(boolean expanded, boolean somethingVisible) {
-            PreferenceUtils.edit().putBoolean(PreferenceKeys.HOME_DAILYAGENDA_EXPANDED.key(), expanded).apply();
             /*if (expanded && firstTime != null) {
                 scrollTo(firstTime);
                 firstTime = null;
