@@ -309,6 +309,13 @@ dependencies {
     // Secured preferences
     implementation 'online.devliving:securedpreferencestore:0.7.3'
 
+    implementation "io.reactivex.rxjava3:rxjava:3.1.10"
+    implementation 'io.reactivex.rxjava3:rxandroid:3.0.2'
 
+    def autoDispose = "2.2.1"
+    implementation "com.uber.autodispose2:autodispose:${autoDispose}"
+    implementation "com.uber.autodispose2:autodispose-lifecycle:${autoDispose}"
+    implementation "com.uber.autodispose2:autodispose-android:${autoDispose}"
+    implementation "com.uber.autodispose2:autodispose-androidx-lifecycle:${autoDispose}"
 }
 
