@@ -297,7 +297,7 @@ dependencies {
     implementation 'com.astuetz:pagerslidingtabstrip:1.0.1'
 
     // Sliding left drawer
-    implementation('com.mikepenz:materialdrawer:9.0.2@aar') {
+    implementation('com.mikepenz:materialdrawer:6.1.1@aar') {
         transitive = true
     }
 
