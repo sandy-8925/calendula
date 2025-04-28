@@ -70,17 +70,17 @@ import org.joda.time.LocalDate
  */
 class DailyAgendaFragment : Fragment() {
     private val viewModel: DailyAgendaFragmentViewModel by viewModels()
-    var emptyView: View? = null
+    private var emptyView: View? = null
 
     var llm: LinearLayoutManager? = null
 
-    var rv: RecyclerView? = null
-    var rvAdapter: DailyAgendaRecyclerAdapter? = null
-    var rvListener: DailyAgendaRecyclerListener? = null
+    private var rv: RecyclerView? = null
+    private var rvAdapter: DailyAgendaRecyclerAdapter? = null
+    private var rvListener: DailyAgendaRecyclerListener? = null
 
     var items: MutableList<DailyAgendaItemStub?> = ArrayList()
 
-    var emptyViewIcon: IIcon = IconUtils.randomNiceIcon()
+    private var emptyViewIcon: IIcon = IconUtils.randomNiceIcon()
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
@@ -147,7 +147,7 @@ class DailyAgendaFragment : Fragment() {
         notifyDataChange()
     }
 
-    fun buildItems(): List<DailyAgendaItemStub?> {
+    private fun buildItems(): List<DailyAgendaItemStub?> {
         val stubs: MutableList<DailyAgendaItemStub?> = ArrayList()
 
         val daily = DB.dailyScheduleItems().findAll()
@@ -274,7 +274,7 @@ class DailyAgendaFragment : Fragment() {
         return stubs
     }
 
-    fun addEmptyHours(stubs: MutableList<DailyAgendaItemStub?>, min: DateTime, max: DateTime) {
+    private fun addEmptyHours(stubs: MutableList<DailyAgendaItemStub?>, min: DateTime, max: DateTime) {
         var min = min
         var max = max
         min = min.withTimeAtStartOfDay()
@@ -322,7 +322,7 @@ class DailyAgendaFragment : Fragment() {
         }
     }
 
-    fun toggleViewMode() {
+    private fun toggleViewMode() {
         rvAdapter!!.toggleCollapseMode()
     }
 
@@ -350,7 +350,7 @@ class DailyAgendaFragment : Fragment() {
         if (position > 0) llm!!.smoothScrollToPosition(rv, null, position - 1)
     }
 
-    val isExpanded: Boolean
+    private val isExpanded: Boolean
         get() = viewModel.expandedPrefLiveData.value ?: true
 
     fun notifyDataChange() {
@@ -461,7 +461,7 @@ class DailyAgendaFragment : Fragment() {
     }
 
     inner class DailyAgendaRecyclerListener : DailyAgendaRecyclerAdapter.EventListener {
-        var firstTime: DateTime? = null
+        private var firstTime: DateTime? = null
 
         override fun onItemClick(v: View, item: DailyAgendaItemStub, position: Int) {
             showConfirmActivity(v, item, position)
