@@ -45,7 +45,6 @@ import com.mikepenz.iconics.typeface.IIcon
 import es.usc.citius.servando.calendula.CalendulaApp
 import es.usc.citius.servando.calendula.CalendulaApp.Companion.eventBus
 import es.usc.citius.servando.calendula.DailyAgendaRecyclerAdapter
-import es.usc.citius.servando.calendula.HomePagerActivity
 import es.usc.citius.servando.calendula.R
 import es.usc.citius.servando.calendula.activities.ConfirmActivity
 import es.usc.citius.servando.calendula.database.DB
@@ -89,8 +88,8 @@ class DailyAgendaFragment : Fragment() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.action_expand) {
-            val isExpandedPreVal = PreferenceUtils.getBoolean(PreferenceKeys.HOME_DAILYAGENDA_EXPANDED, isExpanded)
-            PreferenceUtils.edit().putBoolean(PreferenceKeys.HOME_DAILYAGENDA_EXPANDED.key(), !isExpandedPreVal).apply()
+            val isExpandedPrefVal = PreferenceUtils.getBoolean(PreferenceKeys.HOME_DAILYAGENDA_EXPANDED, isExpanded)
+            PreferenceUtils.edit().putBoolean(PreferenceKeys.HOME_DAILYAGENDA_EXPANDED.key(), !isExpandedPrefVal).apply()
             return true
         }
         return super.onOptionsItemSelected(item)
@@ -128,9 +127,9 @@ class DailyAgendaFragment : Fragment() {
         setupRecyclerView()
         setupEmptyView()
 
-        viewModel.expandedPrefLiveData.observe(viewLifecycleOwner) { _ ->
+        viewModel.expandedPrefLiveData.observe(viewLifecycleOwner) { expandedPrefVal ->
             requireActivity().invalidateOptionsMenu()
-            toggleViewMode()
+            if(rvAdapter!!.isExpanded == expandedPrefVal) toggleViewMode()
 //            (activity as HomePagerActivity?)!!.appBarLayout.setExpanded(!expanded)
         }
 
