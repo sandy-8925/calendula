@@ -71,7 +71,7 @@ import org.joda.time.LocalDate
 class DailyAgendaFragment : Fragment() {
     private val viewModel: DailyAgendaFragmentViewModel by viewModels()
     private lateinit var emptyView: View
-    private lateinit var llm: LinearLayoutManager
+    private val llm by lazy { LinearLayoutManager(requireContext()) }
 
     private lateinit var rv: RecyclerView
     private lateinit var rvAdapter: DailyAgendaRecyclerAdapter
@@ -379,14 +379,11 @@ class DailyAgendaFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        llm = LinearLayoutManager(context)
         rv.layoutManager = llm
         rvAdapter = DailyAgendaRecyclerAdapter(items, rv, llm, activity)
         rv.adapter = rvAdapter
         rv.itemAnimator = DefaultItemAnimator()
-
         rvListener = DailyAgendaRecyclerListener()
-
         rvAdapter.setListener(rvListener)
     }
 
