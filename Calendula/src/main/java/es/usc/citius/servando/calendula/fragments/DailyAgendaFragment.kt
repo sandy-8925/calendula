@@ -49,7 +49,6 @@ import es.usc.citius.servando.calendula.R
 import es.usc.citius.servando.calendula.activities.ConfirmActivity
 import es.usc.citius.servando.calendula.database.DB
 import es.usc.citius.servando.calendula.databinding.FragmentDailyAgendaBinding
-import es.usc.citius.servando.calendula.fragments.HomeProfileMgr.BackgroundUpdatedEvent
 import es.usc.citius.servando.calendula.persistence.Routine
 import es.usc.citius.servando.calendula.scheduling.AlarmIntentParams
 import es.usc.citius.servando.calendula.util.BooleanSharedPrefsLiveData
@@ -60,7 +59,6 @@ import es.usc.citius.servando.calendula.util.LogUtil
 import es.usc.citius.servando.calendula.util.PreferenceKeys
 import es.usc.citius.servando.calendula.util.PreferenceUtils
 import java.util.Collections
-import org.greenrobot.eventbus.Subscribe
 import org.joda.time.DateTime
 import org.joda.time.Interval
 import org.joda.time.LocalDate
@@ -373,11 +371,6 @@ class DailyAgendaFragment : Fragment() {
         notifyDataChange()
     }
 
-    // Method called from the event bus
-    @Subscribe fun handleBackgroundUpdatedEvent(event: BackgroundUpdatedEvent?) {
-        Handler().postDelayed({ onBackgroundChange(HomeProfileMgr.colorForCurrent(activity)) }, 500)
-    }
-
     private fun setupRecyclerView() {
         rv.layoutManager = llm
         rvAdapter = DailyAgendaRecyclerAdapter(items, rv, llm, activity)
@@ -428,15 +421,6 @@ class DailyAgendaFragment : Fragment() {
         } else {
             startActivity(i)
         }
-    }
-
-    private fun onBackgroundChange(color: Int) {
-        val icon: Drawable = IconicsDrawable(context)
-            .icon(emptyViewIcon)
-            .color(color)
-            .sizeDp(90)
-            .paddingDp(0)
-        (emptyView.findViewById<View>(R.id.imageView_ok) as ImageView).setImageDrawable(icon)
     }
 
     private object DailyAgendaItemStubComparator: Comparator<DailyAgendaItemStub?> {
