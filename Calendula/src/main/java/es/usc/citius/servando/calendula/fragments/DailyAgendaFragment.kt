@@ -48,6 +48,7 @@ import es.usc.citius.servando.calendula.DailyAgendaRecyclerAdapter
 import es.usc.citius.servando.calendula.R
 import es.usc.citius.servando.calendula.activities.ConfirmActivity
 import es.usc.citius.servando.calendula.database.DB
+import es.usc.citius.servando.calendula.databinding.FragmentDailyAgendaBinding
 import es.usc.citius.servando.calendula.fragments.HomeProfileMgr.BackgroundUpdatedEvent
 import es.usc.citius.servando.calendula.persistence.Routine
 import es.usc.citius.servando.calendula.scheduling.AlarmIntentParams
@@ -69,15 +70,14 @@ import org.joda.time.LocalDate
  */
 class DailyAgendaFragment : Fragment() {
     private val viewModel: DailyAgendaFragmentViewModel by viewModels()
-    private var emptyView: View? = null
+    private lateinit var emptyView: View
+    private lateinit var llm: LinearLayoutManager
 
-    var llm: LinearLayoutManager? = null
+    private lateinit var rv: RecyclerView
+    private lateinit var rvAdapter: DailyAgendaRecyclerAdapter
+    private lateinit var rvListener: DailyAgendaRecyclerListener
 
-    private var rv: RecyclerView? = null
-    private var rvAdapter: DailyAgendaRecyclerAdapter? = null
-    private var rvListener: DailyAgendaRecyclerListener? = null
-
-    var items: MutableList<DailyAgendaItemStub?> = ArrayList()
+    private var items: MutableList<DailyAgendaItemStub?> = ArrayList()
 
     private var emptyViewIcon: IIcon = IconUtils.randomNiceIcon()
 
@@ -119,22 +119,11 @@ class DailyAgendaFragment : Fragment() {
         items = ArrayList()
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val rootView = inflater.inflate(R.layout.fragment_daily_agenda, container, false)
-        rv = rootView.findViewById<View>(R.id.rv) as RecyclerView
-        emptyView = rootView.findViewById(R.id.empty_view_placeholder)
-        eventBus().register(this)
-        setupRecyclerView()
-        setupEmptyView()
-
-        viewModel.expandedPrefLiveData.observe(viewLifecycleOwner) { expandedPrefVal ->
-            requireActivity().invalidateOptionsMenu()
-            if(rvAdapter!!.isExpanded == expandedPrefVal) toggleViewMode()
-//            (activity as HomePagerActivity?)!!.appBarLayout.setExpanded(!expanded)
-        }
-
-        return rootView
-    }
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ):View = inflater.inflate(R.layout.fragment_daily_agenda, container, false)
 
     override fun onDestroyView() {
         super.onDestroyView()
@@ -143,6 +132,18 @@ class DailyAgendaFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        val binding = FragmentDailyAgendaBinding.bind(view)
+        rv = binding.rv
+        emptyView = binding.emptyViewPlaceholder
+        eventBus().register(this)
+        setupRecyclerView()
+        setupEmptyView()
+
+        viewModel.expandedPrefLiveData.observe(viewLifecycleOwner) { expandedPrefVal ->
+            requireActivity().invalidateOptionsMenu()
+            if(rvAdapter.isExpanded == expandedPrefVal) toggleViewMode()
+//            (activity as HomePagerActivity?)!!.appBarLayout.setExpanded(!expanded)
+        }
         notifyDataChange()
     }
 
@@ -307,10 +308,10 @@ class DailyAgendaFragment : Fragment() {
 
     fun showOrHideEmptyView(show: Boolean) {
         if (show) {
-            emptyView!!.visibility = View.VISIBLE
+            emptyView.visibility = View.VISIBLE
             //emptyView.animate().alpha(1);
         } else {
-            emptyView!!.visibility = View.GONE
+            emptyView.visibility = View.GONE
 
             //            emptyView.animate().alpha(0).setListener(new AnimatorListenerAdapter() {
 //                @Override
@@ -322,18 +323,18 @@ class DailyAgendaFragment : Fragment() {
     }
 
     private fun toggleViewMode() {
-        rvAdapter!!.toggleCollapseMode()
+        rvAdapter.toggleCollapseMode()
     }
 
     fun refresh() {
-        rvAdapter!!.notifyDataSetChanged()
+        rvAdapter.notifyDataSetChanged()
     }
 
     fun refreshPosition(position: Int) {
         if (position == -1) {
             notifyDataChange()
         } else if (position >= 0 && position < items.size) {
-            rvAdapter!!.updatePosition(position)
+            rvAdapter.updatePosition(position)
         }
     }
 
@@ -346,7 +347,7 @@ class DailyAgendaFragment : Fragment() {
             position++
         }
 
-        if (position > 0) llm!!.smoothScrollToPosition(rv, null, position - 1)
+        if (position > 0) llm.smoothScrollToPosition(rv, null, position - 1)
     }
 
     private val isExpanded: Boolean
@@ -358,9 +359,9 @@ class DailyAgendaFragment : Fragment() {
             items.clear()
             items.addAll(buildItems())
             LogUtil.d(TAG, "Items after rebuild " + items.size)
-            rvAdapter!!.notifyDataSetChanged()
+            rvAdapter.notifyDataSetChanged()
             // show empty list view if there are no items
-            rv!!.postDelayed({ showOrHideEmptyView(!rvAdapter!!.isShowingSomething) }, 100)
+            rv.postDelayed({ showOrHideEmptyView(!rvAdapter.isShowingSomething) }, 100)
         } catch (e: Exception) {
             LogUtil.e(TAG, "Error onPostExecute", e)
         }
@@ -377,14 +378,14 @@ class DailyAgendaFragment : Fragment() {
 
     private fun setupRecyclerView() {
         llm = LinearLayoutManager(context)
-        rv!!.layoutManager = llm
+        rv.layoutManager = llm
         rvAdapter = DailyAgendaRecyclerAdapter(items, rv, llm, activity)
-        rv!!.adapter = rvAdapter
-        rv!!.itemAnimator = DefaultItemAnimator()
+        rv.adapter = rvAdapter
+        rv.itemAnimator = DefaultItemAnimator()
 
         rvListener = DailyAgendaRecyclerListener()
 
-        rvAdapter!!.setListener(rvListener)
+        rvAdapter.setListener(rvListener)
     }
 
     private fun setupEmptyView() {
@@ -394,7 +395,7 @@ class DailyAgendaFragment : Fragment() {
             .color(color)
             .sizeDp(90)
             .paddingDp(0)
-        (emptyView!!.findViewById<View>(R.id.imageView_ok) as ImageView).setImageDrawable(icon)
+        (emptyView.findViewById<View>(R.id.imageView_ok) as ImageView).setImageDrawable(icon)
     }
 
     private fun showConfirmActivity(view: View, item: DailyAgendaItemStub, position: Int) {
@@ -436,7 +437,7 @@ class DailyAgendaFragment : Fragment() {
             .color(color)
             .sizeDp(90)
             .paddingDp(0)
-        (emptyView!!.findViewById<View>(R.id.imageView_ok) as ImageView).setImageDrawable(icon)
+        (emptyView.findViewById<View>(R.id.imageView_ok) as ImageView).setImageDrawable(icon)
     }
 
     private object DailyAgendaItemStubComparator: Comparator<DailyAgendaItemStub?> {
@@ -467,7 +468,7 @@ class DailyAgendaFragment : Fragment() {
         }
 
         override fun onBeforeToggleCollapse(expanded: Boolean, somethingVisible: Boolean) {
-            val firstPosition = llm!!.findFirstVisibleItemPosition()
+            val firstPosition = llm.findFirstVisibleItemPosition()
             firstTime = if (firstPosition >= 0 && firstPosition < items.size) items[firstPosition]!!.dateTime() else null
 
             LogUtil.d(TAG, "OnBeforeCollapse, somethingVisible is $somethingVisible")
