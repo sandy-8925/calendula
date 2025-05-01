@@ -95,28 +95,30 @@ class DailyAgendaFragment : Fragment() {
         return super.onOptionsItemSelected(item)
     }
 
+    private val icAgendaLess by lazy {
+        IconicsDrawable(requireContext())
+        .icon(CommunityMaterial.Icon.cmd_unfold_less_horizontal)
+        .color(Color.WHITE)
+        .sizeDp(24)
+    }
+
+    private val icAgendaMore by lazy {
+        IconicsDrawable(requireContext())
+        .icon(CommunityMaterial.Icon.cmd_unfold_more_horizontal)
+        .color(Color.WHITE)
+        .sizeDp(24)
+    }
+
     override fun onPrepareOptionsMenu(menu: Menu) {
         super.onPrepareOptionsMenu(menu)
         val expandMenuItem = menu.findItem(R.id.action_expand)
-
-        val icAgendaLess = IconicsDrawable(requireContext())
-            .icon(CommunityMaterial.Icon.cmd_unfold_less_horizontal)
-            .color(Color.WHITE)
-            .sizeDp(24)
-
-        val icAgendaMore = IconicsDrawable(requireContext())
-            .icon(CommunityMaterial.Icon.cmd_unfold_more_horizontal)
-            .color(Color.WHITE)
-            .sizeDp(24)
-        val drawableToSet = if (!isExpanded) icAgendaMore
-        else icAgendaLess
+        val drawableToSet = if (!isExpanded) icAgendaMore else icAgendaLess
         expandMenuItem.setIcon(drawableToSet)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
-        items = ArrayList()
     }
 
     override fun onCreateView(
