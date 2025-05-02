@@ -126,7 +126,7 @@ class DailyAgendaFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        eventBus().unregister(this)
+//        eventBus().unregister(this)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -134,7 +134,7 @@ class DailyAgendaFragment : Fragment() {
         val binding = FragmentDailyAgendaBinding.bind(view)
         rv = binding.rv
         emptyView = binding.emptyViewPlaceholder
-        eventBus().register(this)
+//        eventBus().register(this)
         setupRecyclerView()
         setupEmptyView()
 
