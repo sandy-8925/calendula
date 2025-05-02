@@ -35,10 +35,15 @@ import androidx.core.app.ActivityOptionsCompat
 import androidx.core.util.Pair
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.Lifecycle.Event.ON_DESTROY
 import androidx.lifecycle.ViewModel
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import autodispose2.AutoDispose.autoDisposable
+import autodispose2.androidx.lifecycle.AndroidLifecycleScopeProvider
+import autodispose2.androidx.lifecycle.AndroidLifecycleScopeProvider.from
 import com.mikepenz.community_material_typeface_library.CommunityMaterial
 import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.typeface.IIcon
@@ -58,10 +63,13 @@ import es.usc.citius.servando.calendula.util.IconUtils
 import es.usc.citius.servando.calendula.util.LogUtil
 import es.usc.citius.servando.calendula.util.PreferenceKeys
 import es.usc.citius.servando.calendula.util.PreferenceUtils
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.core.Completable
 import java.util.Collections
 import org.joda.time.DateTime
 import org.joda.time.Interval
 import org.joda.time.LocalDate
+import java.util.concurrent.TimeUnit
 
 /**
  * Daily agenda fragment
@@ -456,7 +464,11 @@ class DailyAgendaFragment : Fragment() {
 
         override fun onAfterToggleCollapse(expanded: Boolean, somethingVisible: Boolean) {
             if (expanded)
-                Handler().postDelayed({ scrollTo(DateTime.now()) }, 600)
+                Completable.timer(600, TimeUnit.MILLISECONDS)
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .doOnComplete { scrollTo(DateTime.now()) }
+                    .to(autoDisposable<Unit>(from(viewLifecycleOwner, ON_DESTROY)))
+                    .subscribe({},{})
         }
 
         private fun scrollTo(time: DateTime) {
