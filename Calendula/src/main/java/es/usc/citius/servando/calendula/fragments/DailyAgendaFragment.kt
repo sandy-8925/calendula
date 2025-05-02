@@ -372,12 +372,13 @@ class DailyAgendaFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        rv.layoutManager = llm
-        rvAdapter = DailyAgendaRecyclerAdapter(items, rv, llm, activity)
-        rv.adapter = rvAdapter
-        rv.itemAnimator = DefaultItemAnimator()
         rvListener = DailyAgendaRecyclerListener()
-        rvAdapter.setListener(rvListener)
+        rvAdapter = DailyAgendaRecyclerAdapter(items, rv, llm, activity).apply { setListener(rvListener) }
+        rv.let {
+            it.layoutManager = llm
+            it.adapter = rvAdapter
+            it.itemAnimator = DefaultItemAnimator()
+        }
     }
 
     private fun setupEmptyView() {
