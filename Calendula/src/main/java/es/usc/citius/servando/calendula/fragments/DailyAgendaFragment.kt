@@ -69,7 +69,6 @@ import org.joda.time.LocalDate
 class DailyAgendaFragment : Fragment() {
     private val viewModel: DailyAgendaFragmentViewModel by viewModels()
     private lateinit var emptyView: View
-    private val llm by lazy { LinearLayoutManager(requireContext()) }
 
     private lateinit var rv: RecyclerView
     private lateinit var rvAdapter: DailyAgendaRecyclerAdapter
@@ -338,18 +337,6 @@ class DailyAgendaFragment : Fragment() {
         }
     }
 
-    fun scrollTo(time: DateTime?) {
-        var position = 0
-        for (stub in items) {
-            if (stub!!.dateTime().isAfter(time)) {
-                break
-            }
-            position++
-        }
-
-        if (position > 0) llm.smoothScrollToPosition(rv, null, position - 1)
-    }
-
     private val isExpanded: Boolean
         get() = viewModel.expandedPrefLiveData.value ?: true
 
@@ -372,7 +359,8 @@ class DailyAgendaFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        rvListener = DailyAgendaRecyclerListener()
+        val llm = LinearLayoutManager(requireContext())
+        rvListener = DailyAgendaRecyclerListener(llm)
         rvAdapter = DailyAgendaRecyclerAdapter(items, rv, llm, activity).apply { setListener(rvListener) }
         rv.let {
             it.layoutManager = llm
@@ -444,7 +432,7 @@ class DailyAgendaFragment : Fragment() {
         }
     }
 
-    inner class DailyAgendaRecyclerListener : DailyAgendaRecyclerAdapter.EventListener {
+    inner class DailyAgendaRecyclerListener(private val linearLayoutManager: LinearLayoutManager) : DailyAgendaRecyclerAdapter.EventListener {
         private var firstTime: DateTime? = null
 
         override fun onItemClick(v: View, item: DailyAgendaItemStub, position: Int) {
@@ -452,7 +440,7 @@ class DailyAgendaFragment : Fragment() {
         }
 
         override fun onBeforeToggleCollapse(expanded: Boolean, somethingVisible: Boolean) {
-            val firstPosition = llm.findFirstVisibleItemPosition()
+            val firstPosition = linearLayoutManager.findFirstVisibleItemPosition()
             firstTime = if (firstPosition >= 0 && firstPosition < items.size) items[firstPosition]!!.dateTime() else null
 
             LogUtil.d(TAG, "OnBeforeCollapse, somethingVisible is $somethingVisible")
@@ -467,13 +455,16 @@ class DailyAgendaFragment : Fragment() {
         }
 
         override fun onAfterToggleCollapse(expanded: Boolean, somethingVisible: Boolean) {
-            /*if (expanded && firstTime != null) {
-                scrollTo(firstTime);
-                firstTime = null;
-            } else */
-            if (expanded) {
+            if (expanded)
                 Handler().postDelayed({ scrollTo(DateTime.now()) }, 600)
+        }
+
+        private fun scrollTo(time: DateTime) {
+            val position = items.indexOfFirst {
+                if(it == null) return@indexOfFirst false
+                return@indexOfFirst it.dateTime().isAfter(time)
             }
+            if (position > 0) linearLayoutManager.smoothScrollToPosition(rv, null, position - 1)
         }
     }
 
