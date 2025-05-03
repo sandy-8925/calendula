@@ -31,6 +31,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.annotation.AnyThread
 import androidx.annotation.Keep
+import androidx.annotation.WorkerThread
 import androidx.core.app.ActivityCompat
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.util.Pair
@@ -355,11 +356,10 @@ internal class ItemsListLiveData: LiveData<List<DailyAgendaItemStub>>(), Closeab
         eventBus().unregister(this)
     }
 
+    @WorkerThread
     private fun buildItems(): List<DailyAgendaItemStub> {
         val stubs = mutableListOf<DailyAgendaItemStub>()
-
         val daily = DB.dailyScheduleItems().findAll()
-
         var max = DateTime.now().withTimeAtStartOfDay()
         var min = DateTime.now().withTimeAtStartOfDay()
 
