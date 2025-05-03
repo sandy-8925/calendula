@@ -96,7 +96,7 @@ class DailyAgendaFragment : Fragment() {
     private lateinit var rvAdapter: DailyAgendaRecyclerAdapter
     private lateinit var rvListener: DailyAgendaRecyclerListener
 
-    private var items: MutableList<DailyAgendaItemStub?> = ArrayList()
+    private var items: MutableList<DailyAgendaItemStub> = ArrayList()
 
     private var emptyViewIcon: IIcon = IconUtils.randomNiceIcon()
 
