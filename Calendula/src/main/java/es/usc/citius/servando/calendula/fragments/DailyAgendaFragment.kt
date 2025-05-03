@@ -77,6 +77,7 @@ import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.schedulers.Schedulers
 import java.io.Closeable
 import java.util.Collections
+import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import org.greenrobot.eventbus.Subscribe
 import org.joda.time.DateTime
@@ -346,7 +347,7 @@ internal class ItemsListLiveData: LiveData<List<DailyAgendaItemStub>>(), Closeab
     private fun notifyDataChange() {
         //todo: Need to dedupe multiple calls to this function, make sure only one update/item list build is taking place at a time
         Single.fromCallable { postValue(buildItems()) }
-            .subscribeOn(Schedulers.computation())
+            .subscribeOn(notifyDataScheduler)
             .subscribe({},{})
     }
 
@@ -479,6 +480,10 @@ internal class ItemsListLiveData: LiveData<List<DailyAgendaItemStub>>(), Closeab
         Collections.sort(stubs, DailyAgendaItemStubComparator)
 
         return stubs
+    }
+
+    companion object {
+        private val notifyDataScheduler by lazy { Schedulers.from(Executors.newSingleThreadExecutor()) }
     }
 }
 
