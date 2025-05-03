@@ -172,7 +172,7 @@ class DailyAgendaFragment : Fragment() {
             when (event) {
                 is ModelCreateOrUpdateEvent -> notifyDataChange()
                 is IntakeConfirmedEvent -> notifyDataChange()
-                is UserUpdateEvent -> onUserUpdate()
+                is UserUpdateEvent -> notifyDataChange()
                 is BackgroundUpdatedEvent -> refresh()
                 is ConfirmStateChangeEvent -> refreshPosition(event.position)
                 is AgendaUpdatedEvent -> notifyDataChange()
@@ -361,11 +361,11 @@ class DailyAgendaFragment : Fragment() {
         rvAdapter.toggleCollapseMode()
     }
 
-    fun refresh() {
+    private fun refresh() {
         rvAdapter.notifyDataSetChanged()
     }
 
-    fun refreshPosition(position: Int) {
+    private fun refreshPosition(position: Int) {
         if (position == -1) {
             notifyDataChange()
         } else if (position >= 0 && position < items.size) {
@@ -376,7 +376,7 @@ class DailyAgendaFragment : Fragment() {
     private val isExpanded: Boolean
         get() = viewModel.expandedPrefLiveData.value ?: true
 
-    fun notifyDataChange() {
+    private fun notifyDataChange() {
         try {
             LogUtil.d(TAG, "AgendaView NotifyDataChange")
             items.clear()
@@ -388,10 +388,6 @@ class DailyAgendaFragment : Fragment() {
         } catch (e: Exception) {
             LogUtil.e(TAG, "Error onPostExecute", e)
         }
-    }
-
-    fun onUserUpdate() {
-        notifyDataChange()
     }
 
     private fun setupRecyclerView() {
