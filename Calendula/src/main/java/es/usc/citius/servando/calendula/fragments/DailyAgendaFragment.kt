@@ -96,8 +96,6 @@ class DailyAgendaFragment : Fragment() {
     private lateinit var rvAdapter: DailyAgendaRecyclerAdapter
     private lateinit var rvListener: DailyAgendaRecyclerListener
 
-    private var items: MutableList<DailyAgendaItemStub> = ArrayList()
-
     private var emptyViewIcon: IIcon = IconUtils.randomNiceIcon()
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -160,9 +158,7 @@ class DailyAgendaFragment : Fragment() {
 //            (activity as HomePagerActivity?)!!.appBarLayout.setExpanded(!expanded)
         }
         viewModel.itemsListLiveDate.observe(viewLifecycleOwner) {
-            items.clear()
-            items.addAll(it)
-            rvAdapter.notifyDataSetChanged()
+            rvAdapter.items = it
             rv.postDelayed({ showOrHideEmptyView(!rvAdapter.isShowingSomething) }, 100)
         }
     }
@@ -215,11 +211,7 @@ class DailyAgendaFragment : Fragment() {
         rvAdapter.notifyDataSetChanged()
     }
 
-    private fun refreshPosition(position: Int) {
-        if (position >= 0 && position < items.size) {
-            rvAdapter.updatePosition(position)
-        }
-    }
+    private fun refreshPosition(position: Int) = rvAdapter.updatePosition(position)
 
     private val isExpanded: Boolean
         get() = viewModel.expandedPrefLiveData.value ?: true
@@ -227,7 +219,7 @@ class DailyAgendaFragment : Fragment() {
     private fun setupRecyclerView() {
         val llm = LinearLayoutManager(requireContext())
         rvListener = DailyAgendaRecyclerListener(llm)
-        rvAdapter = DailyAgendaRecyclerAdapter(items, rv, llm, requireActivity()).apply { setListener(rvListener) }
+        rvAdapter = DailyAgendaRecyclerAdapter(rv, llm, requireActivity()).apply { setListener(rvListener) }
         rv.let {
             it.layoutManager = llm
             it.adapter = rvAdapter
@@ -283,13 +275,13 @@ class DailyAgendaFragment : Fragment() {
 
         override fun onBeforeToggleCollapse(expanded: Boolean, somethingVisible: Boolean) {
             val firstPosition = linearLayoutManager.findFirstVisibleItemPosition()
-            firstTime = if (firstPosition >= 0 && firstPosition < items.size) items[firstPosition]!!.dateTime() else null
+            firstTime = if (firstPosition >= 0 && firstPosition < rvAdapter.itemCount) rvAdapter.items[firstPosition].dateTime() else null
 
             LogUtil.d(TAG, "OnBeforeCollapse, somethingVisible is $somethingVisible")
 
             if (expanded) {
                 showOrHideEmptyView(false)
-            } else if (!expanded && somethingVisible) {
+            } else if (somethingVisible) {
                 showOrHideEmptyView(false)
             } else {
                 showOrHideEmptyView(true)
@@ -306,10 +298,7 @@ class DailyAgendaFragment : Fragment() {
         }
 
         private fun scrollTo(time: DateTime) {
-            val position = items.indexOfFirst {
-                if(it == null) return@indexOfFirst false
-                return@indexOfFirst it.dateTime().isAfter(time)
-            }
+            val position = rvAdapter.items.indexOfFirst { it.dateTime().isAfter(time) }
             if (position > 0) linearLayoutManager.smoothScrollToPosition(rv, null, position - 1)
         }
     }

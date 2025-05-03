@@ -49,7 +49,12 @@ import es.usc.citius.servando.calendula.util.view.ParallaxImageView
 import org.joda.time.DateTime
 import org.joda.time.LocalDate
 
-class DailyAgendaRecyclerAdapter(var items: List<DailyAgendaItemStub>, rv: RecyclerView, llm: LinearLayoutManager, ctx: Activity) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class DailyAgendaRecyclerAdapter(rv: RecyclerView, llm: LinearLayoutManager, ctx: Activity) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+    var items: List<DailyAgendaItemStub> = emptyList()
+        set(value) {
+            field = value
+            notifyDataSetChanged()
+        }
     private val window: Long
     private val SPACER = 1
     private val EMPTY = 2
@@ -115,7 +120,6 @@ class DailyAgendaRecyclerAdapter(var items: List<DailyAgendaItemStub>, rv: Recyc
         return type
     }
 
-
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val item = items[position]
 
@@ -128,9 +132,7 @@ class DailyAgendaRecyclerAdapter(var items: List<DailyAgendaItemStub>, rv: Recyc
         }
     }
 
-    override fun getItemCount(): Int {
-        return items.size
-    }
+    override fun getItemCount() = items.size
 
     private fun onBindViewSpacerItemViewHolder(holder: SpacerItemViewHolder, item: DailyAgendaItemStub, position: Int) {
         if (isExpanded) {
@@ -268,7 +270,7 @@ class DailyAgendaRecyclerAdapter(var items: List<DailyAgendaItemStub>, rv: Recyc
     }
 
     fun updatePosition(position: Int) {
-        updateItem(position)
+        if (position >= 0 && position < items.size) updateItem(position)
     }
 
     private fun isAvailable(stub: DailyAgendaItemStub): Boolean {
