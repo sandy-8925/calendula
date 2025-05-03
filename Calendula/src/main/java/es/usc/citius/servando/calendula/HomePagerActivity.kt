@@ -26,18 +26,6 @@ import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import androidx.annotation.ColorInt
-import androidx.annotation.IdRes
-import com.google.android.material.appbar.AppBarLayout
-import com.google.android.material.appbar.AppBarLayout.OnOffsetChangedListener
-import com.google.android.material.appbar.CollapsingToolbarLayout
-import androidx.coordinatorlayout.widget.CoordinatorLayout
-import com.google.android.material.tabs.TabLayout
-import androidx.fragment.app.Fragment
-import androidx.core.content.ContextCompat
-import androidx.core.view.ViewCompat
-import androidx.viewpager.widget.ViewPager
-import androidx.viewpager.widget.ViewPager.OnPageChangeListener
 import android.util.SparseArray
 import android.view.Menu
 import android.view.MenuItem
@@ -45,18 +33,27 @@ import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.viewModels
+import androidx.annotation.ColorInt
+import androidx.annotation.IdRes
+import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.toPublisher
-import autodispose2.AutoDispose
+import androidx.viewpager.widget.ViewPager
+import androidx.viewpager.widget.ViewPager.OnPageChangeListener
 import autodispose2.AutoDispose.autoDisposable
-import autodispose2.androidx.lifecycle.AndroidLifecycleScopeProvider
 import autodispose2.androidx.lifecycle.AndroidLifecycleScopeProvider.from
 import com.github.javiersantos.materialstyleddialogs.MaterialStyledDialog
 import com.github.javiersantos.materialstyleddialogs.enums.Style
+import com.google.android.material.appbar.AppBarLayout
+import com.google.android.material.appbar.AppBarLayout.OnOffsetChangedListener
+import com.google.android.material.appbar.CollapsingToolbarLayout
+import com.google.android.material.tabs.TabLayout
 import com.mikepenz.community_material_typeface_library.CommunityMaterial
 import com.mikepenz.iconics.IconicsDrawable
 import es.usc.citius.servando.calendula.activities.CalendarActivity
-import es.usc.citius.servando.calendula.activities.ConfirmActivity.ConfirmStateChangeEvent
 import es.usc.citius.servando.calendula.activities.LeftDrawerMgr
 import es.usc.citius.servando.calendula.activities.MaterialIntroActivity
 import es.usc.citius.servando.calendula.activities.MedicineInfoActivity
@@ -74,9 +71,7 @@ import es.usc.citius.servando.calendula.events.PersistenceEvents.ModelCreateOrUp
 import es.usc.citius.servando.calendula.events.PersistenceEvents.UserCreateEvent
 import es.usc.citius.servando.calendula.events.PersistenceEvents.UserUpdateEvent
 import es.usc.citius.servando.calendula.events.StockRunningOutEvent
-import es.usc.citius.servando.calendula.fragments.DailyAgendaFragment
 import es.usc.citius.servando.calendula.fragments.HomeProfileMgr
-import es.usc.citius.servando.calendula.fragments.HomeProfileMgr.BackgroundUpdatedEvent
 import es.usc.citius.servando.calendula.fragments.MedicinesListFragment
 import es.usc.citius.servando.calendula.fragments.MedicinesListFragment.OnMedicineSelectedListener
 import es.usc.citius.servando.calendula.fragments.RoutinesListFragment
@@ -99,7 +94,6 @@ import es.usc.citius.servando.calendula.util.stock.StockDisplayUtils.showStockRu
 import es.usc.citius.servando.calendula.util.view.DisableableAppBarLayoutBehavior
 import es.usc.citius.servando.calendula.util.view.ExpandableFAB
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
-import io.reactivex.rxjava3.core.Flowable
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.subjects.PublishSubject
 import java.util.LinkedList
@@ -124,7 +118,6 @@ class HomePagerActivity : CalendulaActivity(), OnRoutineSelectedListener, OnMedi
     private val homeProfileMgr by lazy { HomeProfileMgr() }
     private val drawerMgr: LeftDrawerMgr by lazy { LeftDrawerMgr(this, toolbar) }
     private var activePatient: Patient? = null
-    private var pendingRefresh = -2
     private val pendingEvents: Queue<Any> = LinkedList()
     private val handler by lazy { Handler(Looper.getMainLooper()) }
 
@@ -232,13 +225,10 @@ class HomePagerActivity : CalendulaActivity(), OnRoutineSelectedListener, OnMedi
             handler.post {
                 if (event is ModelCreateOrUpdateEvent) {
                     LogUtil.d(TAG, "handleEvent: " + event.clazz.name)
-                    (getViewPagerFragment(HomePages.HOME) as DailyAgendaFragment?)!!.notifyDataChange()
                     (getViewPagerFragment(HomePages.ROUTINES) as RoutinesListFragment?)!!.notifyDataChange()
                     (getViewPagerFragment(HomePages.MEDICINES) as MedicinesListFragment?)!!.notifyDataChange()
                     (getViewPagerFragment(HomePages.SCHEDULES) as ScheduleListFragment?)!!.notifyDataChange()
                 } else if (event is IntakeConfirmedEvent) {
-                    // dismiss "take all" button, update checkboxes
-                    (getViewPagerFragment(HomePages.HOME) as DailyAgendaFragment?)!!.notifyDataChange()
                     // stock info may need to be updated
                     (getViewPagerFragment(HomePages.MEDICINES) as MedicinesListFragment?)!!.notifyDataChange()
                 } else if (event is ActiveUserChangeEvent) {
@@ -248,7 +238,6 @@ class HomePagerActivity : CalendulaActivity(), OnRoutineSelectedListener, OnMedi
                     fabMgr!!.onPatientUpdate(activePatient)
                 } else if (event is UserUpdateEvent) {
                     val p = event.patient
-                    (getViewPagerFragment(HomePages.HOME) as DailyAgendaFragment?)!!.onUserUpdate()
                     drawerMgr.onPatientUpdated(p)
                     if (DB.patients().isActive(p, this@HomePagerActivity)) {
                         activePatient = p
@@ -259,17 +248,10 @@ class HomePagerActivity : CalendulaActivity(), OnRoutineSelectedListener, OnMedi
                 } else if (event is UserCreateEvent) {
                     val created = event.patient
                     drawerMgr.onPatientCreated(created)
-                } else if (event is BackgroundUpdatedEvent) {
-                    (getViewPagerFragment(HomePages.HOME) as DailyAgendaFragment?)!!.refresh()
-                } else if (event is ConfirmStateChangeEvent) {
-                    pendingRefresh = event.position
-                    (getViewPagerFragment(HomePages.HOME) as DailyAgendaFragment?)!!.refreshPosition(pendingRefresh)
                 } else if (event is AgendaUpdatedEvent) {
-                    (getViewPagerFragment(HomePages.HOME) as DailyAgendaFragment?)!!.notifyDataChange()
                     homeProfileMgr.updateDate()
                 } else if (event is StockRunningOutEvent) {
-                    val sro = event
-                    handler.postDelayed({ showStockRunningOutDialog(this@HomePagerActivity, sro.m, sro.days) }, 1000)
+                    handler.postDelayed({ showStockRunningOutDialog(this@HomePagerActivity, event.m, event.days) }, 1000)
                 } else if (event is DatabaseUpdateEvent) {
                     checkDatabaseUpdateNeeded()
                 }
@@ -309,7 +291,7 @@ class HomePagerActivity : CalendulaActivity(), OnRoutineSelectedListener, OnMedi
         }
     }
 
-    fun getViewPagerFragment(page: HomePages): Fragment? {
+    private fun getViewPagerFragment(page: HomePages): Fragment? {
         val tag = FragmentUtils.makeViewPagerFragmentName(R.id.container, page.ordinal)
         return supportFragmentManager.findFragmentByTag(tag)
     }

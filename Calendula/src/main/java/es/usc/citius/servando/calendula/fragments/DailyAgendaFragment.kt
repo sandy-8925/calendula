@@ -22,7 +22,6 @@ import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -30,19 +29,19 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import androidx.annotation.Keep
 import androidx.core.app.ActivityCompat
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.util.Pair
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.Lifecycle.Event.ON_DESTROY
+import androidx.lifecycle.Lifecycle.Event.ON_STOP
 import androidx.lifecycle.ViewModel
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import autodispose2.AutoDispose.autoDisposable
-import autodispose2.androidx.lifecycle.AndroidLifecycleScopeProvider
 import autodispose2.androidx.lifecycle.AndroidLifecycleScopeProvider.from
 import com.mikepenz.community_material_typeface_library.CommunityMaterial
 import com.mikepenz.iconics.IconicsDrawable
@@ -52,10 +51,16 @@ import es.usc.citius.servando.calendula.CalendulaApp.Companion.eventBus
 import es.usc.citius.servando.calendula.DailyAgendaRecyclerAdapter
 import es.usc.citius.servando.calendula.R
 import es.usc.citius.servando.calendula.activities.ConfirmActivity
+import es.usc.citius.servando.calendula.activities.ConfirmActivity.ConfirmStateChangeEvent
 import es.usc.citius.servando.calendula.database.DB
 import es.usc.citius.servando.calendula.databinding.FragmentDailyAgendaBinding
+import es.usc.citius.servando.calendula.events.PersistenceEvents.IntakeConfirmedEvent
+import es.usc.citius.servando.calendula.events.PersistenceEvents.ModelCreateOrUpdateEvent
+import es.usc.citius.servando.calendula.events.PersistenceEvents.UserUpdateEvent
+import es.usc.citius.servando.calendula.fragments.HomeProfileMgr.BackgroundUpdatedEvent
 import es.usc.citius.servando.calendula.persistence.Routine
 import es.usc.citius.servando.calendula.scheduling.AlarmIntentParams
+import es.usc.citius.servando.calendula.scheduling.DailyAgenda.AgendaUpdatedEvent
 import es.usc.citius.servando.calendula.util.BooleanSharedPrefsLiveData
 import es.usc.citius.servando.calendula.util.DailyAgendaItemStub
 import es.usc.citius.servando.calendula.util.DailyAgendaItemStub.DailyAgendaItemStubElement
@@ -66,10 +71,11 @@ import es.usc.citius.servando.calendula.util.PreferenceUtils
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Completable
 import java.util.Collections
+import java.util.concurrent.TimeUnit
+import org.greenrobot.eventbus.Subscribe
 import org.joda.time.DateTime
 import org.joda.time.Interval
 import org.joda.time.LocalDate
-import java.util.concurrent.TimeUnit
 
 /**
  * Daily agenda fragment
@@ -132,17 +138,11 @@ class DailyAgendaFragment : Fragment() {
         savedInstanceState: Bundle?
     ):View = inflater.inflate(R.layout.fragment_daily_agenda, container, false)
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-//        eventBus().unregister(this)
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val binding = FragmentDailyAgendaBinding.bind(view)
         rv = binding.rv
         emptyView = binding.emptyViewPlaceholder
-//        eventBus().register(this)
         setupRecyclerView()
         setupEmptyView()
 
@@ -152,6 +152,34 @@ class DailyAgendaFragment : Fragment() {
 //            (activity as HomePagerActivity?)!!.appBarLayout.setExpanded(!expanded)
         }
         notifyDataChange()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        eventBus().register(this)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        eventBus().unregister(this)
+    }
+
+    @Subscribe
+    @Keep
+    fun handleEvent(event: Any) {
+        LogUtil.d(TAG, "handleEvent: " + event.javaClass.name)
+        Completable.fromAction {
+            when (event) {
+                is ModelCreateOrUpdateEvent -> notifyDataChange()
+                is IntakeConfirmedEvent -> notifyDataChange()
+                is UserUpdateEvent -> onUserUpdate()
+                is BackgroundUpdatedEvent -> refresh()
+                is ConfirmStateChangeEvent -> refreshPosition(event.position)
+                is AgendaUpdatedEvent -> notifyDataChange()
+            }
+        }.subscribeOn(AndroidSchedulers.mainThread())
+        .to(autoDisposable<Unit>(from(viewLifecycleOwner, ON_STOP)))
+        .subscribe({},{})
     }
 
     private fun buildItems(): List<DailyAgendaItemStub?> {
