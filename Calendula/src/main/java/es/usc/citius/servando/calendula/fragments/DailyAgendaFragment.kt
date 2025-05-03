@@ -21,7 +21,6 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.Drawable
-import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
@@ -245,35 +244,31 @@ class DailyAgendaFragment : Fragment() {
     }
 
     private fun showConfirmActivity(view: View, item: DailyAgendaItemStub, position: Int) {
-        val i = Intent(context, ConfirmActivity::class.java)
-        i.putExtra(CalendulaApp.INTENT_EXTRA_POSITION, position)
-        i.putExtra(CalendulaApp.INTENT_EXTRA_DATE, item.date.toString("dd/MM/YYYY"))
+        val intent = Intent(context, ConfirmActivity::class.java)
+        intent.putExtra(CalendulaApp.INTENT_EXTRA_POSITION, position)
+        intent.putExtra(CalendulaApp.INTENT_EXTRA_DATE, item.date.toString("dd/MM/YYYY"))
 
         if (item.isRoutine) {
-            i.putExtra(CalendulaApp.INTENT_EXTRA_ROUTINE_ID, item.id)
+            intent.putExtra(CalendulaApp.INTENT_EXTRA_ROUTINE_ID, item.id)
         } else {
-            i.putExtra(CalendulaApp.INTENT_EXTRA_SCHEDULE_ID, item.id)
-            i.putExtra(CalendulaApp.INTENT_EXTRA_SCHEDULE_TIME, item.time.toString(AlarmIntentParams.TIME_FORMAT))
+            intent.putExtra(CalendulaApp.INTENT_EXTRA_SCHEDULE_ID, item.id)
+            intent.putExtra(CalendulaApp.INTENT_EXTRA_SCHEDULE_TIME, item.time.toString(AlarmIntentParams.TIME_FORMAT))
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            val v1 = view.findViewById<View>(R.id.patient_avatar)
-            val v2 = view.findViewById<View>(R.id.linearLayout)
-            val v3 = view.findViewById<View>(R.id.routines_list_item_name)
+        val v1 = view.findViewById<View>(R.id.patient_avatar)
+        val v2 = view.findViewById<View>(R.id.linearLayout)
+        val v3 = view.findViewById<View>(R.id.routines_list_item_name)
 
-            if (v1 != null && v2 != null && v3 != null) {
-                val activityOptions = ActivityOptionsCompat.makeSceneTransitionAnimation(
-                    activity!!,
-                    Pair(v1, "avatar_transition"),
-                    Pair(v2, "time"),
-                    Pair(v3, "title")
-                )
-                ActivityCompat.startActivity(activity!!, i, activityOptions.toBundle())
-            } else {
-                startActivity(i)
-            }
+        if (v1 != null && v2 != null && v3 != null) {
+            val activityOptions = ActivityOptionsCompat.makeSceneTransitionAnimation(
+                activity!!,
+                Pair(v1, "avatar_transition"),
+                Pair(v2, "time"),
+                Pair(v3, "title")
+            )
+            ActivityCompat.startActivity(activity!!, intent, activityOptions.toBundle())
         } else {
-            startActivity(i)
+            startActivity(intent)
         }
     }
 
