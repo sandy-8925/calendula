@@ -17,6 +17,7 @@
  */
 package es.usc.citius.servando.calendula.fragments
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.Drawable
@@ -29,6 +30,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import androidx.annotation.AnyThread
 import androidx.annotation.Keep
 import androidx.core.app.ActivityCompat
 import androidx.core.app.ActivityOptionsCompat
@@ -37,6 +39,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle.Event.ON_DESTROY
 import androidx.lifecycle.Lifecycle.Event.ON_STOP
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -47,6 +50,7 @@ import com.mikepenz.community_material_typeface_library.CommunityMaterial
 import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.typeface.IIcon
 import es.usc.citius.servando.calendula.CalendulaApp
+import es.usc.citius.servando.calendula.CalendulaApp.Companion.context
 import es.usc.citius.servando.calendula.CalendulaApp.Companion.eventBus
 import es.usc.citius.servando.calendula.DailyAgendaRecyclerAdapter
 import es.usc.citius.servando.calendula.R
@@ -70,6 +74,9 @@ import es.usc.citius.servando.calendula.util.PreferenceKeys
 import es.usc.citius.servando.calendula.util.PreferenceUtils
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Completable
+import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.schedulers.Schedulers
+import java.io.Closeable
 import java.util.Collections
 import java.util.concurrent.TimeUnit
 import org.greenrobot.eventbus.Subscribe
@@ -151,7 +158,12 @@ class DailyAgendaFragment : Fragment() {
             if(rvAdapter.isExpanded == expandedPrefVal) toggleViewMode()
 //            (activity as HomePagerActivity?)!!.appBarLayout.setExpanded(!expanded)
         }
-        notifyDataChange()
+        viewModel.itemsListLiveDate.observe(viewLifecycleOwner) {
+            items.clear()
+            items.addAll(it)
+            rvAdapter.notifyDataSetChanged()
+            rv.postDelayed({ showOrHideEmptyView(!rvAdapter.isShowingSomething) }, 100)
+        }
     }
 
     override fun onStart() {
@@ -170,20 +182,185 @@ class DailyAgendaFragment : Fragment() {
         LogUtil.d(TAG, "handleEvent: " + event.javaClass.name)
         Completable.fromAction {
             when (event) {
-                is ModelCreateOrUpdateEvent -> notifyDataChange()
-                is IntakeConfirmedEvent -> notifyDataChange()
-                is UserUpdateEvent -> notifyDataChange()
                 is BackgroundUpdatedEvent -> refresh()
                 is ConfirmStateChangeEvent -> refreshPosition(event.position)
-                is AgendaUpdatedEvent -> notifyDataChange()
             }
         }.subscribeOn(AndroidSchedulers.mainThread())
         .to(autoDisposable<Unit>(from(viewLifecycleOwner, ON_STOP)))
         .subscribe({},{})
     }
 
-    private fun buildItems(): List<DailyAgendaItemStub?> {
-        val stubs: MutableList<DailyAgendaItemStub?> = ArrayList()
+    fun showOrHideEmptyView(show: Boolean) {
+        if (show) {
+            emptyView.visibility = View.VISIBLE
+            //emptyView.animate().alpha(1);
+        } else {
+            emptyView.visibility = View.GONE
+
+            //            emptyView.animate().alpha(0).setListener(new AnimatorListenerAdapter() {
+//                @Override
+//                public void onAnimationEnd(Animator animation) {
+//
+//                }
+//            });
+        }
+    }
+
+    private fun toggleViewMode() {
+        rvAdapter.toggleCollapseMode()
+    }
+
+    private fun refresh() {
+        rvAdapter.notifyDataSetChanged()
+    }
+
+    private fun refreshPosition(position: Int) {
+        if (position >= 0 && position < items.size) {
+            rvAdapter.updatePosition(position)
+        }
+    }
+
+    private val isExpanded: Boolean
+        get() = viewModel.expandedPrefLiveData.value ?: true
+
+    private fun setupRecyclerView() {
+        val llm = LinearLayoutManager(requireContext())
+        rvListener = DailyAgendaRecyclerListener(llm)
+        rvAdapter = DailyAgendaRecyclerAdapter(items, rv, llm, activity).apply { setListener(rvListener) }
+        rv.let {
+            it.layoutManager = llm
+            it.adapter = rvAdapter
+            it.itemAnimator = DefaultItemAnimator()
+        }
+    }
+
+    private fun setupEmptyView() {
+        val color = HomeProfileMgr.colorForCurrent(activity)
+        val icon: Drawable = IconicsDrawable(context)
+            .icon(emptyViewIcon)
+            .color(color)
+            .sizeDp(90)
+            .paddingDp(0)
+        (emptyView.findViewById<View>(R.id.imageView_ok) as ImageView).setImageDrawable(icon)
+    }
+
+    private fun showConfirmActivity(view: View, item: DailyAgendaItemStub, position: Int) {
+        val i = Intent(context, ConfirmActivity::class.java)
+        i.putExtra(CalendulaApp.INTENT_EXTRA_POSITION, position)
+        i.putExtra(CalendulaApp.INTENT_EXTRA_DATE, item.date.toString("dd/MM/YYYY"))
+
+        if (item.isRoutine) {
+            i.putExtra(CalendulaApp.INTENT_EXTRA_ROUTINE_ID, item.id)
+        } else {
+            i.putExtra(CalendulaApp.INTENT_EXTRA_SCHEDULE_ID, item.id)
+            i.putExtra(CalendulaApp.INTENT_EXTRA_SCHEDULE_TIME, item.time.toString(AlarmIntentParams.TIME_FORMAT))
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            val v1 = view.findViewById<View>(R.id.patient_avatar)
+            val v2 = view.findViewById<View>(R.id.linearLayout)
+            val v3 = view.findViewById<View>(R.id.routines_list_item_name)
+
+            if (v1 != null && v2 != null && v3 != null) {
+                val activityOptions = ActivityOptionsCompat.makeSceneTransitionAnimation(
+                    activity!!,
+                    Pair(v1, "avatar_transition"),
+                    Pair(v2, "time"),
+                    Pair(v3, "title")
+                )
+                ActivityCompat.startActivity(activity!!, i, activityOptions.toBundle())
+            } else {
+                startActivity(i)
+            }
+        } else {
+            startActivity(i)
+        }
+    }
+
+    inner class DailyAgendaRecyclerListener(private val linearLayoutManager: LinearLayoutManager) : DailyAgendaRecyclerAdapter.EventListener {
+        private var firstTime: DateTime? = null
+
+        override fun onItemClick(v: View, item: DailyAgendaItemStub, position: Int) {
+            showConfirmActivity(v, item, position)
+        }
+
+        override fun onBeforeToggleCollapse(expanded: Boolean, somethingVisible: Boolean) {
+            val firstPosition = linearLayoutManager.findFirstVisibleItemPosition()
+            firstTime = if (firstPosition >= 0 && firstPosition < items.size) items[firstPosition]!!.dateTime() else null
+
+            LogUtil.d(TAG, "OnBeforeCollapse, somethingVisible is $somethingVisible")
+
+            if (expanded) {
+                showOrHideEmptyView(false)
+            } else if (!expanded && somethingVisible) {
+                showOrHideEmptyView(false)
+            } else {
+                showOrHideEmptyView(true)
+            }
+        }
+
+        override fun onAfterToggleCollapse(expanded: Boolean, somethingVisible: Boolean) {
+            if (expanded)
+                Completable.timer(600, TimeUnit.MILLISECONDS)
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .doOnComplete { scrollTo(DateTime.now()) }
+                    .to(autoDisposable<Unit>(from(viewLifecycleOwner, ON_DESTROY)))
+                    .subscribe({},{})
+        }
+
+        private fun scrollTo(time: DateTime) {
+            val position = items.indexOfFirst {
+                if(it == null) return@indexOfFirst false
+                return@indexOfFirst it.dateTime().isAfter(time)
+            }
+            if (position > 0) linearLayoutManager.smoothScrollToPosition(rv, null, position - 1)
+        }
+    }
+
+    companion object {
+        private const val TAG = "DailyAgendaFragment"
+    }
+}
+
+internal class DailyAgendaFragmentViewModel: ViewModel() {
+    val expandedPrefLiveData = BooleanSharedPrefsLiveData(PreferenceUtils.instance().preferences(), PreferenceKeys.HOME_DAILYAGENDA_EXPANDED.toString())
+    val itemsListLiveDate = ItemsListLiveData().apply { addCloseable(this) }
+}
+
+internal class ItemsListLiveData: LiveData<List<DailyAgendaItemStub>>(), Closeable {
+    init {
+        value = emptyList()
+        notifyDataChange()
+        eventBus().register((this))
+    }
+
+    @Subscribe
+    @Keep
+    fun handleEvent(event: Any) {
+        when (event) {
+            is ModelCreateOrUpdateEvent -> notifyDataChange()
+            is IntakeConfirmedEvent -> notifyDataChange()
+            is UserUpdateEvent -> notifyDataChange()
+            is AgendaUpdatedEvent -> notifyDataChange()
+            is ConfirmStateChangeEvent -> if(event.position == -1) notifyDataChange()
+        }
+    }
+
+    @SuppressLint("CheckResult")
+    @AnyThread
+    private fun notifyDataChange() {
+        //todo: Need to dedupe multiple calls to this function, make sure only one update/item list build is taking place at a time
+        Single.fromCallable { postValue(buildItems()) }
+            .subscribeOn(Schedulers.computation())
+            .subscribe({},{})
+    }
+
+    override fun close() {
+        eventBus().unregister(this)
+    }
+
+    private fun buildItems(): List<DailyAgendaItemStub> {
+        val stubs = mutableListOf<DailyAgendaItemStub>()
 
         val daily = DB.dailyScheduleItems().findAll()
 
@@ -252,7 +429,7 @@ class DailyAgendaFragment : Fragment() {
 
                     val routineStubs = dateStubs[date]!!
 
-                    var stub: DailyAgendaItemStub?
+                    lateinit var stub: DailyAgendaItemStub
 
                     val time = routine.time
 
@@ -276,7 +453,7 @@ class DailyAgendaFragment : Fragment() {
                             min = candidate
                         }
                     } else {
-                        stub = routineStubs[routine]
+                        stub = routineStubs[routine] as DailyAgendaItemStub
                     }
 
                     val schedule = scheduleItem.schedule
@@ -291,15 +468,15 @@ class DailyAgendaFragment : Fragment() {
                     el.presentation = medicine.presentation
                     el.minute = time.toString("mm")
                     el.taken = dailyScheduleItem.takenToday
-                    stub!!.meds.add(el)
+                    stub.meds.add(el)
                 }
             }
         }
 
         for (date in dateStubs.keys) {
-            val routineStubs: Map<Routine, DailyAgendaItemStub> = dateStubs[date]!!
+            val routineStubs: Map<Routine, DailyAgendaItemStub> = dateStubs[date] as Map<Routine, DailyAgendaItemStub>
             for (r in routineStubs.keys) {
-                stubs.add(routineStubs[r])
+                stubs.add(routineStubs[r] as DailyAgendaItemStub)
             }
         }
 
@@ -308,207 +485,56 @@ class DailyAgendaFragment : Fragment() {
 
         return stubs
     }
+}
 
-    private fun addEmptyHours(stubs: MutableList<DailyAgendaItemStub?>, min: DateTime, max: DateTime) {
-        var min = min
-        var max = max
-        min = min.withTimeAtStartOfDay()
-        max = max.withTimeAtStartOfDay().plusDays(1) // end of the day
+private object DailyAgendaItemStubComparator: Comparator<DailyAgendaItemStub?> {
+    override fun compare(a: DailyAgendaItemStub?, b: DailyAgendaItemStub?): Int {
+        if(a==null && b==null) return 0
+        else if(a==null) return 1
+        else if(b==null) return -1
 
-        // add empty hours if there is not an item with the same hour
-        var start = min
-        while (start.isBefore(max)) {
-            var exact = false
-            for (item in stubs) {
-                if (start == item!!.dateTime()) {
-                    exact = true
-                    break
-                }
-            }
+        val aT = a.date.toDateTime(a.time)
+        val bT = b.date.toDateTime(b.time)
 
-
-            val hour = Interval(start, start.plusHours(1))
-            if (!exact || hour.contains(DateTime.now())) {
-                stubs.add(DailyAgendaItemStub(start.toLocalDate(), start.toLocalTime()))
-            }
-
-            if (start.hourOfDay == 0) {
-                val spacer = DailyAgendaItemStub(start.toLocalDate(), start.toLocalTime())
-                spacer.isSpacer = true
-                stubs.add(spacer)
-            }
-            start = start.plusHours(1)
+        if (aT.compareTo(bT) == 0 && a.isSpacer) {
+            return -1
+        } else if (aT.compareTo(bT) == 0 && b.isSpacer) {
+            return 1
+        } else if (aT.compareTo(bT) == 0) {
+            return if (a.hasEvents) -1 else 1
         }
-    }
-
-    fun showOrHideEmptyView(show: Boolean) {
-        if (show) {
-            emptyView.visibility = View.VISIBLE
-            //emptyView.animate().alpha(1);
-        } else {
-            emptyView.visibility = View.GONE
-
-            //            emptyView.animate().alpha(0).setListener(new AnimatorListenerAdapter() {
-//                @Override
-//                public void onAnimationEnd(Animator animation) {
-//
-//                }
-//            });
-        }
-    }
-
-    private fun toggleViewMode() {
-        rvAdapter.toggleCollapseMode()
-    }
-
-    private fun refresh() {
-        rvAdapter.notifyDataSetChanged()
-    }
-
-    private fun refreshPosition(position: Int) {
-        if (position == -1) {
-            notifyDataChange()
-        } else if (position >= 0 && position < items.size) {
-            rvAdapter.updatePosition(position)
-        }
-    }
-
-    private val isExpanded: Boolean
-        get() = viewModel.expandedPrefLiveData.value ?: true
-
-    private fun notifyDataChange() {
-        try {
-            LogUtil.d(TAG, "AgendaView NotifyDataChange")
-            items.clear()
-            items.addAll(buildItems())
-            LogUtil.d(TAG, "Items after rebuild " + items.size)
-            rvAdapter.notifyDataSetChanged()
-            // show empty list view if there are no items
-            rv.postDelayed({ showOrHideEmptyView(!rvAdapter.isShowingSomething) }, 100)
-        } catch (e: Exception) {
-            LogUtil.e(TAG, "Error onPostExecute", e)
-        }
-    }
-
-    private fun setupRecyclerView() {
-        val llm = LinearLayoutManager(requireContext())
-        rvListener = DailyAgendaRecyclerListener(llm)
-        rvAdapter = DailyAgendaRecyclerAdapter(items, rv, llm, activity).apply { setListener(rvListener) }
-        rv.let {
-            it.layoutManager = llm
-            it.adapter = rvAdapter
-            it.itemAnimator = DefaultItemAnimator()
-        }
-    }
-
-    private fun setupEmptyView() {
-        val color = HomeProfileMgr.colorForCurrent(activity)
-        val icon: Drawable = IconicsDrawable(context)
-            .icon(emptyViewIcon)
-            .color(color)
-            .sizeDp(90)
-            .paddingDp(0)
-        (emptyView.findViewById<View>(R.id.imageView_ok) as ImageView).setImageDrawable(icon)
-    }
-
-    private fun showConfirmActivity(view: View, item: DailyAgendaItemStub, position: Int) {
-        val i = Intent(context, ConfirmActivity::class.java)
-        i.putExtra(CalendulaApp.INTENT_EXTRA_POSITION, position)
-        i.putExtra(CalendulaApp.INTENT_EXTRA_DATE, item.date.toString("dd/MM/YYYY"))
-
-        if (item.isRoutine) {
-            i.putExtra(CalendulaApp.INTENT_EXTRA_ROUTINE_ID, item.id)
-        } else {
-            i.putExtra(CalendulaApp.INTENT_EXTRA_SCHEDULE_ID, item.id)
-            i.putExtra(CalendulaApp.INTENT_EXTRA_SCHEDULE_TIME, item.time.toString(AlarmIntentParams.TIME_FORMAT))
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            val v1 = view.findViewById<View>(R.id.patient_avatar)
-            val v2 = view.findViewById<View>(R.id.linearLayout)
-            val v3 = view.findViewById<View>(R.id.routines_list_item_name)
-
-            if (v1 != null && v2 != null && v3 != null) {
-                val activityOptions = ActivityOptionsCompat.makeSceneTransitionAnimation(
-                    activity!!,
-                    Pair(v1, "avatar_transition"),
-                    Pair(v2, "time"),
-                    Pair(v3, "title")
-                )
-                ActivityCompat.startActivity(activity!!, i, activityOptions.toBundle())
-            } else {
-                startActivity(i)
-            }
-        } else {
-            startActivity(i)
-        }
-    }
-
-    private object DailyAgendaItemStubComparator: Comparator<DailyAgendaItemStub?> {
-        override fun compare(a: DailyAgendaItemStub?, b: DailyAgendaItemStub?): Int {
-            if(a==null && b==null) return 0
-            else if(a==null) return 1
-            else if(b==null) return -1
-
-            val aT = a.date.toDateTime(a.time)
-            val bT = b.date.toDateTime(b.time)
-
-            if (aT.compareTo(bT) == 0 && a.isSpacer) {
-                return -1
-            } else if (aT.compareTo(bT) == 0 && b.isSpacer) {
-                return 1
-            } else if (aT.compareTo(bT) == 0) {
-                return if (a.hasEvents) -1 else 1
-            }
-            return aT.compareTo(bT)
-        }
-    }
-
-    inner class DailyAgendaRecyclerListener(private val linearLayoutManager: LinearLayoutManager) : DailyAgendaRecyclerAdapter.EventListener {
-        private var firstTime: DateTime? = null
-
-        override fun onItemClick(v: View, item: DailyAgendaItemStub, position: Int) {
-            showConfirmActivity(v, item, position)
-        }
-
-        override fun onBeforeToggleCollapse(expanded: Boolean, somethingVisible: Boolean) {
-            val firstPosition = linearLayoutManager.findFirstVisibleItemPosition()
-            firstTime = if (firstPosition >= 0 && firstPosition < items.size) items[firstPosition]!!.dateTime() else null
-
-            LogUtil.d(TAG, "OnBeforeCollapse, somethingVisible is $somethingVisible")
-
-            if (expanded) {
-                showOrHideEmptyView(false)
-            } else if (!expanded && somethingVisible) {
-                showOrHideEmptyView(false)
-            } else {
-                showOrHideEmptyView(true)
-            }
-        }
-
-        override fun onAfterToggleCollapse(expanded: Boolean, somethingVisible: Boolean) {
-            if (expanded)
-                Completable.timer(600, TimeUnit.MILLISECONDS)
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .doOnComplete { scrollTo(DateTime.now()) }
-                    .to(autoDisposable<Unit>(from(viewLifecycleOwner, ON_DESTROY)))
-                    .subscribe({},{})
-        }
-
-        private fun scrollTo(time: DateTime) {
-            val position = items.indexOfFirst {
-                if(it == null) return@indexOfFirst false
-                return@indexOfFirst it.dateTime().isAfter(time)
-            }
-            if (position > 0) linearLayoutManager.smoothScrollToPosition(rv, null, position - 1)
-        }
-    }
-
-    companion object {
-        private const val TAG = "DailyAgendaFragment"
+        return aT.compareTo(bT)
     }
 }
 
-internal class DailyAgendaFragmentViewModel: ViewModel() {
-    val expandedPrefLiveData = BooleanSharedPrefsLiveData(PreferenceUtils.instance().preferences(), PreferenceKeys.HOME_DAILYAGENDA_EXPANDED.toString())
+private fun addEmptyHours(stubs: MutableList<DailyAgendaItemStub>, min: DateTime, max: DateTime) {
+    var min = min
+    var max = max
+    min = min.withTimeAtStartOfDay()
+    max = max.withTimeAtStartOfDay().plusDays(1) // end of the day
+
+    // add empty hours if there is not an item with the same hour
+    var start = min
+    while (start.isBefore(max)) {
+        var exact = false
+        for (item in stubs) {
+            if (start == item.dateTime()) {
+                exact = true
+                break
+            }
+        }
+
+
+        val hour = Interval(start, start.plusHours(1))
+        if (!exact || hour.contains(DateTime.now())) {
+            stubs.add(DailyAgendaItemStub(start.toLocalDate(), start.toLocalTime()))
+        }
+
+        if (start.hourOfDay == 0) {
+            val spacer = DailyAgendaItemStub(start.toLocalDate(), start.toLocalTime())
+            spacer.isSpacer = true
+            stubs.add(spacer)
+        }
+        start = start.plusHours(1)
+    }
 }
