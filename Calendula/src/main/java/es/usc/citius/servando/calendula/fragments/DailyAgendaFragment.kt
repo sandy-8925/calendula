@@ -227,7 +227,7 @@ class DailyAgendaFragment : Fragment() {
     private fun setupRecyclerView() {
         val llm = LinearLayoutManager(requireContext())
         rvListener = DailyAgendaRecyclerListener(llm)
-        rvAdapter = DailyAgendaRecyclerAdapter(items, rv, llm, activity).apply { setListener(rvListener) }
+        rvAdapter = DailyAgendaRecyclerAdapter(items, rv, llm, requireActivity()).apply { setListener(rvListener) }
         rv.let {
             it.layoutManager = llm
             it.adapter = rvAdapter
