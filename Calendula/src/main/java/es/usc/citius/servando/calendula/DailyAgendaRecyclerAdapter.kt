@@ -235,19 +235,8 @@ class DailyAgendaRecyclerAdapter(rv: RecyclerView, llm: LinearLayoutManager, ctx
 
     val isShowingSomething: Boolean
         get() {
-            LogUtil.d(TAG, "isShowingSomething, expanded: " + isExpanded)
-
-            if (isExpanded && items.size > 0) return true
-
-            var result = false
-            for (item in items) {
-                if (isDisplayable(item)) {
-                    LogUtil.d(TAG, "Item is displayable: $item")
-                    result = true
-                }
-            }
-
-            return result
+            if (isExpanded && items.isNotEmpty()) return true
+            return items.any { isDisplayable(it) }
         }
 
     fun toggleCollapseMode() {
