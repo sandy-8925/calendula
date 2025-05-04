@@ -466,7 +466,7 @@ internal class ItemsListLiveData: LiveData<List<DailyAgendaItemStub>>(), Closeab
         }
 
         addEmptyHours(stubs, DateTime.now().minusDays(1), max)
-        Collections.sort(stubs, DailyAgendaItemStubComparator)
+        stubs.sortWith(DailyAgendaItemStubComparator)
 
         return stubs
     }
@@ -476,12 +476,8 @@ internal class ItemsListLiveData: LiveData<List<DailyAgendaItemStub>>(), Closeab
     }
 }
 
-private object DailyAgendaItemStubComparator: Comparator<DailyAgendaItemStub?> {
-    override fun compare(a: DailyAgendaItemStub?, b: DailyAgendaItemStub?): Int {
-        if(a==null && b==null) return 0
-        else if(a==null) return 1
-        else if(b==null) return -1
-
+private object DailyAgendaItemStubComparator: Comparator<DailyAgendaItemStub> {
+    override fun compare(a: DailyAgendaItemStub, b: DailyAgendaItemStub): Int {
         val aT = a.date.toDateTime(a.time)
         val bT = b.date.toDateTime(b.time)
 
