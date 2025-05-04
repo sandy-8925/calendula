@@ -188,19 +188,8 @@ class DailyAgendaFragment : Fragment() {
     }
 
     fun showOrHideEmptyView(show: Boolean) {
-        if (show) {
-            emptyView.visibility = View.VISIBLE
-            //emptyView.animate().alpha(1);
-        } else {
-            emptyView.visibility = View.GONE
-
-            //            emptyView.animate().alpha(0).setListener(new AnimatorListenerAdapter() {
-//                @Override
-//                public void onAnimationEnd(Animator animation) {
-//
-//                }
-//            });
-        }
+        if (show) emptyView.visibility = View.VISIBLE
+        else emptyView.visibility = View.GONE
     }
 
     private fun toggleViewMode() {
