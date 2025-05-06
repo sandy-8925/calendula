@@ -89,7 +89,6 @@ class DailyAgendaFragment : Fragment() {
     private val viewModel: DailyAgendaFragmentViewModel by viewModels()
 
     private lateinit var rvAdapter: DailyAgendaRecyclerAdapter
-    private lateinit var rvListener: DailyAgendaRecyclerListener
 
     private var emptyViewIcon: IIcon = IconUtils.randomNiceIcon()
 
@@ -200,7 +199,7 @@ class DailyAgendaFragment : Fragment() {
 
     private fun setupRecyclerView(binding: FragmentDailyAgendaBinding) {
         val llm = LinearLayoutManager(requireContext())
-        rvListener = DailyAgendaRecyclerListener(binding, llm)
+        val rvListener = DailyAgendaRecyclerListener(binding, llm)
         rvAdapter = DailyAgendaRecyclerAdapter(binding.rv, llm, requireActivity()).apply { setListener(rvListener) }
         binding.rv.let {
             it.layoutManager = llm
