@@ -454,14 +454,9 @@ internal class ItemsListLiveData: LiveData<List<DailyAgendaItemStub>>(), Closeab
     }
 
     private fun addEmptyHours(stubs: MutableList<DailyAgendaItemStub>, min: DateTime, max: DateTime) {
-        var min = min
-        var max = max
-        min = min.withTimeAtStartOfDay()
-        max = max.withTimeAtStartOfDay().plusDays(1) // end of the day
-
         // add empty hours if there is not an item with the same hour
-        var start = min
-        while (start.isBefore(max)) {
+        var start = min.withTimeAtStartOfDay()
+        while (start.isBefore(max.withTimeAtStartOfDay().plusDays(1))) {
             var exact = false
             for (item in stubs) {
                 if (start == item.dateTime()) {
