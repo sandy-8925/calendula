@@ -30,6 +30,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.AnyThread
 import androidx.annotation.Keep
+import androidx.annotation.MainThread
 import androidx.annotation.WorkerThread
 import androidx.core.app.ActivityCompat
 import androidx.core.app.ActivityOptionsCompat
@@ -184,6 +185,7 @@ class DailyAgendaFragment : Fragment() {
         else binding.emptyViewPlaceholder.visibility = View.GONE
     }
 
+    @MainThread
     private fun toggleViewMode() {
         rvAdapter.toggleCollapseMode()
     }

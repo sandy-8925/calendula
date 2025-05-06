@@ -31,6 +31,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
+import androidx.annotation.MainThread
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.mikepenz.community_material_typeface_library.CommunityMaterial
@@ -239,23 +240,12 @@ class DailyAgendaRecyclerAdapter(rv: RecyclerView, llm: LinearLayoutManager, ctx
             return items.any { isDisplayable(it) }
         }
 
+    @MainThread
     fun toggleCollapseMode() {
-        LogUtil.d(TAG, "toggleCollapseMode")
         isExpanded = !isExpanded
-
-        val willSHowSomething = isShowingSomething
-
-        if (listener != null) {
-            listener!!.onBeforeToggleCollapse(isExpanded, willSHowSomething)
-        }
-
-        for (i in items.indices) {
-            notifyItemChanged(i)
-        }
-
-        if (listener != null) {
-            listener!!.onAfterToggleCollapse(isExpanded, willSHowSomething)
-        }
+        listener?.onBeforeToggleCollapse(isExpanded, isShowingSomething)
+        items.indices.forEach { notifyItemChanged(it) }
+        listener?.onAfterToggleCollapse(isExpanded, isShowingSomething)
     }
 
     fun updatePosition(position: Int) {
