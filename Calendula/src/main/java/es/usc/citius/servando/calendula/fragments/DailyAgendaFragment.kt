@@ -248,18 +248,12 @@ class DailyAgendaFragment : Fragment() {
     }
 
     inner class DailyAgendaRecyclerListener(private val binding: FragmentDailyAgendaBinding, private val linearLayoutManager: LinearLayoutManager) : DailyAgendaRecyclerAdapter.EventListener {
-        private var firstTime: DateTime? = null
 
         override fun onItemClick(v: View, item: DailyAgendaItemStub, position: Int) {
             showConfirmActivity(v, item, position)
         }
 
         override fun onBeforeToggleCollapse(expanded: Boolean, somethingVisible: Boolean) {
-            val firstPosition = linearLayoutManager.findFirstVisibleItemPosition()
-            firstTime = if (firstPosition >= 0 && firstPosition < rvAdapter.itemCount) rvAdapter.items[firstPosition].dateTime() else null
-
-            LogUtil.d(TAG, "OnBeforeCollapse, somethingVisible is $somethingVisible")
-
             showOrHideEmptyView(binding, !(expanded || somethingVisible))
         }
 
