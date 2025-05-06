@@ -237,12 +237,12 @@ class DailyAgendaFragment : Fragment() {
 
         if (v1 != null && v2 != null && v3 != null) {
             val activityOptions = ActivityOptionsCompat.makeSceneTransitionAnimation(
-                activity!!,
+                requireActivity(),
                 Pair(v1, "avatar_transition"),
                 Pair(v2, "time"),
                 Pair(v3, "title")
             )
-            ActivityCompat.startActivity(activity!!, intent, activityOptions.toBundle())
+            ActivityCompat.startActivity(requireActivity(), intent, activityOptions.toBundle())
         } else {
             startActivity(intent)
         }
