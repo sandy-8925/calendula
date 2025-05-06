@@ -260,13 +260,7 @@ class DailyAgendaFragment : Fragment() {
 
             LogUtil.d(TAG, "OnBeforeCollapse, somethingVisible is $somethingVisible")
 
-            if (expanded) {
-                showOrHideEmptyView(binding, false)
-            } else if (somethingVisible) {
-                showOrHideEmptyView(binding, false)
-            } else {
-                showOrHideEmptyView(binding, true)
-            }
+            showOrHideEmptyView(binding, !(expanded || somethingVisible))
         }
 
         override fun onAfterToggleCollapse(expanded: Boolean, somethingVisible: Boolean) {
