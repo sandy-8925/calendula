@@ -77,7 +77,6 @@ import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.schedulers.Schedulers
 import java.io.Closeable
-import java.util.Collections
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import org.greenrobot.eventbus.Subscribe
@@ -460,6 +459,38 @@ internal class ItemsListLiveData: LiveData<List<DailyAgendaItemStub>>(), Closeab
         return stubs
     }
 
+    private fun addEmptyHours(stubs: MutableList<DailyAgendaItemStub>, min: DateTime, max: DateTime) {
+        var min = min
+        var max = max
+        min = min.withTimeAtStartOfDay()
+        max = max.withTimeAtStartOfDay().plusDays(1) // end of the day
+
+        // add empty hours if there is not an item with the same hour
+        var start = min
+        while (start.isBefore(max)) {
+            var exact = false
+            for (item in stubs) {
+                if (start == item.dateTime()) {
+                    exact = true
+                    break
+                }
+            }
+
+
+            val hour = Interval(start, start.plusHours(1))
+            if (!exact || hour.contains(DateTime.now())) {
+                stubs.add(DailyAgendaItemStub(start.toLocalDate(), start.toLocalTime()))
+            }
+
+            if (start.hourOfDay == 0) {
+                val spacer = DailyAgendaItemStub(start.toLocalDate(), start.toLocalTime())
+                spacer.isSpacer = true
+                stubs.add(spacer)
+            }
+            start = start.plusHours(1)
+        }
+    }
+
     companion object {
         private val notifyDataScheduler by lazy { Schedulers.from(Executors.newSingleThreadExecutor()) }
     }
@@ -478,37 +509,5 @@ private object DailyAgendaItemStubComparator: Comparator<DailyAgendaItemStub> {
             return if (a.hasEvents) -1 else 1
         }
         return aT.compareTo(bT)
-    }
-}
-
-private fun addEmptyHours(stubs: MutableList<DailyAgendaItemStub>, min: DateTime, max: DateTime) {
-    var min = min
-    var max = max
-    min = min.withTimeAtStartOfDay()
-    max = max.withTimeAtStartOfDay().plusDays(1) // end of the day
-
-    // add empty hours if there is not an item with the same hour
-    var start = min
-    while (start.isBefore(max)) {
-        var exact = false
-        for (item in stubs) {
-            if (start == item.dateTime()) {
-                exact = true
-                break
-            }
-        }
-
-
-        val hour = Interval(start, start.plusHours(1))
-        if (!exact || hour.contains(DateTime.now())) {
-            stubs.add(DailyAgendaItemStub(start.toLocalDate(), start.toLocalTime()))
-        }
-
-        if (start.hourOfDay == 0) {
-            val spacer = DailyAgendaItemStub(start.toLocalDate(), start.toLocalTime())
-            spacer.isSpacer = true
-            stubs.add(spacer)
-        }
-        start = start.plusHours(1)
     }
 }
