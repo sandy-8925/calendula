@@ -91,20 +91,20 @@ class DailyAgendaRecyclerAdapter(rv: RecyclerView, llm: LinearLayoutManager, ctx
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        val v: View
+        val layoutInflater = LayoutInflater.from(parent.context)
         when (viewType) {
             NORMAL -> {
-                v = LayoutInflater.from(parent.context).inflate(R.layout.daily_view_intake, parent, false)
+                val v = layoutInflater.inflate(R.layout.daily_view_intake, parent, false)
                 return NormalItemViewHolder(v)
             }
 
             SPACER -> {
-                v = LayoutInflater.from(parent.context).inflate(R.layout.daily_view_empty_dayspacer, parent, false)
+                val v = layoutInflater.inflate(R.layout.daily_view_empty_dayspacer, parent, false)
                 return SpacerItemViewHolder(v)
             }
 
             else -> {
-                v = LayoutInflater.from(parent.context).inflate(R.layout.daily_view_empty_hour, parent, false)
+                val v = layoutInflater.inflate(R.layout.daily_view_empty_hour, parent, false)
                 return EmptyItemViewHolder(v)
             }
         }
@@ -124,12 +124,10 @@ class DailyAgendaRecyclerAdapter(rv: RecyclerView, llm: LinearLayoutManager, ctx
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val item = items[position]
 
-        if (holder is SpacerItemViewHolder) {
-            onBindViewSpacerItemViewHolder(holder, item)
-        } else if (holder is NormalItemViewHolder) {
-            onBindNormalItemViewHolder(holder, item)
-        } else {
-            onBindEmptyItemViewHolder(holder as EmptyItemViewHolder, item)
+        when (holder) {
+            is SpacerItemViewHolder -> onBindViewSpacerItemViewHolder(holder, item)
+            is NormalItemViewHolder -> onBindNormalItemViewHolder(holder, item)
+            else -> onBindEmptyItemViewHolder(holder as EmptyItemViewHolder, item)
         }
     }
 
