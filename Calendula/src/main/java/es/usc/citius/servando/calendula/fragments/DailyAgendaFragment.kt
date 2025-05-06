@@ -42,7 +42,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import autodispose2.AutoDispose.autoDisposable
 import autodispose2.androidx.lifecycle.AndroidLifecycleScopeProvider.from
 import com.mikepenz.community_material_typeface_library.CommunityMaterial
@@ -89,7 +88,6 @@ import org.joda.time.LocalDate
 class DailyAgendaFragment : Fragment() {
     private val viewModel: DailyAgendaFragmentViewModel by viewModels()
 
-    private lateinit var rv: RecyclerView
     private lateinit var rvAdapter: DailyAgendaRecyclerAdapter
     private lateinit var rvListener: DailyAgendaRecyclerListener
 
@@ -144,7 +142,6 @@ class DailyAgendaFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val binding = FragmentDailyAgendaBinding.bind(view)
-        rv = binding.rv
         setupRecyclerView(binding)
         setupEmptyView(binding)
 
@@ -155,7 +152,7 @@ class DailyAgendaFragment : Fragment() {
         }
         viewModel.itemsListLiveDate.observe(viewLifecycleOwner) {
             rvAdapter.items = it
-            rv.postDelayed({ showOrHideEmptyView(binding, !rvAdapter.isShowingSomething) }, 100)
+            binding.rv.postDelayed({ showOrHideEmptyView(binding, !rvAdapter.isShowingSomething) }, 100)
         }
     }
 
@@ -204,8 +201,8 @@ class DailyAgendaFragment : Fragment() {
     private fun setupRecyclerView(binding: FragmentDailyAgendaBinding) {
         val llm = LinearLayoutManager(requireContext())
         rvListener = DailyAgendaRecyclerListener(binding, llm)
-        rvAdapter = DailyAgendaRecyclerAdapter(rv, llm, requireActivity()).apply { setListener(rvListener) }
-        rv.let {
+        rvAdapter = DailyAgendaRecyclerAdapter(binding.rv, llm, requireActivity()).apply { setListener(rvListener) }
+        binding.rv.let {
             it.layoutManager = llm
             it.adapter = rvAdapter
             it.itemAnimator = DefaultItemAnimator()
@@ -284,7 +281,7 @@ class DailyAgendaFragment : Fragment() {
 
         private fun scrollTo(time: DateTime) {
             val position = rvAdapter.items.indexOfFirst { it.dateTime().isAfter(time) }
-            if (position > 0) linearLayoutManager.smoothScrollToPosition(rv, null, position - 1)
+            if (position > 0) linearLayoutManager.smoothScrollToPosition(binding.rv, null, position - 1)
         }
     }
 
