@@ -125,17 +125,17 @@ class DailyAgendaRecyclerAdapter(rv: RecyclerView, llm: LinearLayoutManager, ctx
         val item = items[position]
 
         if (holder is SpacerItemViewHolder) {
-            onBindViewSpacerItemViewHolder(holder, item, position)
+            onBindViewSpacerItemViewHolder(holder, item)
         } else if (holder is NormalItemViewHolder) {
-            onBindNormalItemViewHolder(holder, item, position)
+            onBindNormalItemViewHolder(holder, item)
         } else {
-            onBindEmptyItemViewHolder(holder as EmptyItemViewHolder, item, position)
+            onBindEmptyItemViewHolder(holder as EmptyItemViewHolder, item)
         }
     }
 
     override fun getItemCount() = items.size
 
-    private fun onBindViewSpacerItemViewHolder(holder: SpacerItemViewHolder, item: DailyAgendaItemStub, position: Int) {
+    private fun onBindViewSpacerItemViewHolder(holder: SpacerItemViewHolder, item: DailyAgendaItemStub) {
         if (isExpanded) {
             val color = HomeProfileMgr.colorForCurrent(ctx)
             val title = if (item.date == LocalDate.now()) {
@@ -164,7 +164,7 @@ class DailyAgendaRecyclerAdapter(rv: RecyclerView, llm: LinearLayoutManager, ctx
         }
     }
 
-    private fun onBindEmptyItemViewHolder(viewHolder: EmptyItemViewHolder, item: DailyAgendaItemStub, position: Int) {
+    private fun onBindEmptyItemViewHolder(viewHolder: EmptyItemViewHolder, item: DailyAgendaItemStub) {
         viewHolder.stub = item
 
         if (isExpanded) {
@@ -185,7 +185,7 @@ class DailyAgendaRecyclerAdapter(rv: RecyclerView, llm: LinearLayoutManager, ctx
         }
     }
 
-    private fun onBindNormalItemViewHolder(viewHolder: NormalItemViewHolder, item: DailyAgendaItemStub, i: Int) {
+    private fun onBindNormalItemViewHolder(viewHolder: NormalItemViewHolder, item: DailyAgendaItemStub) {
         viewHolder.stub = item
         item.displayable = isDisplayable(item)
 
@@ -296,7 +296,7 @@ class DailyAgendaRecyclerAdapter(rv: RecyclerView, llm: LinearLayoutManager, ctx
             val nameDecorator = intakeView.findViewById<View>(R.id.name_decorator) as ImageView
             val units = element.presentation.units(viewHolder.context.resources, element.dose)
             image.setImageDrawable(medIcon(element.presentation.icon(), intakeView.context))
-            medDose.text = element.displayDose + " " + units
+            medDose.text = "${element.displayDose} $units"
             medName.text = element.medName
             if (element.medNameDecorator != null) {
                 nameDecorator.setImageDrawable(element.medNameDecorator)
@@ -416,18 +416,18 @@ class DailyAgendaRecyclerAdapter(rv: RecyclerView, llm: LinearLayoutManager, ctx
             LogUtil.d(TAG, "Click row, listener is null? " + (listener == null))
             if (view.id == R.id.check_all_button || view.id == R.id.action_container) {
                 hideCheckAllButton()
-            } else if (listener != null) {
-                listener!!.onItemClick(view, stub, adapterPosition)
+            } else {
+                listener?.onItemClick(view, stub, adapterPosition)
             }
         }
 
         private fun hideCheckAllButton() {
             actionsView.animate().setDuration(100).alpha(0f).scaleY(0.5f).setListener(object : AnimatorListenerAdapter() {
                 override fun onAnimationEnd(animation: Animator) {
-                    if (stub!!.isRoutine) {
-                        AlarmScheduler.instance().onIntakeConfirmAll(DB.routines().findById(stub!!.id), stub!!.date, context)
+                    if (stub.isRoutine) {
+                        AlarmScheduler.instance().onIntakeConfirmAll(DB.routines().findById(stub.id), stub.date, context)
                     } else {
-                        AlarmScheduler.instance().onIntakeConfirmAll(DB.schedules().findById(stub!!.id), stub!!.time, stub!!.date, context)
+                        AlarmScheduler.instance().onIntakeConfirmAll(DB.schedules().findById(stub.id), stub.time, stub.date, context)
                     }
                     updateItem(adapterPosition)
                 }
