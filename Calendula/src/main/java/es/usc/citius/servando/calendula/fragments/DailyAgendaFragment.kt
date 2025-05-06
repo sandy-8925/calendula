@@ -28,7 +28,6 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import androidx.annotation.AnyThread
 import androidx.annotation.Keep
 import androidx.annotation.WorkerThread
@@ -89,7 +88,6 @@ import org.joda.time.LocalDate
  */
 class DailyAgendaFragment : Fragment() {
     private val viewModel: DailyAgendaFragmentViewModel by viewModels()
-    private lateinit var emptyView: View
 
     private lateinit var rv: RecyclerView
     private lateinit var rvAdapter: DailyAgendaRecyclerAdapter
@@ -147,9 +145,8 @@ class DailyAgendaFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         val binding = FragmentDailyAgendaBinding.bind(view)
         rv = binding.rv
-        emptyView = binding.emptyViewPlaceholder
-        setupRecyclerView()
-        setupEmptyView()
+        setupRecyclerView(binding)
+        setupEmptyView(binding)
 
         viewModel.expandedPrefLiveData.observe(viewLifecycleOwner) { expandedPrefVal ->
             requireActivity().invalidateOptionsMenu()
@@ -158,7 +155,7 @@ class DailyAgendaFragment : Fragment() {
         }
         viewModel.itemsListLiveDate.observe(viewLifecycleOwner) {
             rvAdapter.items = it
-            rv.postDelayed({ showOrHideEmptyView(!rvAdapter.isShowingSomething) }, 100)
+            rv.postDelayed({ showOrHideEmptyView(binding, !rvAdapter.isShowingSomething) }, 100)
         }
     }
 
@@ -186,9 +183,9 @@ class DailyAgendaFragment : Fragment() {
         .subscribe({},{})
     }
 
-    fun showOrHideEmptyView(show: Boolean) {
-        if (show) emptyView.visibility = View.VISIBLE
-        else emptyView.visibility = View.GONE
+    fun showOrHideEmptyView(binding: FragmentDailyAgendaBinding, show: Boolean) {
+        if (show) binding.emptyViewPlaceholder.visibility = View.VISIBLE
+        else binding.emptyViewPlaceholder.visibility = View.GONE
     }
 
     private fun toggleViewMode() {
@@ -204,9 +201,9 @@ class DailyAgendaFragment : Fragment() {
     private val isExpanded: Boolean
         get() = viewModel.expandedPrefLiveData.value ?: true
 
-    private fun setupRecyclerView() {
+    private fun setupRecyclerView(binding: FragmentDailyAgendaBinding) {
         val llm = LinearLayoutManager(requireContext())
-        rvListener = DailyAgendaRecyclerListener(llm)
+        rvListener = DailyAgendaRecyclerListener(binding, llm)
         rvAdapter = DailyAgendaRecyclerAdapter(rv, llm, requireActivity()).apply { setListener(rvListener) }
         rv.let {
             it.layoutManager = llm
@@ -215,14 +212,14 @@ class DailyAgendaFragment : Fragment() {
         }
     }
 
-    private fun setupEmptyView() {
+    private fun setupEmptyView(binding: FragmentDailyAgendaBinding) {
         val color = HomeProfileMgr.colorForCurrent(activity)
         val icon: Drawable = IconicsDrawable(context)
             .icon(emptyViewIcon)
             .color(color)
             .sizeDp(90)
             .paddingDp(0)
-        (emptyView.findViewById<View>(R.id.imageView_ok) as ImageView).setImageDrawable(icon)
+        binding.emptyViewPlaceholderParent.imageViewOk.setImageDrawable(icon)
     }
 
     private fun showConfirmActivity(view: View, item: DailyAgendaItemStub, position: Int) {
@@ -254,7 +251,7 @@ class DailyAgendaFragment : Fragment() {
         }
     }
 
-    inner class DailyAgendaRecyclerListener(private val linearLayoutManager: LinearLayoutManager) : DailyAgendaRecyclerAdapter.EventListener {
+    inner class DailyAgendaRecyclerListener(private val binding: FragmentDailyAgendaBinding, private val linearLayoutManager: LinearLayoutManager) : DailyAgendaRecyclerAdapter.EventListener {
         private var firstTime: DateTime? = null
 
         override fun onItemClick(v: View, item: DailyAgendaItemStub, position: Int) {
@@ -268,11 +265,11 @@ class DailyAgendaFragment : Fragment() {
             LogUtil.d(TAG, "OnBeforeCollapse, somethingVisible is $somethingVisible")
 
             if (expanded) {
-                showOrHideEmptyView(false)
+                showOrHideEmptyView(binding, false)
             } else if (somethingVisible) {
-                showOrHideEmptyView(false)
+                showOrHideEmptyView(binding, false)
             } else {
-                showOrHideEmptyView(true)
+                showOrHideEmptyView(binding, true)
             }
         }
 

@@ -46,7 +46,9 @@
         android:background="#eeffffff"
         android:visibility="gone">
 
-        <include layout="@layout/daily_view_empty_placeholder"/>
+        <include
+            android:id="@+id/empty_view_placeholder_parent"
+            layout="@layout/daily_view_empty_placeholder"/>
     </FrameLayout>
 
 
