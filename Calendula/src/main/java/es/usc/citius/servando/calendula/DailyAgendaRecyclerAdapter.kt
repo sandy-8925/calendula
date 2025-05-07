@@ -19,9 +19,8 @@ package es.usc.citius.servando.calendula
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
-import android.app.Activity
+import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.Point
 import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.View
@@ -50,7 +49,7 @@ import es.usc.citius.servando.calendula.util.view.ParallaxImageView
 import org.joda.time.DateTime
 import org.joda.time.LocalDate
 
-class DailyAgendaRecyclerAdapter(rv: RecyclerView, llm: LinearLayoutManager, ctx: Activity) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class DailyAgendaRecyclerAdapter(rv: RecyclerView, llm: LinearLayoutManager) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     var items: List<DailyAgendaItemStub> = emptyList()
         set(value) {
             field = value
@@ -63,25 +62,17 @@ class DailyAgendaRecyclerAdapter(rv: RecyclerView, llm: LinearLayoutManager, ctx
     var isExpanded: Boolean = false
         private set
     private val parallaxHeight: Int
-    private val emptyItemHeight = ScreenUtils.dpToPx(ctx.resources, 45f)
     private val enableParallax = true
     private var listener: EventListener? = null
-    private val ctx: Context = ctx.applicationContext
 
     init {
         val delayMinutesStr = PreferenceUtils.getString(PreferenceKeys.SETTINGS_ALARM_REMINDER_WINDOW, "60")
         window = delayMinutesStr.toLong()
-
-        val display = ctx.windowManager.defaultDisplay
-        val size = Point()
-        display.getSize(size)
-        parallaxHeight = size.y * 2
+        parallaxHeight = rv.height * 2
 
         if (enableParallax) {
             rv.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                    updateParallax(llm, recyclerView)
-                }
+                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) = updateParallax(llm, recyclerView)
             })
         }
     }
@@ -134,8 +125,9 @@ class DailyAgendaRecyclerAdapter(rv: RecyclerView, llm: LinearLayoutManager, ctx
     override fun getItemCount() = items.size
 
     private fun onBindViewSpacerItemViewHolder(holder: SpacerItemViewHolder, item: DailyAgendaItemStub) {
+        val ctx = holder.itemView.context
         if (isExpanded) {
-            val color = HomeProfileMgr.colorForCurrent(ctx)
+            val color = HomeProfileMgr.colorForCurrent(holder.itemView.context)
             val title = if (item.date == LocalDate.now()) {
                 ctx.getString(R.string.today)
             } else if (item.date == LocalDate.now().minusDays(1)) {
@@ -176,6 +168,7 @@ class DailyAgendaRecyclerAdapter(rv: RecyclerView, llm: LinearLayoutManager, ctx
         viewHolder.itemView.visibility = if (isExpanded) View.VISIBLE else View.GONE
 
         val params = viewHolder.container.layoutParams
+        val emptyItemHeight = ScreenUtils.dpToPx(viewHolder.itemView.context.resources, 45f)
         val newHeight = if (isExpanded) emptyItemHeight else 0
         if (params.height != newHeight) {
             params.height = newHeight
@@ -287,7 +280,7 @@ class DailyAgendaRecyclerAdapter(rv: RecyclerView, llm: LinearLayoutManager, ctx
         viewHolder.medList.removeAllViews()
 
         for (element in item.meds) {
-            val intakeView = viewHolder.inflater.inflate(R.layout.daily_view_intake_med, null)
+            val intakeView = viewHolder.inflater.inflate(R.layout.daily_view_intake_med, viewHolder.medList)
             val medName = intakeView.findViewById<View>(R.id.med_item_name) as TextView
             val medDose = intakeView.findViewById<View>(R.id.med_item_dose) as TextView
             val image = intakeView.findViewById<View>(R.id.imageView) as ImageView

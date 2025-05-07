@@ -202,7 +202,7 @@ class DailyAgendaFragment : Fragment() {
     private fun setupRecyclerView(binding: FragmentDailyAgendaBinding) {
         val llm = LinearLayoutManager(requireContext())
         val rvListener = DailyAgendaRecyclerListener(binding, llm)
-        rvAdapter = DailyAgendaRecyclerAdapter(binding.rv, llm, requireActivity()).apply { setListener(rvListener) }
+        rvAdapter = DailyAgendaRecyclerAdapter(binding.rv, llm).apply { setListener(rvListener) }
         binding.rv.let {
             it.layoutManager = llm
             it.adapter = rvAdapter
