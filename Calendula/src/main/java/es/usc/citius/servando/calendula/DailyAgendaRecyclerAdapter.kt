@@ -128,14 +128,11 @@ class DailyAgendaRecyclerAdapter(rv: RecyclerView, llm: LinearLayoutManager) : R
         val ctx = holder.itemView.context
         if (isExpanded) {
             val color = HomeProfileMgr.colorForCurrent(holder.itemView.context)
-            val title = if (item.date == LocalDate.now()) {
-                ctx.getString(R.string.today)
-            } else if (item.date == LocalDate.now().minusDays(1)) {
-                ctx.getString(R.string.yesterday)
-            } else if (item.date == LocalDate.now().plusDays(1)) {
-                ctx.getString(R.string.tomorrow)
-            } else {
-                item.date.toString("EEEE dd")
+            val title = when (item.date) {
+                LocalDate.now() -> ctx.getString(R.string.today)
+                LocalDate.now().minusDays(1) -> ctx.getString(R.string.yesterday)
+                LocalDate.now().plusDays(1) -> ctx.getString(R.string.tomorrow)
+                else -> item.date.toString("EEEE dd")
             }
 
             holder.dayBg.setBackgroundColor(color)
