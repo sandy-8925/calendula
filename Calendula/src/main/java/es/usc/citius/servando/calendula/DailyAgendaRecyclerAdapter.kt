@@ -19,7 +19,6 @@ package es.usc.citius.servando.calendula
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
-import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
@@ -104,10 +103,9 @@ class DailyAgendaRecyclerAdapter(rv: RecyclerView, llm: LinearLayoutManager) : R
     override fun getItemViewType(position: Int): Int {
         val item = items[position]
         var type = EMPTY
-        if (item.hasEvents) {
-            type = NORMAL
-        } else if (item.isSpacer) {
-            return SPACER
+        when {
+            item.hasEvents -> type = NORMAL
+            item.isSpacer -> type = SPACER
         }
         return type
     }
@@ -118,7 +116,8 @@ class DailyAgendaRecyclerAdapter(rv: RecyclerView, llm: LinearLayoutManager) : R
         when (holder) {
             is SpacerItemViewHolder -> onBindViewSpacerItemViewHolder(holder, item)
             is NormalItemViewHolder -> onBindNormalItemViewHolder(holder, item)
-            else -> onBindEmptyItemViewHolder(holder as EmptyItemViewHolder, item)
+            is EmptyItemViewHolder -> onBindEmptyItemViewHolder(holder, item)
+            else -> {}
         }
     }
 
@@ -336,9 +335,7 @@ class DailyAgendaRecyclerAdapter(rv: RecyclerView, llm: LinearLayoutManager) : R
 
     interface EventListener {
         fun onItemClick(v: View, item: DailyAgendaItemStub, position: Int)
-
         fun onBeforeToggleCollapse(expanded: Boolean, somethingVisible: Boolean)
-
         fun onAfterToggleCollapse(expanded: Boolean, somethingVisible: Boolean)
     }
 
