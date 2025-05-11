@@ -150,10 +150,8 @@ class DailyAgendaRecyclerAdapter(rv: RecyclerView, llm: LinearLayoutManager) : R
     }
 
     private fun onBindEmptyItemViewHolder(viewHolder: EmptyItemViewHolder, item: DailyAgendaItemStub) {
-        viewHolder.stub = item
-
         if (isExpanded) {
-            val d = viewHolder.stub!!.date
+            val d = item.date
             if (d == DateTime.now().toLocalDate()) {
                 viewHolder.hourText.text = if (item.time != null) item.time.toString("HH:mm") else "--"
             } else {
@@ -341,7 +339,6 @@ class DailyAgendaRecyclerAdapter(rv: RecyclerView, llm: LinearLayoutManager) : R
     class EmptyItemViewHolder internal constructor(itemView: View) : RecyclerView.ViewHolder(itemView) {
         var container: RelativeLayout = itemView.findViewById<View>(R.id.container) as RelativeLayout
         var hourText: TextView = itemView.findViewById<View>(R.id.hour_text) as TextView
-        var stub: DailyAgendaItemStub? = null
     }
 
     class SpacerItemViewHolder internal constructor(itemView: View, parallaxHeight: Int) : RecyclerView.ViewHolder(itemView) {
