@@ -40,7 +40,6 @@ import es.usc.citius.servando.calendula.fragments.HomeProfileMgr
 import es.usc.citius.servando.calendula.scheduling.AlarmScheduler
 import es.usc.citius.servando.calendula.util.AvatarMgr
 import es.usc.citius.servando.calendula.util.DailyAgendaItemStub
-import es.usc.citius.servando.calendula.util.LogUtil
 import es.usc.citius.servando.calendula.util.PreferenceKeys
 import es.usc.citius.servando.calendula.util.PreferenceUtils
 import es.usc.citius.servando.calendula.util.ScreenUtils
@@ -85,12 +84,12 @@ class DailyAgendaRecyclerAdapter(rv: RecyclerView, llm: LinearLayoutManager) : R
         when (viewType) {
             NORMAL -> {
                 val v = layoutInflater.inflate(R.layout.daily_view_intake, parent, false)
-                return NormalItemViewHolder(v)
+                return NormalItemViewHolder(v, listener)
             }
 
             SPACER -> {
                 val v = layoutInflater.inflate(R.layout.daily_view_empty_dayspacer, parent, false)
-                return SpacerItemViewHolder(v)
+                return SpacerItemViewHolder(v, parallaxHeight)
             }
 
             else -> {
@@ -345,7 +344,7 @@ class DailyAgendaRecyclerAdapter(rv: RecyclerView, llm: LinearLayoutManager) : R
         var stub: DailyAgendaItemStub? = null
     }
 
-    inner class SpacerItemViewHolder internal constructor(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    class SpacerItemViewHolder internal constructor(itemView: View, parallaxHeight: Int) : RecyclerView.ViewHolder(itemView) {
         var day: TextView = itemView.findViewById<View>(R.id.day_text) as TextView
         var dayBg: ImageView = itemView.findViewById<View>(R.id.day_bg) as ImageView
         var container: View = itemView.findViewById(R.id.container)
@@ -358,7 +357,7 @@ class DailyAgendaRecyclerAdapter(rv: RecyclerView, llm: LinearLayoutManager) : R
         }
     }
 
-    inner class NormalItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
+    inner class NormalItemViewHolder(itemView: View, private val listener: EventListener?) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
         var context: Context = itemView.context
         lateinit var stub: DailyAgendaItemStub
 
@@ -398,7 +397,6 @@ class DailyAgendaRecyclerAdapter(rv: RecyclerView, llm: LinearLayoutManager) : R
         }
 
         override fun onClick(view: View) {
-            LogUtil.d(TAG, "Click row, listener is null? " + (listener == null))
             if (view.id == R.id.check_all_button || view.id == R.id.action_container) {
                 hideCheckAllButton()
             } else {
