@@ -61,8 +61,8 @@ class MedicinesListFragment : Fragment() {
     var mMedicines: MutableList<Medicine> = mutableListOf()
     private var mMedicineSelectedCallback: OnMedicineSelectedListener? = null
 
-    @JvmField @BindView(R.id.medicines_list)
-    var recyclerView: RecyclerView? = null
+    @BindView(R.id.medicines_list)
+    lateinit var recyclerView: RecyclerView
 
     @JvmField @BindView(android.R.id.empty)
     var emptyView: View? = null
@@ -70,8 +70,8 @@ class MedicinesListFragment : Fragment() {
     @JvmField @BindView(R.id.sort_layout)
     var sortLayout: View? = null
 
-    @JvmField @BindView(R.id.medicine_sort_spinner)
-    var sortSpinner: AppCompatSpinner? = null
+    @BindView(R.id.medicine_sort_spinner)
+    lateinit var sortSpinner: AppCompatSpinner
 
     @JvmField @BindView(R.id.med_list_container)
     var medListContainer: View? = null
@@ -186,9 +186,9 @@ class MedicinesListFragment : Fragment() {
     private fun setupSortSpinner() {
         val spinnerAdapter = ArrayAdapter(requireContext(), R.layout.sort_spinner_item, MedSortType.entries.toTypedArray())
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        sortSpinner!!.adapter = spinnerAdapter
-        sortSpinner!!.background.setColorFilter(resources.getColor(R.color.white), PorterDuff.Mode.SRC_ATOP) //change caret color
-        sortSpinner!!.onItemSelectedListener = object : OnItemSelectedListener {
+        sortSpinner.adapter = spinnerAdapter
+        sortSpinner.background.setColorFilter(resources.getColor(R.color.white), PorterDuff.Mode.SRC_ATOP) //change caret color
+        sortSpinner.onItemSelectedListener = object : OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
                 val type = parent.getItemAtPosition(position) as MedSortType
                 val cmp = type.comparator()
@@ -208,7 +208,7 @@ class MedicinesListFragment : Fragment() {
 
     private fun setupRecyclerView() {
         val llm = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
-        recyclerView!!.layoutManager = llm
+        recyclerView.layoutManager = llm
         adapter.withSelectable(false)
         adapter.withPositionBasedStateManagement(false)
         for (mMedicine in mMedicines) {
@@ -235,8 +235,8 @@ class MedicinesListFragment : Fragment() {
             true
         }
 
-        recyclerView!!.adapter = adapter
-        recyclerView?.setOnTouchListener { view, motionEvent ->
+        recyclerView.adapter = adapter
+        recyclerView.setOnTouchListener { view, motionEvent ->
             view.performClick()
             if (!isSortCollapsed) toggleSort()
             false
@@ -278,7 +278,7 @@ class MedicinesListFragment : Fragment() {
 
         override fun onPostExecute(aVoid: Void?) {
             super.onPostExecute(aVoid)
-            val sortType = sortSpinner!!.selectedItem as MedSortType
+            val sortType = sortSpinner.selectedItem as MedSortType
             Collections.sort(mMedicines, sortType.comparator())
             updateViewVisibility()
             updateAdapterItems()
