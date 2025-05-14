@@ -66,13 +66,11 @@ import es.usc.citius.servando.calendula.database.DB
 import es.usc.citius.servando.calendula.databinding.ActivityMainBinding
 import es.usc.citius.servando.calendula.events.PersistenceEvents.ActiveUserChangeEvent
 import es.usc.citius.servando.calendula.events.PersistenceEvents.DatabaseUpdateEvent
-import es.usc.citius.servando.calendula.events.PersistenceEvents.IntakeConfirmedEvent
 import es.usc.citius.servando.calendula.events.PersistenceEvents.ModelCreateOrUpdateEvent
 import es.usc.citius.servando.calendula.events.PersistenceEvents.UserCreateEvent
 import es.usc.citius.servando.calendula.events.PersistenceEvents.UserUpdateEvent
 import es.usc.citius.servando.calendula.events.StockRunningOutEvent
 import es.usc.citius.servando.calendula.fragments.HomeProfileMgr
-import es.usc.citius.servando.calendula.fragments.MedicinesListFragment
 import es.usc.citius.servando.calendula.fragments.MedicinesListFragment.OnMedicineSelectedListener
 import es.usc.citius.servando.calendula.fragments.RoutinesListFragment
 import es.usc.citius.servando.calendula.fragments.RoutinesListFragment.OnRoutineSelectedListener
@@ -142,7 +140,6 @@ class HomePagerActivity : CalendulaActivity(), OnRoutineSelectedListener, OnMedi
         for (menuItem in MENU_ITEMS) {
             menuItems.put(menuItem, menu.findItem(menuItem))
         }
-        menuItems[R.id.action_sort].setIcon(IconUtils.icon(applicationContext, CommunityMaterial.Icon.cmd_sort, R.color.white))
         return true
     }
 
@@ -156,7 +153,6 @@ class HomePagerActivity : CalendulaActivity(), OnRoutineSelectedListener, OnMedi
         }
 
         when (page) {
-            HomePages.MEDICINES -> menuItems[R.id.action_sort].setVisible(true)
             HomePages.SCHEDULES -> menuItems[R.id.action_schedules_help].setVisible(true)
             else -> {}
         }
@@ -172,11 +168,6 @@ class HomePagerActivity : CalendulaActivity(), OnRoutineSelectedListener, OnMedi
 
             R.id.action_schedules_help -> {
                 launchActivity(Intent(this, SchedulesHelpActivity::class.java))
-                return true
-            }
-
-            R.id.action_sort -> {
-                (getViewPagerFragment(HomePages.MEDICINES) as MedicinesListFragment?)!!.toggleSort()
                 return true
             }
         }
@@ -226,11 +217,7 @@ class HomePagerActivity : CalendulaActivity(), OnRoutineSelectedListener, OnMedi
                 if (event is ModelCreateOrUpdateEvent) {
                     LogUtil.d(TAG, "handleEvent: " + event.clazz.name)
                     (getViewPagerFragment(HomePages.ROUTINES) as RoutinesListFragment?)!!.notifyDataChange()
-                    (getViewPagerFragment(HomePages.MEDICINES) as MedicinesListFragment?)!!.notifyDataChange()
                     (getViewPagerFragment(HomePages.SCHEDULES) as ScheduleListFragment?)!!.notifyDataChange()
-                } else if (event is IntakeConfirmedEvent) {
-                    // stock info may need to be updated
-                    (getViewPagerFragment(HomePages.MEDICINES) as MedicinesListFragment?)!!.notifyDataChange()
                 } else if (event is ActiveUserChangeEvent) {
                     activePatient = event.patient
                     updateTitle(mViewPager.currentItem)
@@ -492,9 +479,7 @@ class HomePagerActivity : CalendulaActivity(), OnRoutineSelectedListener, OnMedi
         private const val TAG = "HomePagerActivity"
 
         @IdRes
-        private val MENU_ITEMS = intArrayOf(
-            R.id.action_sort, R.id.action_calendar, R.id.action_schedules_help
-        )
+        private val MENU_ITEMS = intArrayOf(R.id.action_calendar, R.id.action_schedules_help)
     }
 }
 

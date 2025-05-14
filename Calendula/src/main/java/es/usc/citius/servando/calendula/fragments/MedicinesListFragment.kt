@@ -24,6 +24,9 @@ import android.os.AsyncTask
 import android.os.Bundle
 import android.os.Handler
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
@@ -45,6 +48,7 @@ import es.usc.citius.servando.calendula.adapters.items.MedicineItem
 import es.usc.citius.servando.calendula.adapters.items.MedicineItem.MedicineViewHolder
 import es.usc.citius.servando.calendula.database.DB
 import es.usc.citius.servando.calendula.databinding.FragmentMedicinesListBinding
+import es.usc.citius.servando.calendula.events.PersistenceEvents.IntakeConfirmedEvent
 import es.usc.citius.servando.calendula.events.PersistenceEvents.ModelCreateOrUpdateEvent
 import es.usc.citius.servando.calendula.persistence.Medicine
 import es.usc.citius.servando.calendula.util.IconUtils
@@ -86,7 +90,7 @@ class MedicinesListFragment : Fragment() {
         updateViewVisibility()
     }
 
-    fun notifyDataChange() {
+    private fun notifyDataChange() {
         ReloadItemsTask().execute()
     }
 
@@ -97,6 +101,22 @@ class MedicinesListFragment : Fragment() {
         if (activity is OnMedicineSelectedListener) {
             mMedicineSelectedCallback = activity
         }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.fragment_medicines_list, menu)
+        menu.findItem(R.id.action_sort).setIcon(IconUtils.icon(requireContext(), CommunityMaterial.Icon.cmd_sort, R.color.white))
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when(item.itemId) {
+            R.id.action_sort -> {
+                toggleSort()
+                return true
+            }
+        }
+        return super.onOptionsItemSelected(item)
     }
 
     override fun onStart() {
@@ -114,13 +134,20 @@ class MedicinesListFragment : Fragment() {
         notifyDataChange()
     }
 
-    @Suppress("unused") @Subscribe fun handleModelCreateOrUpdate(event: ModelCreateOrUpdateEvent) {
-        if (event.clazz == Medicine::class.java) {
-            handler.post { notifyDataChange() }
+    @Suppress("unused") @Subscribe fun handleModelCreateOrUpdate(event: Any) {
+        when(event) {
+            is ModelCreateOrUpdateEvent -> if (event.clazz == Medicine::class.java) handler.post { notifyDataChange() }
+            is IntakeConfirmedEvent -> handler.post { notifyDataChange() }
+
         }
     }
 
-    fun toggleSort() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
+
+    private fun toggleSort() {
         LogUtil.d(TAG, "toggleSort() called")
         if (isSortCollapsed) {
             val targetHeight = resources.getDimension(R.dimen.sort_bar_height).toInt()
@@ -209,9 +236,8 @@ class MedicinesListFragment : Fragment() {
                 return null
             }
 
-            override fun onClick(v: View, position: Int, fastAdapter: FastAdapter<MedicineItem>, item: MedicineItem) {
+            override fun onClick(v: View, position: Int, fastAdapter: FastAdapter<MedicineItem>, item: MedicineItem) =
                 openMedicineInfoActivity(item.medicine, true)
-            }
         })
 
         adapter.withOnClickListener { v, adapter, item, position ->
