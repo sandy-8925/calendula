@@ -62,15 +62,8 @@ class MedicinesListFragment : Fragment() {
     var mMedicines: MutableList<Medicine> = mutableListOf()
     private var mMedicineSelectedCallback: OnMedicineSelectedListener? = null
 
-//    private val recyclerView: RecyclerView by lazy { binding.medicinesList }
-    private val emptyView: View by lazy { binding.empty }
-    private val sortLayout: View by lazy { binding.sortLayout }
-    private val sortSpinner by lazy { binding.medicineSortSpinner }
-//    private val medListContainer by lazy { binding.medListContainer }
     private val adapter by lazy { FastItemAdapter<MedicineItem>() }
-
     private lateinit var binding: FragmentMedicinesListBinding
-
     private val handler: Handler = Handler()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
@@ -191,7 +184,7 @@ class MedicinesListFragment : Fragment() {
 
     private val isSortCollapsed: Boolean
         get() {
-            val collapsed = sortLayout.layoutParams.height == 0
+            val collapsed = binding.sortLayout.layoutParams.height == 0
             LogUtil.d(TAG, "isSortCollapsed() returned: $collapsed")
             return collapsed
         }
@@ -255,11 +248,11 @@ class MedicinesListFragment : Fragment() {
 
     private fun updateViewVisibility() {
         if (mMedicines.size > 0) {
-            emptyView.visibility = View.GONE
-            sortLayout.visibility = View.VISIBLE
+            binding.empty.visibility = View.GONE
+            binding.sortLayout.visibility = View.VISIBLE
         } else {
-            emptyView.visibility = View.VISIBLE
-            sortLayout.visibility = View.GONE
+            binding.empty.visibility = View.VISIBLE
+            binding.sortLayout.visibility = View.GONE
         }
     }
 
@@ -288,7 +281,7 @@ class MedicinesListFragment : Fragment() {
 
         override fun onPostExecute(aVoid: Void?) {
             super.onPostExecute(aVoid)
-            val sortType = sortSpinner.selectedItem as MedSortType
+            val sortType = binding.medicineSortSpinner.selectedItem as MedSortType
             Collections.sort(mMedicines, sortType.comparator())
             updateViewVisibility()
             updateAdapterItems()
