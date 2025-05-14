@@ -29,13 +29,9 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.AdapterView.OnItemSelectedListener
 import android.widget.ArrayAdapter
-import androidx.appcompat.widget.AppCompatSpinner
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import butterknife.BindView
-import butterknife.ButterKnife
-import butterknife.Unbinder
 import com.github.javiersantos.materialstyleddialogs.MaterialStyledDialog
 import com.github.javiersantos.materialstyleddialogs.enums.Style
 import com.mikepenz.community_material_typeface_library.CommunityMaterial
@@ -48,6 +44,7 @@ import es.usc.citius.servando.calendula.activities.MedicineInfoActivity
 import es.usc.citius.servando.calendula.adapters.items.MedicineItem
 import es.usc.citius.servando.calendula.adapters.items.MedicineItem.MedicineViewHolder
 import es.usc.citius.servando.calendula.database.DB
+import es.usc.citius.servando.calendula.databinding.FragmentMedicinesListBinding
 import es.usc.citius.servando.calendula.events.PersistenceEvents.ModelCreateOrUpdateEvent
 import es.usc.citius.servando.calendula.persistence.Medicine
 import es.usc.citius.servando.calendula.util.IconUtils
@@ -61,43 +58,32 @@ class MedicinesListFragment : Fragment() {
     var mMedicines: MutableList<Medicine> = mutableListOf()
     private var mMedicineSelectedCallback: OnMedicineSelectedListener? = null
 
-    @BindView(R.id.medicines_list)
-    lateinit var recyclerView: RecyclerView
-
-    @JvmField @BindView(android.R.id.empty)
-    var emptyView: View? = null
-
-    @JvmField @BindView(R.id.sort_layout)
-    var sortLayout: View? = null
-
-    @BindView(R.id.medicine_sort_spinner)
-    lateinit var sortSpinner: AppCompatSpinner
-
-    @JvmField @BindView(R.id.med_list_container)
-    var medListContainer: View? = null
-
+//    private val recyclerView: RecyclerView by lazy { binding.medicinesList }
+    private val emptyView: View by lazy { binding.empty }
+    private val sortLayout: View by lazy { binding.sortLayout }
+    private val sortSpinner by lazy { binding.medicineSortSpinner }
+//    private val medListContainer by lazy { binding.medListContainer }
     private val adapter by lazy { FastItemAdapter<MedicineItem>() }
-    private val handler: Handler = Handler()
-    var unbinder: Unbinder? = null
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val rootView = inflater.inflate(R.layout.fragment_medicines_list, container, false)
-        unbinder = ButterKnife.bind(this, rootView)
+    private lateinit var binding: FragmentMedicinesListBinding
+
+    private val handler: Handler = Handler()
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
+        inflater.inflate(R.layout.fragment_medicines_list, container, false)
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        binding = FragmentMedicinesListBinding.bind(view)
         mMedicines = DB.medicines().findAllForActivePatient(context)
-        setupRecyclerView()
-        setupSortSpinner()
-        medListContainer?.setOnTouchListener { view, motionEvent ->
+        setupRecyclerView(binding)
+        setupSortSpinner(binding)
+        binding.medListContainer.setOnTouchListener { view, motionEvent ->
             if (!isSortCollapsed) toggleSort()
             view.performClick()
             false
         }
         updateViewVisibility()
-        return rootView
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        unbinder?.unbind()
     }
 
     fun notifyDataChange() {
@@ -138,9 +124,9 @@ class MedicinesListFragment : Fragment() {
         LogUtil.d(TAG, "toggleSort() called")
         if (isSortCollapsed) {
             val targetHeight = resources.getDimension(R.dimen.sort_bar_height).toInt()
-            CollapseExpandAnimator.expand(sortLayout, 100, targetHeight)
+            CollapseExpandAnimator.expand(binding.sortLayout, 100, targetHeight)
         } else {
-            CollapseExpandAnimator.collapse(sortLayout, 100, 0)
+            CollapseExpandAnimator.collapse(binding.sortLayout, 100, 0)
         }
     }
 
@@ -178,17 +164,17 @@ class MedicinesListFragment : Fragment() {
 
     private val isSortCollapsed: Boolean
         get() {
-            val collapsed = sortLayout!!.layoutParams.height == 0
+            val collapsed = sortLayout.layoutParams.height == 0
             LogUtil.d(TAG, "isSortCollapsed() returned: $collapsed")
             return collapsed
         }
 
-    private fun setupSortSpinner() {
+    private fun setupSortSpinner(binding: FragmentMedicinesListBinding) {
         val spinnerAdapter = ArrayAdapter(requireContext(), R.layout.sort_spinner_item, MedSortType.entries.toTypedArray())
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        sortSpinner.adapter = spinnerAdapter
-        sortSpinner.background.setColorFilter(resources.getColor(R.color.white), PorterDuff.Mode.SRC_ATOP) //change caret color
-        sortSpinner.onItemSelectedListener = object : OnItemSelectedListener {
+        binding.medicineSortSpinner.adapter = spinnerAdapter
+        binding.medicineSortSpinner.background.setColorFilter(resources.getColor(R.color.white), PorterDuff.Mode.SRC_ATOP) //change caret color
+        binding.medicineSortSpinner.onItemSelectedListener = object : OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
                 val type = parent.getItemAtPosition(position) as MedSortType
                 val cmp = type.comparator()
@@ -200,15 +186,13 @@ class MedicinesListFragment : Fragment() {
                 }
             }
 
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-                //noop
-            }
+            override fun onNothingSelected(parent: AdapterView<*>?) = Unit
         }
     }
 
-    private fun setupRecyclerView() {
+    private fun setupRecyclerView(binding: FragmentMedicinesListBinding) {
         val llm = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
-        recyclerView.layoutManager = llm
+        binding.medicinesList.layoutManager = llm
         adapter.withSelectable(false)
         adapter.withPositionBasedStateManagement(false)
         for (mMedicine in mMedicines) {
@@ -235,8 +219,8 @@ class MedicinesListFragment : Fragment() {
             true
         }
 
-        recyclerView.adapter = adapter
-        recyclerView.setOnTouchListener { view, motionEvent ->
+        binding.medicinesList.adapter = adapter
+        binding.medicinesList.setOnTouchListener { view, motionEvent ->
             view.performClick()
             if (!isSortCollapsed) toggleSort()
             false
@@ -245,11 +229,11 @@ class MedicinesListFragment : Fragment() {
 
     private fun updateViewVisibility() {
         if (mMedicines.size > 0) {
-            emptyView!!.visibility = View.GONE
-            sortLayout!!.visibility = View.VISIBLE
+            emptyView.visibility = View.GONE
+            sortLayout.visibility = View.VISIBLE
         } else {
-            emptyView!!.visibility = View.VISIBLE
-            sortLayout!!.visibility = View.GONE
+            emptyView.visibility = View.VISIBLE
+            sortLayout.visibility = View.GONE
         }
     }
 
