@@ -34,6 +34,7 @@ import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -54,7 +55,6 @@ import es.usc.citius.servando.calendula.databinding.FragmentMedicinesListBinding
 import es.usc.citius.servando.calendula.events.PersistenceEvents.ModelCreateOrUpdateEvent
 import es.usc.citius.servando.calendula.persistence.Medicine
 import es.usc.citius.servando.calendula.util.IconUtils
-import es.usc.citius.servando.calendula.util.LogUtil
 import es.usc.citius.servando.calendula.util.medicine.MedicineSortUtil.MedSortType
 import es.usc.citius.servando.calendula.util.view.CollapseExpandAnimator
 import io.reactivex.rxjava3.core.Completable
@@ -64,26 +64,24 @@ import java.util.concurrent.Executors
 import org.greenrobot.eventbus.Subscribe
 
 class MedicinesListFragment : Fragment() {
+    private val isSortCollapsed: Boolean
+        get() = viewModel.sortCollapsedLiveData.value ?: true
     private val viewModel: MLFViewModel by viewModels()
     private var mMedicineSelectedCallback: OnMedicineSelectedListener? = null
-
-    private lateinit var binding: FragmentMedicinesListBinding
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
         inflater.inflate(R.layout.fragment_medicines_list, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding = FragmentMedicinesListBinding.bind(view)
+        val binding = FragmentMedicinesListBinding.bind(view)
         setupRecyclerView(binding)
         setupSortSpinner(binding)
-        binding.medListContainer.setOnTouchListener { view, motionEvent ->
-            if (!isSortCollapsed) toggleSort()
-            view.performClick()
-            false
-        }
         viewModel.medicineItemListLiveData.observe(viewLifecycleOwner) {
             updateViewVisibility(it, binding)
+        }
+        viewModel.sortCollapsedLiveData.observe(viewLifecycleOwner) {
+            setSortVisibility(it, binding)
         }
     }
 
@@ -105,7 +103,7 @@ class MedicinesListFragment : Fragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when(item.itemId) {
             R.id.action_sort -> {
-                toggleSort()
+                viewModel.toggleSort()
                 return true
             }
         }
@@ -117,9 +115,8 @@ class MedicinesListFragment : Fragment() {
         setHasOptionsMenu(true)
     }
 
-    private fun toggleSort() {
-        LogUtil.d(TAG, "toggleSort() called")
-        if (isSortCollapsed) {
+    private fun setSortVisibility(isSortCollapsed: Boolean, binding: FragmentMedicinesListBinding) {
+        if (!isSortCollapsed) {
             val targetHeight = resources.getDimension(R.dimen.sort_bar_height).toInt()
             CollapseExpandAnimator.expand(binding.sortLayout, 100, targetHeight)
         } else {
@@ -158,13 +155,6 @@ class MedicinesListFragment : Fragment() {
             }.onNeutral { dialog, which -> dialog.cancel() }
             .show()
     }
-
-    private val isSortCollapsed: Boolean
-        get() {
-            val collapsed = binding.sortLayout.layoutParams.height == 0
-            LogUtil.d(TAG, "isSortCollapsed() returned: $collapsed")
-            return collapsed
-        }
 
     private fun setupSortSpinner(binding: FragmentMedicinesListBinding) {
         val spinnerAdapter = ArrayAdapter(requireContext(), R.layout.sort_spinner_item, MedSortType.entries.toTypedArray())
@@ -209,7 +199,7 @@ class MedicinesListFragment : Fragment() {
         binding.medicinesList.adapter = adapter
         binding.medicinesList.setOnTouchListener { view, motionEvent ->
             view.performClick()
-            if (!isSortCollapsed) toggleSort()
+            if (!isSortCollapsed) viewModel.toggleSort()
             false
         }
         viewModel.medicineItemListLiveData.observe(viewLifecycleOwner) { adapter.setNewList(it) }
@@ -243,6 +233,12 @@ class MedicinesListFragment : Fragment() {
 
 internal class MLFViewModel: ViewModel() {
     internal val medicineItemListLiveData = MedicineItemListLiveData(CalendulaApp.context).apply { addCloseable(this) }
+    internal val sortCollapsedLiveData = MutableLiveData(true)
+
+    internal fun toggleSort() {
+        val oldSortCollapseVal = sortCollapsedLiveData.value ?: true
+        sortCollapsedLiveData.postValue(!oldSortCollapseVal)
+    }
 }
 
 internal class MedicineItemListLiveData(private val context: Context) : LiveData<List<MedicineItem>>(), Closeable {
