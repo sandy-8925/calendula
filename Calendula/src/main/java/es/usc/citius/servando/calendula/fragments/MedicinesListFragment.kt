@@ -18,11 +18,10 @@
 package es.usc.citius.servando.calendula.fragments
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.graphics.PorterDuff
-import android.os.AsyncTask
 import android.os.Bundle
-import android.os.Handler
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -33,6 +32,9 @@ import android.widget.AdapterView
 import android.widget.AdapterView.OnItemSelectedListener
 import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.ViewModel
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.github.javiersantos.materialstyleddialogs.MaterialStyledDialog
@@ -41,6 +43,7 @@ import com.mikepenz.community_material_typeface_library.CommunityMaterial
 import com.mikepenz.fastadapter.FastAdapter
 import com.mikepenz.fastadapter.commons.adapters.FastItemAdapter
 import com.mikepenz.fastadapter.listeners.ClickEventHook
+import es.usc.citius.servando.calendula.CalendulaApp
 import es.usc.citius.servando.calendula.CalendulaApp.Companion.eventBus
 import es.usc.citius.servando.calendula.R
 import es.usc.citius.servando.calendula.activities.MedicineInfoActivity
@@ -48,23 +51,24 @@ import es.usc.citius.servando.calendula.adapters.items.MedicineItem
 import es.usc.citius.servando.calendula.adapters.items.MedicineItem.MedicineViewHolder
 import es.usc.citius.servando.calendula.database.DB
 import es.usc.citius.servando.calendula.databinding.FragmentMedicinesListBinding
-import es.usc.citius.servando.calendula.events.PersistenceEvents.IntakeConfirmedEvent
 import es.usc.citius.servando.calendula.events.PersistenceEvents.ModelCreateOrUpdateEvent
 import es.usc.citius.servando.calendula.persistence.Medicine
 import es.usc.citius.servando.calendula.util.IconUtils
 import es.usc.citius.servando.calendula.util.LogUtil
 import es.usc.citius.servando.calendula.util.medicine.MedicineSortUtil.MedSortType
 import es.usc.citius.servando.calendula.util.view.CollapseExpandAnimator
-import java.util.Collections
+import io.reactivex.rxjava3.core.Completable
+import io.reactivex.rxjava3.schedulers.Schedulers
+import java.io.Closeable
+import java.util.concurrent.Executors
 import org.greenrobot.eventbus.Subscribe
 
 class MedicinesListFragment : Fragment() {
-    var mMedicines: MutableList<Medicine> = mutableListOf()
+    private val viewModel: MLFViewModel by viewModels()
     private var mMedicineSelectedCallback: OnMedicineSelectedListener? = null
 
     private val adapter by lazy { FastItemAdapter<MedicineItem>() }
     private lateinit var binding: FragmentMedicinesListBinding
-    private val handler: Handler = Handler()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
         inflater.inflate(R.layout.fragment_medicines_list, container, false)
@@ -72,7 +76,6 @@ class MedicinesListFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentMedicinesListBinding.bind(view)
-        mMedicines = DB.medicines().findAllForActivePatient(context)
         setupRecyclerView(binding)
         setupSortSpinner(binding)
         binding.medListContainer.setOnTouchListener { view, motionEvent ->
@@ -80,11 +83,14 @@ class MedicinesListFragment : Fragment() {
             view.performClick()
             false
         }
-        updateViewVisibility()
+        viewModel.medicineItemListLiveData.observe(viewLifecycleOwner) {
+            updateAdapterItems(it)
+            updateViewVisibility(it)
+        }
     }
 
     private fun notifyDataChange() {
-        ReloadItemsTask().execute()
+        //todo: Find out how to hook this up
     }
 
     @Deprecated("Deprecated in Java")
@@ -120,19 +126,6 @@ class MedicinesListFragment : Fragment() {
     override fun onStop() {
         eventBus().unregister(this)
         super.onStop()
-    }
-
-    // Method called from the event bus
-    @Suppress("unused") @Subscribe fun handleActiveUserChange() {
-        notifyDataChange()
-    }
-
-    @Suppress("unused") @Subscribe fun handleModelCreateOrUpdate(event: Any) {
-        when(event) {
-            is ModelCreateOrUpdateEvent -> if (event.clazz == Medicine::class.java) handler.post { notifyDataChange() }
-            is IntakeConfirmedEvent -> handler.post { notifyDataChange() }
-
-        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -177,7 +170,7 @@ class MedicinesListFragment : Fragment() {
             .setPositiveText(getString(R.string.dialog_yes_option))
             .onPositive { dialog, which ->
                 DB.medicines().deleteCascade(m, true)
-                notifyDataChange()
+                viewModel.medicineItemListLiveData.reload() //todo: Figure out how to get the LiveData to handle this internally
             }.onNeutral { dialog, which -> dialog.cancel() }
             .show()
     }
@@ -196,14 +189,7 @@ class MedicinesListFragment : Fragment() {
         binding.medicineSortSpinner.background.setColorFilter(resources.getColor(R.color.white), PorterDuff.Mode.SRC_ATOP) //change caret color
         binding.medicineSortSpinner.onItemSelectedListener = object : OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
-                val type = parent.getItemAtPosition(position) as MedSortType
-                val cmp = type.comparator()
-                if (cmp != null) {
-                    Collections.sort(mMedicines, cmp)
-                    updateAdapterItems()
-                } else {
-                    LogUtil.e(TAG, "onItemSelected: null comparator! wrong sort type?")
-                }
+                viewModel.medicineItemListLiveData.medSortType = parent.getItemAtPosition(position) as MedSortType
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) = Unit
@@ -215,9 +201,6 @@ class MedicinesListFragment : Fragment() {
         binding.medicinesList.layoutManager = llm
         adapter.withSelectable(false)
         adapter.withPositionBasedStateManagement(false)
-        for (mMedicine in mMedicines) {
-            adapter.add(MedicineItem(mMedicine))
-        }
         adapter.withOnLongClickListener { v, adapter, item, position ->
             showDeleteConfirmationDialog(item.medicine)
             true
@@ -234,7 +217,7 @@ class MedicinesListFragment : Fragment() {
         })
 
         adapter.withOnClickListener { v, adapter, item, position ->
-            if (mMedicineSelectedCallback != null && item != null && item.medicine != null) mMedicineSelectedCallback!!.onMedicineSelected(item.medicine)
+            if (mMedicineSelectedCallback != null && item != null && item.medicine != null) mMedicineSelectedCallback?.onMedicineSelected(item.medicine)
             true
         }
 
@@ -246,8 +229,8 @@ class MedicinesListFragment : Fragment() {
         }
     }
 
-    private fun updateViewVisibility() {
-        if (mMedicines.size > 0) {
+    private fun updateViewVisibility(mMedicines: List<MedicineItem>) {
+        if (mMedicines.isNotEmpty()) {
             binding.empty.visibility = View.GONE
             binding.sortLayout.visibility = View.VISIBLE
         } else {
@@ -256,12 +239,8 @@ class MedicinesListFragment : Fragment() {
         }
     }
 
-    private fun updateAdapterItems() {
-        adapter.clear()
-        for (m in mMedicines) {
-            adapter.add(MedicineItem(m))
-        }
-        adapter.notifyAdapterDataSetChanged()
+    private fun updateAdapterItems(mMedicines: List<MedicineItem>) {
+        adapter.setNewList(mMedicines)
     }
 
     //
@@ -272,24 +251,52 @@ class MedicinesListFragment : Fragment() {
         fun onCreateMedicine()
     }
 
-    private inner class ReloadItemsTask : AsyncTask<Void, Void, Void?>() {
-        override fun doInBackground(vararg params: Void): Void? {
-            LogUtil.d(TAG, "Reloading items...")
-            mMedicines = DB.medicines().findAllForActivePatient(context)
-            return null
+    companion object {
+        private const val TAG = "MedicinesListFragment"
+    }
+}
+
+internal class MLFViewModel: ViewModel() {
+    internal val medicineItemListLiveData = MedicineItemListLiveData(CalendulaApp.context).apply { addCloseable(this) }
+}
+
+internal class MedicineItemListLiveData(private val context: Context) : LiveData<List<MedicineItem>>(), Closeable {
+    internal var medSortType = MedSortType.NAME
+        set(value) {
+            field = value
+            reload()
         }
 
-        override fun onPostExecute(aVoid: Void?) {
-            super.onPostExecute(aVoid)
-            val sortType = binding.medicineSortSpinner.selectedItem as MedSortType
-            Collections.sort(mMedicines, sortType.comparator())
-            updateViewVisibility()
-            updateAdapterItems()
-            LogUtil.d(TAG, "Reloaded items, count: " + mMedicines.size)
+    init {
+        reload()
+        eventBus().register(this)
+    }
+
+    internal fun reload() {
+        Completable.fromAction {
+            postValue(
+                DB.medicines().findAllForActivePatient(context)
+                    .sortedWith(medSortType.comparator())
+                    .map { MedicineItem(it) },
+            )
+        }.subscribeOn(scheduler)
+            .subscribe({},{})
+    }
+
+    @Suppress("unused")
+    @Subscribe
+    fun handleEvent(event: Any) {
+        when(event) {
+            is ModelCreateOrUpdateEvent -> if (event.clazz == Medicine::class.java) reload()
+            else -> reload()
         }
     }
 
     companion object {
-        private const val TAG = "MedicinesListFragment"
+        private val scheduler by lazy { Schedulers.from(Executors.newSingleThreadExecutor()) }
+    }
+
+    override fun close() {
+        eventBus().unregister(this)
     }
 }
