@@ -89,10 +89,6 @@ class MedicinesListFragment : Fragment() {
         }
     }
 
-    private fun notifyDataChange() {
-        //todo: Find out how to hook this up
-    }
-
     @Deprecated("Deprecated in Java")
     override fun onAttach(activity: Activity) {
         super.onAttach(activity)
@@ -116,16 +112,6 @@ class MedicinesListFragment : Fragment() {
             }
         }
         return super.onOptionsItemSelected(item)
-    }
-
-    override fun onStart() {
-        super.onStart()
-        eventBus().register(this)
-    }
-
-    override fun onStop() {
-        eventBus().unregister(this)
-        super.onStop()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -280,7 +266,7 @@ internal class MedicineItemListLiveData(private val context: Context) : LiveData
                     .map { MedicineItem(it) },
             )
         }.subscribeOn(scheduler)
-            .subscribe({},{})
+        .subscribe({},{})
     }
 
     @Suppress("unused")
