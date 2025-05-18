@@ -67,7 +67,6 @@ class MedicinesListFragment : Fragment() {
     private val viewModel: MLFViewModel by viewModels()
     private var mMedicineSelectedCallback: OnMedicineSelectedListener? = null
 
-    private val adapter by lazy { FastItemAdapter<MedicineItem>() }
     private lateinit var binding: FragmentMedicinesListBinding
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
@@ -84,8 +83,7 @@ class MedicinesListFragment : Fragment() {
             false
         }
         viewModel.medicineItemListLiveData.observe(viewLifecycleOwner) {
-            updateAdapterItems(it)
-            updateViewVisibility(it)
+            updateViewVisibility(it, binding)
         }
     }
 
@@ -185,9 +183,10 @@ class MedicinesListFragment : Fragment() {
     private fun setupRecyclerView(binding: FragmentMedicinesListBinding) {
         val llm = LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
         binding.medicinesList.layoutManager = llm
+        val adapter = FastItemAdapter<MedicineItem>()
         adapter.withSelectable(false)
         adapter.withPositionBasedStateManagement(false)
-        adapter.withOnLongClickListener { v, adapter, item, position ->
+        adapter.withOnLongClickListener { v, rvAdapter, item, position ->
             showDeleteConfirmationDialog(item.medicine)
             true
         }
@@ -213,9 +212,13 @@ class MedicinesListFragment : Fragment() {
             if (!isSortCollapsed) toggleSort()
             false
         }
+        viewModel.medicineItemListLiveData.observe(viewLifecycleOwner) { adapter.setNewList(it) }
     }
 
-    private fun updateViewVisibility(mMedicines: List<MedicineItem>) {
+    private fun updateViewVisibility(
+        mMedicines: List<MedicineItem>,
+        binding: FragmentMedicinesListBinding
+    ) {
         if (mMedicines.isNotEmpty()) {
             binding.empty.visibility = View.GONE
             binding.sortLayout.visibility = View.VISIBLE
@@ -223,10 +226,6 @@ class MedicinesListFragment : Fragment() {
             binding.empty.visibility = View.VISIBLE
             binding.sortLayout.visibility = View.GONE
         }
-    }
-
-    private fun updateAdapterItems(mMedicines: List<MedicineItem>) {
-        adapter.setNewList(mMedicines)
     }
 
     //
