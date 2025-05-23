@@ -17,7 +17,6 @@
  */
 package es.usc.citius.servando.calendula.fragments
 
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.graphics.PorterDuff
@@ -66,8 +65,19 @@ import org.greenrobot.eventbus.Subscribe
 class MedicinesListFragment : Fragment() {
     private val isSortCollapsed: Boolean
         get() = viewModel.sortCollapsedLiveData.value ?: true
+
     private val viewModel: MLFViewModel by viewModels()
-    private var mMedicineSelectedCallback: OnMedicineSelectedListener? = null
+
+    private val mMedicineSelectedCallback = object : OnMedicineSelectedListener {
+        override fun onMedicineSelected(m: Medicine) {
+            val intent = Intent(requireContext(), MedicineInfoActivity::class.java).apply {
+                putExtra(CalendulaApp.INTENT_EXTRA_MEDICINE_ID, m.id)
+            }
+            requireContext().startActivity(intent)
+        }
+
+        override fun onCreateMedicine() = Unit
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
         inflater.inflate(R.layout.fragment_medicines_list, container, false)
@@ -82,15 +92,6 @@ class MedicinesListFragment : Fragment() {
         }
         viewModel.sortCollapsedLiveData.observe(viewLifecycleOwner) {
             setSortVisibility(it, binding)
-        }
-    }
-
-    @Deprecated("Deprecated in Java")
-    override fun onAttach(activity: Activity) {
-        super.onAttach(activity)
-        // If the container activity has implemented the callback interface, set it as listener
-        if (activity is OnMedicineSelectedListener) {
-            mMedicineSelectedCallback = activity
         }
     }
 
@@ -192,7 +193,7 @@ class MedicinesListFragment : Fragment() {
         })
 
         adapter.withOnClickListener { v, adapter, item, position ->
-            if (mMedicineSelectedCallback != null && item != null && item.medicine != null) mMedicineSelectedCallback?.onMedicineSelected(item.medicine)
+            if (item != null && item.medicine != null) mMedicineSelectedCallback.onMedicineSelected(item.medicine)
             true
         }
 
@@ -216,14 +217,6 @@ class MedicinesListFragment : Fragment() {
             binding.empty.visibility = View.VISIBLE
             binding.sortLayout.visibility = View.GONE
         }
-    }
-
-    //
-    // Container Activity must implement this interface
-    //
-    interface OnMedicineSelectedListener {
-        fun onMedicineSelected(m: Medicine)
-        fun onCreateMedicine()
     }
 
     companion object {
@@ -280,4 +273,12 @@ internal class MedicineItemListLiveData(private val context: Context) : LiveData
     override fun close() {
         eventBus().unregister(this)
     }
+}
+
+//
+// Container Activity must implement this interface
+//
+internal interface OnMedicineSelectedListener {
+    fun onMedicineSelected(m: Medicine)
+    fun onCreateMedicine()
 }

@@ -56,7 +56,6 @@ import com.mikepenz.iconics.IconicsDrawable
 import es.usc.citius.servando.calendula.activities.CalendarActivity
 import es.usc.citius.servando.calendula.activities.LeftDrawerMgr
 import es.usc.citius.servando.calendula.activities.MaterialIntroActivity
-import es.usc.citius.servando.calendula.activities.MedicineInfoActivity
 import es.usc.citius.servando.calendula.activities.RoutinesActivity
 import es.usc.citius.servando.calendula.activities.ScheduleCreationActivity
 import es.usc.citius.servando.calendula.activities.SchedulesHelpActivity
@@ -71,12 +70,10 @@ import es.usc.citius.servando.calendula.events.PersistenceEvents.UserCreateEvent
 import es.usc.citius.servando.calendula.events.PersistenceEvents.UserUpdateEvent
 import es.usc.citius.servando.calendula.events.StockRunningOutEvent
 import es.usc.citius.servando.calendula.fragments.HomeProfileMgr
-import es.usc.citius.servando.calendula.fragments.MedicinesListFragment.OnMedicineSelectedListener
 import es.usc.citius.servando.calendula.fragments.RoutinesListFragment
 import es.usc.citius.servando.calendula.fragments.RoutinesListFragment.OnRoutineSelectedListener
 import es.usc.citius.servando.calendula.fragments.ScheduleListFragment
 import es.usc.citius.servando.calendula.fragments.ScheduleListFragment.OnScheduleSelectedListener
-import es.usc.citius.servando.calendula.persistence.Medicine
 import es.usc.citius.servando.calendula.persistence.Patient
 import es.usc.citius.servando.calendula.persistence.Routine
 import es.usc.citius.servando.calendula.persistence.Schedule
@@ -98,7 +95,7 @@ import java.util.LinkedList
 import java.util.Queue
 import org.greenrobot.eventbus.Subscribe
 
-class HomePagerActivity : CalendulaActivity(), OnRoutineSelectedListener, OnMedicineSelectedListener, OnScheduleSelectedListener {
+class HomePagerActivity : CalendulaActivity(), OnRoutineSelectedListener, OnScheduleSelectedListener {
     private val viewModel: HomePagerActivityViewModel by viewModels()
     val appBarLayout: AppBarLayout by lazy { binding.appbar }
     private val toolbarLayout: CollapsingToolbarLayout by lazy { binding.collapsingToolbar }
@@ -188,16 +185,6 @@ class HomePagerActivity : CalendulaActivity(), OnRoutineSelectedListener, OnMedi
     }
 
     override fun onCreateRoutine() {
-        //do nothing
-    }
-
-    override fun onMedicineSelected(m: Medicine) {
-        val i = Intent(this, MedicineInfoActivity::class.java)
-        i.putExtra(CalendulaApp.INTENT_EXTRA_MEDICINE_ID, m.id)
-        launchActivity(i)
-    }
-
-    override fun onCreateMedicine() {
         //do nothing
     }
 
