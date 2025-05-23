@@ -25,8 +25,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
-import android.widget.ImageButton
-import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.LiveData
@@ -42,6 +40,7 @@ import es.usc.citius.servando.calendula.activities.ReminderNotification
 import es.usc.citius.servando.calendula.activities.RoutinesActivity
 import es.usc.citius.servando.calendula.database.DB
 import es.usc.citius.servando.calendula.databinding.FragmentRoutinesListBinding
+import es.usc.citius.servando.calendula.databinding.RoutinesListItemBinding
 import es.usc.citius.servando.calendula.events.PersistenceEvents.ActiveUserChangeEvent
 import es.usc.citius.servando.calendula.events.PersistenceEvents.ModelCreateOrUpdateEvent
 import es.usc.citius.servando.calendula.persistence.Routine
@@ -130,39 +129,37 @@ class RoutinesListFragment : Fragment() {
         override fun getCount() = items.size
         override fun getItem(position: Int) = items[position]
         override fun getItemId(position: Int): Long = getItem(position).id
-
-        override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-            val layoutInflater = LayoutInflater.from(parent.context)
-            return createRoutineListItem(layoutInflater, items[position], parent, mRoutineSelectedCallback)
-        }
+        override fun getView(position: Int, convertView: View?, parent: ViewGroup) =
+            createRoutineListItem(getItem(position), parent, mRoutineSelectedCallback)
     }
 
-    private fun createRoutineListItem(inflater: LayoutInflater, routine: Routine, parent: ViewGroup, mRoutineSelectedCallback: OnRoutineSelectedListener?): View {
+    private fun createRoutineListItem(routine: Routine, parent: ViewGroup, mRoutineSelectedCallback: OnRoutineSelectedListener): View {
+        val inflater = LayoutInflater.from(parent.context)
         val hour = routine.time.hourOfDay
         val minute = routine.time.minuteOfHour
 
         val strHour = (if (hour >= 10) hour else "0$hour").toString()
         val strMinute = ":" + (if (minute >= 10) minute else "0$minute").toString()
 
-        val item = inflater.inflate(R.layout.routines_list_item, parent, false)
+        val binding = RoutinesListItemBinding.inflate(inflater, parent, false)
 
-        (item.findViewById<View>(R.id.routines_list_item_hour) as TextView).text = strHour
-        (item.findViewById<View>(R.id.routines_list_item_minute) as TextView).text = strMinute
-        (item.findViewById<View>(R.id.routines_list_item_name) as TextView).text = routine.name
-        (item.findViewById<View>(R.id.imageButton2) as ImageButton).setImageDrawable(ic)
+        binding.routinesListItemHour.text = strHour
+        binding.routinesListItemMinute.text = strMinute
+        binding.routinesListItemName.text = routine.name
+        binding.imageButton2.setImageDrawable(ic)
 
         val items = routine.scheduleItems.size
 
         val schedules = if (items > 0) parent.context.getString(R.string.schedules_for_med, items)
         else parent.context.getString(R.string.schedules_for_med_none)
 
-        (item.findViewById<View>(R.id.routines_list_item_subtitle) as TextView).text = schedules
-        val overlay = item.findViewById<View>(R.id.routine_list_item_container)
+        binding.routinesListItemSubtitle.text = schedules
+        val overlay = binding.routineListItemContainer
         overlay.tag = routine
 
         val clickListener = View.OnClickListener { view ->
             val r = view.tag as Routine?
-            r?.let { mRoutineSelectedCallback?.onRoutineSelected(r) }
+            r?.let { mRoutineSelectedCallback.onRoutineSelected(r) }
         }
 
         overlay.setOnClickListener(clickListener)
@@ -170,7 +167,7 @@ class RoutinesListFragment : Fragment() {
             view.tag?.let { showDeleteConfirmationDialog(it as Routine) }
             true
         }
-        return item
+        return binding.root
     }
 }
 
