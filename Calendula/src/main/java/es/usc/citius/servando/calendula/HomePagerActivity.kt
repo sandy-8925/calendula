@@ -56,7 +56,6 @@ import com.mikepenz.iconics.IconicsDrawable
 import es.usc.citius.servando.calendula.activities.CalendarActivity
 import es.usc.citius.servando.calendula.activities.LeftDrawerMgr
 import es.usc.citius.servando.calendula.activities.MaterialIntroActivity
-import es.usc.citius.servando.calendula.activities.RoutinesActivity
 import es.usc.citius.servando.calendula.activities.ScheduleCreationActivity
 import es.usc.citius.servando.calendula.activities.SchedulesHelpActivity
 import es.usc.citius.servando.calendula.adapters.HomePageAdapter
@@ -70,12 +69,9 @@ import es.usc.citius.servando.calendula.events.PersistenceEvents.UserCreateEvent
 import es.usc.citius.servando.calendula.events.PersistenceEvents.UserUpdateEvent
 import es.usc.citius.servando.calendula.events.StockRunningOutEvent
 import es.usc.citius.servando.calendula.fragments.HomeProfileMgr
-import es.usc.citius.servando.calendula.fragments.RoutinesListFragment
-import es.usc.citius.servando.calendula.fragments.RoutinesListFragment.OnRoutineSelectedListener
 import es.usc.citius.servando.calendula.fragments.ScheduleListFragment
 import es.usc.citius.servando.calendula.fragments.ScheduleListFragment.OnScheduleSelectedListener
 import es.usc.citius.servando.calendula.persistence.Patient
-import es.usc.citius.servando.calendula.persistence.Routine
 import es.usc.citius.servando.calendula.persistence.Schedule
 import es.usc.citius.servando.calendula.scheduling.DailyAgenda.AgendaUpdatedEvent
 import es.usc.citius.servando.calendula.settings.CalendulaSettingsActivity
@@ -95,7 +91,7 @@ import java.util.LinkedList
 import java.util.Queue
 import org.greenrobot.eventbus.Subscribe
 
-class HomePagerActivity : CalendulaActivity(), OnRoutineSelectedListener, OnScheduleSelectedListener {
+class HomePagerActivity : CalendulaActivity(), OnScheduleSelectedListener {
     private val viewModel: HomePagerActivityViewModel by viewModels()
     val appBarLayout: AppBarLayout by lazy { binding.appbar }
     private val toolbarLayout: CollapsingToolbarLayout by lazy { binding.collapsingToolbar }
@@ -178,16 +174,6 @@ class HomePagerActivity : CalendulaActivity(), OnRoutineSelectedListener, OnSche
         }, delay.toLong())
     }
 
-    override fun onRoutineSelected(r: Routine) {
-        val i = Intent(this, RoutinesActivity::class.java)
-        i.putExtra(CalendulaApp.INTENT_EXTRA_ROUTINE_ID, r.id)
-        launchActivity(i)
-    }
-
-    override fun onCreateRoutine() {
-        //do nothing
-    }
-
     override fun onScheduleSelected(r: Schedule) {
         val i = Intent(this, ScheduleCreationActivity::class.java)
         i.putExtra(CalendulaApp.INTENT_EXTRA_SCHEDULE_ID, r.id)
@@ -203,7 +189,6 @@ class HomePagerActivity : CalendulaActivity(), OnRoutineSelectedListener, OnSche
             handler.post {
                 if (event is ModelCreateOrUpdateEvent) {
                     LogUtil.d(TAG, "handleEvent: " + event.clazz.name)
-                    (getViewPagerFragment(HomePages.ROUTINES) as RoutinesListFragment?)!!.notifyDataChange()
                     (getViewPagerFragment(HomePages.SCHEDULES) as ScheduleListFragment?)!!.notifyDataChange()
                 } else if (event is ActiveUserChangeEvent) {
                     activePatient = event.patient
