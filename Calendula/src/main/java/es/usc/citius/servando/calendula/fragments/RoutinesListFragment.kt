@@ -29,6 +29,8 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
+import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.github.javiersantos.materialstyleddialogs.MaterialStyledDialog
 import com.github.javiersantos.materialstyleddialogs.enums.Style
 import com.mikepenz.community_material_typeface_library.CommunityMaterial
@@ -49,6 +51,7 @@ import es.usc.citius.servando.calendula.util.IconUtils
 import io.reactivex.rxjava3.core.Completable
 import io.reactivex.rxjava3.core.Scheduler
 import io.reactivex.rxjava3.schedulers.Schedulers
+import kotlinx.coroutines.NonDisposableHandle.parent
 import java.io.Closeable
 import java.util.concurrent.Executors
 import org.greenrobot.eventbus.Subscribe
@@ -62,10 +65,18 @@ class RoutinesListFragment : Fragment() {
         val binding = FragmentRoutinesListBinding.bind(view)
         val listAdapter = RoutinesListAdapter(binding.root.context)
         binding.routinesList.apply {
-            emptyView = binding.empty
             adapter = listAdapter
         }
-        viewModel.routinesListLiveData.observe(viewLifecycleOwner) { listAdapter.items = it }
+        viewModel.routinesListLiveData.observe(viewLifecycleOwner) {
+            listAdapter.items = it
+            if(it.isEmpty()) {
+                binding.routinesList.visibility = View.INVISIBLE
+                binding.empty.visibility = View.VISIBLE
+            } else {
+                binding.routinesList.visibility = View.VISIBLE
+                binding.empty.visibility = View.INVISIBLE
+            }
+        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
@@ -102,7 +113,7 @@ class RoutinesListFragment : Fragment() {
             .show()
     }
 
-    private inner class RoutinesListAdapter(context: Context) : BaseAdapter() {
+    private inner class RoutinesListAdapter(context: Context) : RecyclerView.Adapter<RoutinesListItemViewHolder>() {
         var items: List<Routine> = emptyList()
             set(value) {
                 field = value
@@ -117,21 +128,30 @@ class RoutinesListFragment : Fragment() {
                 .sizeDp(40)
         }
 
-        override fun getCount() = items.size
-        override fun getItem(position: Int) = items[position]
-        override fun getItemId(position: Int): Long = getItem(position).id
-        override fun getView(position: Int, convertView: View?, parent: ViewGroup) =
-            createRoutineListItem(getItem(position), parent)
+        private fun getItem(position: Int) = items[position]
 
-        private fun createRoutineListItem(routine: Routine, parent: ViewGroup): View {
+        override fun onCreateViewHolder(
+            parent: ViewGroup,
+            viewType: Int
+        ): RoutinesListItemViewHolder {
             val inflater = LayoutInflater.from(parent.context)
+            val binding = RoutinesListItemBinding.inflate(inflater, parent, false)
+            return RoutinesListItemViewHolder(binding)
+        }
+
+        override fun onBindViewHolder(holder: RoutinesListItemViewHolder, position: Int) {
+            createRoutineListItem(getItem(position), holder.binding)
+        }
+
+        override fun getItemId(position: Int): Long = getItem(position).id
+        override fun getItemCount() = items.size
+
+        private fun createRoutineListItem(routine: Routine, binding: RoutinesListItemBinding): View {
             val hour = routine.time.hourOfDay
             val minute = routine.time.minuteOfHour
 
             val strHour = (if (hour >= 10) hour else "0$hour").toString()
             val strMinute = ":" + (if (minute >= 10) minute else "0$minute").toString()
-
-            val binding = RoutinesListItemBinding.inflate(inflater, parent, false)
 
             binding.routinesListItemHour.text = strHour
             binding.routinesListItemMinute.text = strMinute
@@ -140,8 +160,8 @@ class RoutinesListFragment : Fragment() {
 
             val items = routine.scheduleItems.size
 
-            val schedules = if (items > 0) parent.context.getString(R.string.schedules_for_med, items)
-            else parent.context.getString(R.string.schedules_for_med_none)
+            val schedules = if (items > 0) binding.root.context.getString(R.string.schedules_for_med, items)
+            else binding.root.context.getString(R.string.schedules_for_med_none)
 
             binding.routinesListItemSubtitle.text = schedules
             val overlay = binding.routineListItemContainer
@@ -166,6 +186,8 @@ class RoutinesListFragment : Fragment() {
         }
     }
 }
+
+private class RoutinesListItemViewHolder(val binding: RoutinesListItemBinding): ViewHolder(binding.root)
 
 class RoutinesListFragViewModel: ViewModel() {
     internal val routinesListLiveData = RoutinesListLiveData(CalendulaApp.context).apply { addCloseable(this) }
