@@ -57,27 +57,10 @@ import org.greenrobot.eventbus.Subscribe
 class RoutinesListFragment : Fragment() {
     private val viewModel: RoutinesListFragViewModel by viewModels()
 
-    private val mRoutineSelectedCallback by lazy {
-        OnRoutineSelectedListener {
-            val intent = Intent(requireContext(), RoutinesActivity::class.java).apply {
-                putExtra(CalendulaApp.INTENT_EXTRA_ROUTINE_ID, it.id)
-            }
-            requireContext().startActivity(intent)
-        }
-    }
-
-    private val ic: Drawable by lazy {
-        IconicsDrawable(requireContext())
-            .icon(CommunityMaterial.Icon.cmd_clock)
-            .colorRes(R.color.agenda_item_title)
-            .paddingDp(8)
-            .sizeDp(40)
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val binding = FragmentRoutinesListBinding.bind(view)
-        val listAdapter = RoutinesListAdapter()
+        val listAdapter = RoutinesListAdapter(binding.root.context)
         binding.routinesList.apply {
             emptyView = binding.empty
             adapter = listAdapter
@@ -99,7 +82,7 @@ class RoutinesListFragment : Fragment() {
             String.format(getString(R.string.remove_routine_message_short), r.name)
         }
 
-        MaterialStyledDialog.Builder(activity)
+        MaterialStyledDialog.Builder(requireContext())
             .setTitle("")
             .setStyle(Style.HEADER_WITH_ICON)
             .setIcon(IconUtils.icon(activity, CommunityMaterial.Icon.cmd_clock, R.color.white, 100))
@@ -119,61 +102,69 @@ class RoutinesListFragment : Fragment() {
             .show()
     }
 
-    private inner class RoutinesListAdapter : BaseAdapter() {
+    private inner class RoutinesListAdapter(context: Context) : BaseAdapter() {
         var items: List<Routine> = emptyList()
             set(value) {
                 field = value
                 notifyDataSetChanged()
             }
 
+        private val ic: Drawable by lazy {
+            IconicsDrawable(context)
+                .icon(CommunityMaterial.Icon.cmd_clock)
+                .colorRes(R.color.agenda_item_title)
+                .paddingDp(8)
+                .sizeDp(40)
+        }
+
         override fun getCount() = items.size
         override fun getItem(position: Int) = items[position]
         override fun getItemId(position: Int): Long = getItem(position).id
         override fun getView(position: Int, convertView: View?, parent: ViewGroup) =
-            createRoutineListItem(getItem(position), parent, mRoutineSelectedCallback)
-    }
+            createRoutineListItem(getItem(position), parent)
 
-    private fun createRoutineListItem(routine: Routine, parent: ViewGroup, mRoutineSelectedCallback: OnRoutineSelectedListener): View {
-        val inflater = LayoutInflater.from(parent.context)
-        val hour = routine.time.hourOfDay
-        val minute = routine.time.minuteOfHour
+        private fun createRoutineListItem(routine: Routine, parent: ViewGroup): View {
+            val inflater = LayoutInflater.from(parent.context)
+            val hour = routine.time.hourOfDay
+            val minute = routine.time.minuteOfHour
 
-        val strHour = (if (hour >= 10) hour else "0$hour").toString()
-        val strMinute = ":" + (if (minute >= 10) minute else "0$minute").toString()
+            val strHour = (if (hour >= 10) hour else "0$hour").toString()
+            val strMinute = ":" + (if (minute >= 10) minute else "0$minute").toString()
 
-        val binding = RoutinesListItemBinding.inflate(inflater, parent, false)
+            val binding = RoutinesListItemBinding.inflate(inflater, parent, false)
 
-        binding.routinesListItemHour.text = strHour
-        binding.routinesListItemMinute.text = strMinute
-        binding.routinesListItemName.text = routine.name
-        binding.imageButton2.setImageDrawable(ic)
+            binding.routinesListItemHour.text = strHour
+            binding.routinesListItemMinute.text = strMinute
+            binding.routinesListItemName.text = routine.name
+            binding.imageButton2.setImageDrawable(ic)
 
-        val items = routine.scheduleItems.size
+            val items = routine.scheduleItems.size
 
-        val schedules = if (items > 0) parent.context.getString(R.string.schedules_for_med, items)
-        else parent.context.getString(R.string.schedules_for_med_none)
+            val schedules = if (items > 0) parent.context.getString(R.string.schedules_for_med, items)
+            else parent.context.getString(R.string.schedules_for_med_none)
 
-        binding.routinesListItemSubtitle.text = schedules
-        val overlay = binding.routineListItemContainer
-        overlay.tag = routine
+            binding.routinesListItemSubtitle.text = schedules
+            val overlay = binding.routineListItemContainer
+            overlay.tag = routine
 
-        val clickListener = View.OnClickListener { view ->
-            val r = view.tag as Routine?
-            r?.let { mRoutineSelectedCallback.onRoutineSelected(r) }
+            val clickListener = View.OnClickListener { view ->
+                val r = view.tag as Routine?
+                r?.let {
+                    val intent = Intent(view.context, RoutinesActivity::class.java).apply {
+                        putExtra(CalendulaApp.INTENT_EXTRA_ROUTINE_ID, routine.id)
+                    }
+                    view.context.startActivity(intent)
+                }
+            }
+
+            overlay.setOnClickListener(clickListener)
+            overlay.setOnLongClickListener { view ->
+                view.tag?.let { showDeleteConfirmationDialog(it as Routine) }
+                true
+            }
+            return binding.root
         }
-
-        overlay.setOnClickListener(clickListener)
-        overlay.setOnLongClickListener { view ->
-            view.tag?.let { showDeleteConfirmationDialog(it as Routine) }
-            true
-        }
-        return binding.root
     }
-}
-
-// Container Activity must implement this interface
-private fun interface OnRoutineSelectedListener {
-    fun onRoutineSelected(r: Routine)
 }
 
 class RoutinesListFragViewModel: ViewModel() {
