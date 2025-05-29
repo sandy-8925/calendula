@@ -294,7 +294,6 @@ class DailyAgendaRecyclerAdapter(rv: RecyclerView, llm: LinearLayoutManager) : R
                 allTaken = false
                 intakeView.findViewById<View>(R.id.ic_done).visibility = View.INVISIBLE
             }
-            viewHolder.medList.addView(intakeView)
         }
 
         return allTaken
