@@ -36,6 +36,7 @@ import com.mikepenz.community_material_typeface_library.CommunityMaterial
 import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.typeface.IIcon
 import es.usc.citius.servando.calendula.database.DB
+import es.usc.citius.servando.calendula.databinding.DailyViewIntakeMedBinding
 import es.usc.citius.servando.calendula.fragments.HomeProfileMgr
 import es.usc.citius.servando.calendula.scheduling.AlarmScheduler
 import es.usc.citius.servando.calendula.util.AvatarMgr
@@ -273,26 +274,27 @@ class DailyAgendaRecyclerAdapter(rv: RecyclerView, llm: LinearLayoutManager) : R
         viewHolder.medList.removeAllViews()
 
         for (element in item.meds) {
-            val intakeView = viewHolder.inflater.inflate(R.layout.daily_view_intake_med, viewHolder.medList)
-            val medName = intakeView.findViewById<View>(R.id.med_item_name) as TextView
-            val medDose = intakeView.findViewById<View>(R.id.med_item_dose) as TextView
-            val image = intakeView.findViewById<View>(R.id.imageView) as ImageView
-            val nameDecorator = intakeView.findViewById<View>(R.id.name_decorator) as ImageView
+            val binding = DailyViewIntakeMedBinding.inflate(viewHolder.inflater, viewHolder.medList, true)
             val units = element.presentation.units(viewHolder.context.resources, element.dose)
-            image.setImageDrawable(medIcon(element.presentation.icon(), intakeView.context))
-            medDose.text = "${element.displayDose} $units"
-            medName.text = element.medName
+            binding.imageView.setImageDrawable(
+                medIcon(
+                    element.presentation.icon(),
+                    binding.root.context
+                )
+            )
+            binding.medItemDose.text = "${element.displayDose} $units"
+            binding.medItemName.text = element.medName
             if (element.medNameDecorator != null) {
-                nameDecorator.setImageDrawable(element.medNameDecorator)
+                binding.nameDecorator.setImageDrawable(element.medNameDecorator)
             } else {
-                nameDecorator.visibility = View.GONE
+                binding.nameDecorator.visibility = View.GONE
             }
 
             if (element.taken) {
-                intakeView.findViewById<View>(R.id.ic_done).visibility = View.VISIBLE
+                binding.icDone.visibility = View.VISIBLE
             } else {
                 allTaken = false
-                intakeView.findViewById<View>(R.id.ic_done).visibility = View.INVISIBLE
+                binding.icDone.visibility = View.INVISIBLE
             }
         }
 
