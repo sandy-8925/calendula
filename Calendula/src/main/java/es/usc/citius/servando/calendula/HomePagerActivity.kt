@@ -56,7 +56,6 @@ import com.mikepenz.iconics.IconicsDrawable
 import es.usc.citius.servando.calendula.activities.CalendarActivity
 import es.usc.citius.servando.calendula.activities.LeftDrawerMgr
 import es.usc.citius.servando.calendula.activities.MaterialIntroActivity
-import es.usc.citius.servando.calendula.activities.ScheduleCreationActivity
 import es.usc.citius.servando.calendula.activities.SchedulesHelpActivity
 import es.usc.citius.servando.calendula.adapters.HomePageAdapter
 import es.usc.citius.servando.calendula.adapters.HomePages
@@ -64,15 +63,11 @@ import es.usc.citius.servando.calendula.database.DB
 import es.usc.citius.servando.calendula.databinding.ActivityMainBinding
 import es.usc.citius.servando.calendula.events.PersistenceEvents.ActiveUserChangeEvent
 import es.usc.citius.servando.calendula.events.PersistenceEvents.DatabaseUpdateEvent
-import es.usc.citius.servando.calendula.events.PersistenceEvents.ModelCreateOrUpdateEvent
 import es.usc.citius.servando.calendula.events.PersistenceEvents.UserCreateEvent
 import es.usc.citius.servando.calendula.events.PersistenceEvents.UserUpdateEvent
 import es.usc.citius.servando.calendula.events.StockRunningOutEvent
 import es.usc.citius.servando.calendula.fragments.HomeProfileMgr
-import es.usc.citius.servando.calendula.fragments.ScheduleListFragment
-import es.usc.citius.servando.calendula.fragments.ScheduleListFragment.OnScheduleSelectedListener
 import es.usc.citius.servando.calendula.persistence.Patient
-import es.usc.citius.servando.calendula.persistence.Schedule
 import es.usc.citius.servando.calendula.scheduling.DailyAgenda.AgendaUpdatedEvent
 import es.usc.citius.servando.calendula.settings.CalendulaSettingsActivity
 import es.usc.citius.servando.calendula.util.BooleanSharedPrefsLiveData
@@ -87,11 +82,11 @@ import es.usc.citius.servando.calendula.util.view.ExpandableFAB
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.subjects.PublishSubject
+import org.greenrobot.eventbus.Subscribe
 import java.util.LinkedList
 import java.util.Queue
-import org.greenrobot.eventbus.Subscribe
 
-class HomePagerActivity : CalendulaActivity(), OnScheduleSelectedListener {
+class HomePagerActivity : CalendulaActivity() {
     private val viewModel: HomePagerActivityViewModel by viewModels()
     val appBarLayout: AppBarLayout by lazy { binding.appbar }
     private val toolbarLayout: CollapsingToolbarLayout by lazy { binding.collapsingToolbar }
@@ -174,23 +169,11 @@ class HomePagerActivity : CalendulaActivity(), OnScheduleSelectedListener {
         }, delay.toLong())
     }
 
-    override fun onScheduleSelected(r: Schedule) {
-        val i = Intent(this, ScheduleCreationActivity::class.java)
-        i.putExtra(CalendulaApp.INTENT_EXTRA_SCHEDULE_ID, r.id)
-        launchActivity(i)
-    }
-
-    override fun onCreateSchedule() {
-    }
-
     // Method called from the event bus
     @Subscribe fun handleEvent(event: Any) {
         if (active) {
             handler.post {
-                if (event is ModelCreateOrUpdateEvent) {
-                    LogUtil.d(TAG, "handleEvent: " + event.clazz.name)
-                    (getViewPagerFragment(HomePages.SCHEDULES) as ScheduleListFragment?)!!.notifyDataChange()
-                } else if (event is ActiveUserChangeEvent) {
+                if (event is ActiveUserChangeEvent) {
                     activePatient = event.patient
                     updateTitle(mViewPager.currentItem)
                     activePatient?.let { toolbarLayout.setContentScrimColor(it.color) }
