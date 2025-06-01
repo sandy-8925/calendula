@@ -36,6 +36,9 @@ import com.mikepenz.community_material_typeface_library.CommunityMaterial
 import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.typeface.IIcon
 import es.usc.citius.servando.calendula.database.DB
+import es.usc.citius.servando.calendula.databinding.DailyViewEmptyDayspacerBinding
+import es.usc.citius.servando.calendula.databinding.DailyViewEmptyHourBinding
+import es.usc.citius.servando.calendula.databinding.DailyViewIntakeBinding
 import es.usc.citius.servando.calendula.databinding.DailyViewIntakeMedBinding
 import es.usc.citius.servando.calendula.fragments.HomeProfileMgr
 import es.usc.citius.servando.calendula.scheduling.AlarmScheduler
@@ -84,18 +87,18 @@ class DailyAgendaRecyclerAdapter(rv: RecyclerView, llm: LinearLayoutManager) : R
         val layoutInflater = LayoutInflater.from(parent.context)
         when (viewType) {
             NORMAL -> {
-                val v = layoutInflater.inflate(R.layout.daily_view_intake, parent, false)
-                return NormalItemViewHolder(v, listener)
+                val binding = DailyViewIntakeBinding.inflate(layoutInflater, parent, false)
+                return NormalItemViewHolder(binding, listener)
             }
 
             SPACER -> {
-                val v = layoutInflater.inflate(R.layout.daily_view_empty_dayspacer, parent, false)
-                return SpacerItemViewHolder(v, parallaxHeight)
+                val binding = DailyViewEmptyDayspacerBinding.inflate(layoutInflater, parent, false)
+                return SpacerItemViewHolder(binding, parallaxHeight)
             }
 
             else -> {
-                val v = layoutInflater.inflate(R.layout.daily_view_empty_hour, parent, false)
-                return EmptyItemViewHolder(v)
+                val binding = DailyViewEmptyHourBinding.inflate(layoutInflater, parent, false)
+                return EmptyItemViewHolder(binding)
             }
         }
     }
@@ -337,26 +340,8 @@ class DailyAgendaRecyclerAdapter(rv: RecyclerView, llm: LinearLayoutManager) : R
         fun onAfterToggleCollapse(expanded: Boolean, somethingVisible: Boolean)
     }
 
-    class EmptyItemViewHolder internal constructor(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        var container: RelativeLayout = itemView.findViewById<View>(R.id.container) as RelativeLayout
-        var hourText: TextView = itemView.findViewById<View>(R.id.hour_text) as TextView
-    }
-
-    class SpacerItemViewHolder internal constructor(itemView: View, parallaxHeight: Int) : RecyclerView.ViewHolder(itemView) {
-        var day: TextView = itemView.findViewById<View>(R.id.day_text) as TextView
-        var dayBg: ImageView = itemView.findViewById<View>(R.id.day_bg) as ImageView
-        var container: View = itemView.findViewById(R.id.container)
-        var parallax: ParallaxImageView = itemView.findViewById<View>(R.id.parallax_bg) as ParallaxImageView
-
-        init {
-            val layoutParams = parallax.layoutParams
-            layoutParams.height = parallaxHeight
-            parallax.layoutParams = layoutParams
-        }
-    }
-
-    inner class NormalItemViewHolder(itemView: View, private val listener: EventListener?) : RecyclerView.ViewHolder(itemView), View.OnClickListener {
-        var context: Context = itemView.context
+    inner class NormalItemViewHolder(binding: DailyViewIntakeBinding, private val listener: EventListener?) : RecyclerView.ViewHolder(binding.root), View.OnClickListener {
+        val context: Context = binding.root.context
         lateinit var stub: DailyAgendaItemStub
 
         var inflater: LayoutInflater = LayoutInflater.from(itemView.context)
@@ -418,5 +403,22 @@ class DailyAgendaRecyclerAdapter(rv: RecyclerView, llm: LinearLayoutManager) : R
 
     companion object {
         private const val TAG = "DailyAgendaAdapter"
+    }
+}
+
+
+private class EmptyItemViewHolder internal constructor(binding: DailyViewEmptyHourBinding) : RecyclerView.ViewHolder(binding.root) {
+    val container: RelativeLayout = binding.container
+    val hourText: TextView = binding.hourText
+}
+
+private class SpacerItemViewHolder internal constructor(binding: DailyViewEmptyDayspacerBinding, parallaxHeight: Int) : RecyclerView.ViewHolder(binding.root) {
+    val day: TextView = binding.dayText
+    val dayBg: ImageView = binding.dayBg
+    val container: View = binding.container
+    val parallax: ParallaxImageView = binding.parallaxBg
+
+    init {
+        parallax.layoutParams = parallax.layoutParams.apply { height = parallaxHeight }
     }
 }
