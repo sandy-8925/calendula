@@ -78,19 +78,18 @@ class CalendulaApp : Application() {
 //            LeakCanary.install(CalendulaApp.this);
         }
 
-        val applicationContext = applicationContext
-        context = applicationContext
+        context = this.applicationContext
 
         LogUtil.d(TAG, "Application started")
 
         try {
             LogUtil.d(TAG, "Application flavor is \"" + BuildConfig.FLAVOR + "\"")
             val flavor = BuildConfig.FLAVOR.uppercase(Locale.getDefault())
-            ModuleManager.getInstance().runModules(flavor, applicationContext)
+            ModuleManager.getInstance().runModules(flavor, this.applicationContext)
         } catch (e: Exception) {
             LogUtil.e(TAG, "onCreate: Error loading module configuration", e)
             LogUtil.w(TAG, "onCreate: Loading default module configuration instead")
-            ModuleManager.getInstance().runDefaultModules(applicationContext)
+            ModuleManager.getInstance().runDefaultModules(this.applicationContext)
         }
     }
 
