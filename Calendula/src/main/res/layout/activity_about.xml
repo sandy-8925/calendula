@@ -16,35 +16,36 @@
   ~    along with this software.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 xmlns:tools="http://schemas.android.com/tools"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:paddingTop="@dimen/status_bar_height"
+                android:orientation="vertical"
                 tools:context="es.usc.citius.servando.calendula.activities.AboutActivity">
 
     <androidx.appcompat.widget.Toolbar xmlns:app="http://schemas.android.com/apk/res-auto"
                                        android:id="@+id/toolbar"
                                        android:layout_width="match_parent"
-                                       android:layout_height="56dp"
+                                       android:layout_height="wrap_content"
                                        android:background="@color/dark_grey_home"
                                        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-                                       app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"/>
+                                       app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+                                       android:fitsSystemWindows="true" />
 
 
     <ImageView
         android:id="@+id/tabs_shadow"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="5dp"
-        android:layout_below="@+id/toolbar"
         android:alpha="0.7"
         android:scaleType="fitXY"
         android:src="@drawable/daily_view_list_item_tab_shadow_top"/>
 
     <FrameLayout
         android:id="@+id/fragment_holder"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_below="@+id/toolbar"/>
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        />
 
-</RelativeLayout>
+</LinearLayout>
