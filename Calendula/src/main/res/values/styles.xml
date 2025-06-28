@@ -36,6 +36,7 @@
 
         <item name="android:actionModeBackground">@color/dark_grey_home</item>
         <item name="android:windowActionModeOverlay">true</item>
+        <item name="android:fitsSystemWindows">true</item>
     </style>
 
     <!-- Styles for pop-up dialogs -->

@@ -33,6 +33,7 @@
         <item name="drawerArrowStyle">@style/DrawerArrowStyle</item>
         <item name="android:windowContentTransitions">true</item>
         <item name="siv_insetForeground">#01ffffff</item>
+        <item name="android:fitsSystemWindows">true</item>
     </style>
 
     <style name="BlueProgressBar" parent="Theme.AppCompat.Light">
