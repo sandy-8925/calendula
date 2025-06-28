@@ -31,8 +31,6 @@ public class MaterialIntroActivity extends IntroActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
-        setFullscreen(true);
         super.onCreate(savedInstanceState);
 
         setSkipEnabled(true);
