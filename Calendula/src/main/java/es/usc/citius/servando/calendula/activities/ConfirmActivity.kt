@@ -257,8 +257,8 @@ class ConfirmActivity : CalendulaActivity() {
         builder.create().show()
     }
 
-    fun getDisplayableDose(dose: Double, doseString: String, m: Medicine?): String {
-        return doseString + " " + m!!.presentation.units(resources, dose)
+    fun getDisplayableDose(dose: Double, doseString: String, m: Medicine): String {
+        return doseString + " " + m.presentation.units(resources, dose)
     }
 
     fun showEnsureConfirmDialog(listener: DialogInterface.OnClickListener?, uncheck: Boolean) {
@@ -610,7 +610,7 @@ class ConfirmActivity : CalendulaActivity() {
         }
 
         for (i in items) {
-            LogUtil.d(TAG, i?.toString() ?: "Null")
+            LogUtil.d(TAG, i.toString() ?: "Null")
         }
     }
 
