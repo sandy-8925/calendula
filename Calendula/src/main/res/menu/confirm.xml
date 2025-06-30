@@ -24,6 +24,7 @@
         android:id="@+id/action_delay"
         android:icon="@drawable/ic_alarm_off_white_24dp"
         android:orderInCategory="100"
+        android:title="@string/delay"
         app:showAsAction="always"/>
 
     <!--<item-->
