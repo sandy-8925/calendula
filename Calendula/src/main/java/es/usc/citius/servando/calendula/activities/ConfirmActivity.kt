@@ -465,11 +465,6 @@ class ConfirmActivity : CalendulaActivity() {
         startActivity(intent)
     }
 
-    override fun onResume() {
-        super.onResume()
-        //Toast.makeText(this, "Is distant: " + isDistant + " (" + date.toDateTime(time).toString("dd/MM/YYYY, kk:mm")+")", Toast.LENGTH_LONG).show();
-    }
-
     protected fun onDailyAgendaItemCheck(v: ImageButton?) {
         val total = items.size
         var checked = 0
@@ -610,7 +605,7 @@ class ConfirmActivity : CalendulaActivity() {
         }
 
         for (i in items) {
-            LogUtil.d(TAG, i.toString() ?: "Null")
+            LogUtil.d(TAG, i.toString())
         }
     }
 
@@ -656,7 +651,8 @@ class ConfirmActivity : CalendulaActivity() {
         }
     }
 
-    internal inner class ConfirmItemAdapter : RecyclerView.Adapter<ConfirmItemAdapter.ConfirmItemViewHolder>() {
+    internal inner class ConfirmItemAdapter :
+        RecyclerView.Adapter<ConfirmItemAdapter.ConfirmItemViewHolder>() {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ConfirmItemViewHolder {
             val v = LayoutInflater.from(parent.context)
@@ -695,7 +691,11 @@ class ConfirmActivity : CalendulaActivity() {
             return items.size
         }
 
-        private fun updateCheckedStatus(p: Presentation, i: DailyScheduleItem, h: ConfirmItemViewHolder) {
+        private fun updateCheckedStatus(
+            p: Presentation,
+            i: DailyScheduleItem,
+            h: ConfirmItemViewHolder
+        ) {
             val medDrawable: Drawable = IconicsDrawable(this@ConfirmActivity)
                 .icon(p.icon())
                 .color(if (i.takenToday) Color.parseColor("#81c784") else Color.parseColor("#11000000"))
