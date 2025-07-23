@@ -45,9 +45,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import butterknife.BindView
 import butterknife.ButterKnife
-import com.google.android.material.appbar.AppBarLayout
-import com.google.android.material.appbar.CollapsingToolbarLayout
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.mikepenz.community_material_typeface_library.CommunityMaterial
 import com.mikepenz.iconics.IconicsDrawable
 import es.usc.citius.servando.calendula.CalendulaActivity
@@ -56,6 +53,7 @@ import es.usc.citius.servando.calendula.CalendulaApp.Companion.eventBus
 import es.usc.citius.servando.calendula.HomePagerActivity
 import es.usc.citius.servando.calendula.R
 import es.usc.citius.servando.calendula.database.DB
+import es.usc.citius.servando.calendula.databinding.ActivityConfirmBinding
 import es.usc.citius.servando.calendula.persistence.DailyScheduleItem
 import es.usc.citius.servando.calendula.persistence.Medicine
 import es.usc.citius.servando.calendula.persistence.Patient
@@ -81,65 +79,7 @@ import java.util.Locale
 import kotlin.math.hypot
 
 class ConfirmActivity : CalendulaActivity() {
-    @JvmField
-    @BindView(R.id.appbar)
-    var appBarLayout: AppBarLayout? = null
-
-    @JvmField
-    @BindView(R.id.collapsing_toolbar)
-    var toolbarLayout: CollapsingToolbarLayout? = null
-
-    @JvmField
-    @BindView(R.id.myFAB)
-    var fab: FloatingActionButton? = null
-
-    @JvmField
-    @BindView(R.id.patient_avatar)
-    var avatar: ImageView? = null
-
-    @JvmField
-    @BindView(R.id.patient_avatar_title)
-    var avatarTitle: ImageView? = null
-
-    @JvmField
-    @BindView(R.id.check_all_image)
-    var checkAllImage: ImageView? = null
-
-    @JvmField
-    @BindView(R.id.listView)
-    var listView: RecyclerView? = null
-
-    @JvmField
-    @BindView(R.id.user_friendly_time)
-    var friendlyTime: TextView? = null
-
-    @JvmField
-    @BindView(R.id.routines_list_item_hour)
-    var hour: TextView? = null
-
-    @JvmField
-    @BindView(R.id.routines_list_item_minute)
-    var minute: TextView? = null
-
-    @JvmField
-    @BindView(R.id.textView3)
-    var takeMedsMessage: TextView? = null
-
-    @JvmField
-    @BindView(R.id.routine_name)
-    var title: TextView? = null
-
-    @JvmField
-    @BindView(R.id.routine_name_title)
-    var titleTitle: TextView? = null
-
-    @JvmField
-    @BindView(R.id.check_overlay)
-    var checkAllOverlay: View? = null
-
-    @JvmField
-    @BindView(R.id.toolbar_title)
-    var toolbarTitle: View? = null
+    private val binding by lazy { ActivityConfirmBinding.inflate(LayoutInflater.from(this)) }
 
     private var fromNotification = false
     private var isDistant = false
@@ -319,7 +259,7 @@ class ConfirmActivity : CalendulaActivity() {
         if (somethingChecked) {
             itemAdapter!!.notifyDataSetChanged()
             stateChanged = true
-            fab!!.postDelayed({ animateAllChecked() }, 100)
+            binding.myFAB.postDelayed({ animateAllChecked() }, 100)
             onAllChecked()
         } else {
             supportFinishAfterTransition()
@@ -327,7 +267,7 @@ class ConfirmActivity : CalendulaActivity() {
     }
 
     private fun moveArrowsDown(duration: Int) {
-        checkAllImage!!.animate()
+        binding.checkAllImage.animate()
             .translationY(ScreenUtils.dpToPx(resources, 150f).toFloat())
             .setDuration(duration.toLong())
             .setInterpolator(OvershootInterpolator())
@@ -338,7 +278,7 @@ class ConfirmActivity : CalendulaActivity() {
         val duration = 500
         val arrowDuration = 400
 
-        checkAllOverlay!!.postDelayed({
+        binding.checkOverlay.postDelayed({
             finishAndRemoveTask()
         }, (duration + 300).toLong())
 
@@ -350,7 +290,7 @@ class ConfirmActivity : CalendulaActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         processIntent()
-        setContentView(R.layout.activity_confirm)
+        setContentView(binding.root)
         ButterKnife.bind(this)
 
         val window = window
@@ -371,11 +311,11 @@ class ConfirmActivity : CalendulaActivity() {
         setupToolbar("", Color.TRANSPARENT, Color.WHITE)
         toolbar!!.setTitleTextColor(Color.WHITE)
 
-        avatar!!.setImageResource(AvatarMgr.res(patient!!.avatar))
-        avatarTitle!!.setImageResource(AvatarMgr.res(patient!!.avatar))
-        titleTitle!!.text = patient!!.name
-        title!!.text = if (isRoutine) routine!!.name else schedule!!.toReadableString(this)
-        takeMedsMessage!!.text =
+        binding.patientAvatar.setImageResource(AvatarMgr.res(patient!!.avatar))
+        binding.patientAvatarTitle.setImageResource(AvatarMgr.res(patient!!.avatar))
+        binding.routineNameTitle.text = patient!!.name
+        binding.routineName.text = if (isRoutine) routine!!.name else schedule!!.toReadableString(this)
+        binding.textView3.text =
             if (isInWindow) getString(R.string.agenda_zoom_meds_time) else getString(
                 R.string.meds_from
             ) + " " + date!!.toString("EEEE dd")
@@ -387,20 +327,20 @@ class ConfirmActivity : CalendulaActivity() {
             DateUtils.FORMAT_ABBREV_ALL
         ).toString()
 
-        hour!!.text = time!!.toString("HH:")
-        minute!!.text = time!!.toString("mm")
-        friendlyTime!!.text = String.format(
+        binding.routinesListItemHour.text = time!!.toString("HH:")
+        binding.routinesListItemMinute.text = time!!.toString("mm")
+        binding.userFriendlyTime.text = String.format(
             "%s%s",
             relativeTime.substring(0, 1).uppercase(Locale.getDefault()),
             relativeTime.substring(1)
         )
 
         if (isDistant) {
-            fab!!.backgroundTintList =
+            binding.myFAB.backgroundTintList =
                 ColorStateList.valueOf(resources.getColor(R.color.android_orange_dark))
         }
 
-        fab!!.setImageDrawable(
+        binding.myFAB.setImageDrawable(
             IconicsDrawable(this)
                 .icon(CommunityMaterial.Icon.cmd_check_all)
                 .color(Color.WHITE)
@@ -409,7 +349,7 @@ class ConfirmActivity : CalendulaActivity() {
         )
 
 
-        checkAllImage!!.setImageDrawable(
+        binding.checkAllImage.setImageDrawable(
             IconicsDrawable(this)
                 .icon(CommunityMaterial.Icon.cmd_check_all)
                 .color(Color.WHITE)
@@ -417,7 +357,7 @@ class ConfirmActivity : CalendulaActivity() {
                 .paddingDp(0)
         )
 
-        fab!!.setOnClickListener {
+        binding.myFAB.setOnClickListener {
             var somethingToCheck = false
             for (item in items) {
                 if (!item.takenToday) {
@@ -437,7 +377,7 @@ class ConfirmActivity : CalendulaActivity() {
         }
 
 
-        toolbarLayout!!.setContentScrimColor(patient!!.color)
+        binding.collapsingToolbar.setContentScrimColor(patient!!.color)
         setupListView()
 
         if ("delay" == action) {
@@ -493,14 +433,14 @@ class ConfirmActivity : CalendulaActivity() {
     }
 
     private fun animateAllChecked() {
-        val width = appBarLayout!!.width
+        val width = binding.appbar.width
         val middle = width / 2
-        val fabCentered = middle - fab!!.width / 2
-        val translationX = fab!!.x.toInt() - fabCentered
+        val fabCentered = middle - binding.myFAB.width / 2
+        val translationX = binding.myFAB.x.toInt() - fabCentered
         val translationY = ScreenUtils.dpToPx(resources, 150f)
 
         val rippleX = middle
-        val rippleY = (fab!!.y + fab!!.height / 2).toInt() - translationY
+        val rippleY = (binding.myFAB.y + binding.myFAB.height / 2).toInt() - translationY
 
         val arcAnimation: Animation =
             ArcTranslateAnimation(0f, -translationX.toFloat(), 0f, -translationY.toFloat())
@@ -519,28 +459,28 @@ class ConfirmActivity : CalendulaActivity() {
         arcAnimation.interpolator = DecelerateInterpolator()
         arcAnimation.duration = 200
         arcAnimation.fillAfter = true
-        fab!!.startAnimation(arcAnimation)
+        binding.myFAB.startAnimation(arcAnimation)
     }
 
     private fun showRipple(x: Int, y: Int, duration: Int) {
         LogUtil.d(TAG, "Ripple x,y [$x, $y]")
-        checkAllOverlay!!.visibility = View.INVISIBLE
+        binding.checkOverlay.visibility = View.INVISIBLE
         // get the final radius for the clipping circle
         val finalRadius = hypot(
-            checkAllOverlay!!.width.toDouble(),
-            checkAllOverlay!!.height.toDouble()
+            binding.checkOverlay.width.toDouble(),
+            binding.checkOverlay.height.toDouble()
         ).toInt()
         // create the animator for this view (the start radius is zero)
         val anim = ViewAnimationUtils.createCircularReveal(
-            checkAllOverlay,
+            binding.checkOverlay,
             x,
             y,
-            (fab!!.width / 2).toFloat(),
+            (binding.myFAB.width / 2).toFloat(),
             finalRadius.toFloat()
         )
         anim.interpolator = DecelerateInterpolator()
         // make the view visible and start the animation
-        checkAllOverlay!!.visibility = View.VISIBLE
+        binding.checkOverlay.visibility = View.VISIBLE
         anim.setDuration(duration.toLong()).start()
     }
 
@@ -548,9 +488,9 @@ class ConfirmActivity : CalendulaActivity() {
         loadItems()
         itemAdapter = ConfirmItemAdapter()
         val llm = LinearLayoutManager(this)
-        listView!!.layoutManager = llm
-        listView!!.adapter = itemAdapter
-        listView!!.itemAnimator = DefaultItemAnimator()
+        binding.listView.layoutManager = llm
+        binding.listView.adapter = itemAdapter
+        binding.listView.itemAnimator = DefaultItemAnimator()
     }
 
     private fun processIntent() {
