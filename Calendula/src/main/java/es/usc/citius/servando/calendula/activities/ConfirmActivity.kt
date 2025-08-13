@@ -36,15 +36,11 @@ import android.view.animation.Animation
 import android.view.animation.DecelerateInterpolator
 import android.view.animation.OvershootInterpolator
 import android.widget.ImageButton
-import android.widget.ImageView
-import android.widget.TextView
 import android.widget.Toast
 import androidx.core.util.Pair
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import butterknife.BindView
-import butterknife.ButterKnife
 import com.mikepenz.community_material_typeface_library.CommunityMaterial
 import com.mikepenz.iconics.IconicsDrawable
 import es.usc.citius.servando.calendula.CalendulaActivity
@@ -54,6 +50,7 @@ import es.usc.citius.servando.calendula.HomePagerActivity
 import es.usc.citius.servando.calendula.R
 import es.usc.citius.servando.calendula.database.DB
 import es.usc.citius.servando.calendula.databinding.ActivityConfirmBinding
+import es.usc.citius.servando.calendula.databinding.ConfirmActivityListItemBinding
 import es.usc.citius.servando.calendula.persistence.DailyScheduleItem
 import es.usc.citius.servando.calendula.persistence.Medicine
 import es.usc.citius.servando.calendula.persistence.Patient
@@ -594,9 +591,9 @@ class ConfirmActivity : CalendulaActivity() {
         RecyclerView.Adapter<ConfirmItemAdapter.ConfirmItemViewHolder>() {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ConfirmItemViewHolder {
-            val v = LayoutInflater.from(parent.context)
-                .inflate(R.layout.confirm_activity_list_item, parent, false)
-            return ConfirmItemViewHolder(v)
+            val inflater = LayoutInflater.from(parent.context)
+            val binding = ConfirmActivityListItemBinding.inflate(inflater, parent, false)
+            return ConfirmItemViewHolder(binding)
         }
 
         override fun onBindViewHolder(holder: ConfirmItemViewHolder, position: Int) {
@@ -615,13 +612,13 @@ class ConfirmActivity : CalendulaActivity() {
                     ) + "h"
             }
 
-            holder.med.text = m.name
-            holder.dose.text = getDisplayableDose(
+            holder.binding.medItemName.text = m.name
+            holder.binding.medItemDose.text = getDisplayableDose(
                 (if (i.boundToSchedule()) s.dose() else si.dose).toDouble(),
                 if (i.boundToSchedule()) s.displayDose() else si.displayDose(),
                 m
             )
-            holder.status.text = status
+            holder.binding.medItemStatus.text = status
             holder.dailyScheduleItem = i
             updateCheckedStatus(p, i, holder)
         }
@@ -644,33 +641,15 @@ class ConfirmActivity : CalendulaActivity() {
             val checkDrawable = if (i.takenToday) getCheckedIcon(Color.parseColor("#81c784"))
             else getUncheckedIcon(Color.parseColor("#11000000"))
 
-            h.check.setImageDrawable(checkDrawable)
-            h.icon.setImageDrawable(medDrawable)
+            h.binding.checkButton.setImageDrawable(checkDrawable)
+            h.binding.imageView.setImageDrawable(medDrawable)
         }
 
-        internal inner class ConfirmItemViewHolder(itemView: View) : RecyclerView.ViewHolder(
-            itemView
-        ), View.OnClickListener {
-            @BindView(R.id.med_item_name)
-            lateinit var med: TextView
-
-            @BindView(R.id.med_item_dose)
-            lateinit var dose: TextView
-
-            @BindView(R.id.med_item_status)
-            lateinit var status: TextView
-
-            @BindView(R.id.check_button)
-            lateinit var check: ImageButton
-
-            @BindView(R.id.imageView)
-            lateinit var icon: ImageView
-
+        internal inner class ConfirmItemViewHolder(val binding: ConfirmActivityListItemBinding) : RecyclerView.ViewHolder(binding.root), View.OnClickListener {
             lateinit var dailyScheduleItem: DailyScheduleItem
 
             init {
-                ButterKnife.bind(this, itemView)
-                check.setOnClickListener(this)
+                binding.checkButton.setOnClickListener(this)
             }
 
             override fun onClick(view: View) {
@@ -680,14 +659,14 @@ class ConfirmActivity : CalendulaActivity() {
                         dailyScheduleItem.takenToday = !taken
                         DB.dailyScheduleItems().saveAndUpdateStock(dailyScheduleItem, true)
                         stateChanged = true
-                        onDailyAgendaItemCheck(check)
+                        onDailyAgendaItemCheck(binding.checkButton)
                         notifyItemChanged(adapterPosition)
                     }, taken)
                 } else {
                     dailyScheduleItem.takenToday = !taken
                     DB.dailyScheduleItems().saveAndUpdateStock(dailyScheduleItem, true)
                     stateChanged = true
-                    onDailyAgendaItemCheck(check)
+                    onDailyAgendaItemCheck(binding.checkButton)
                     notifyItemChanged(adapterPosition)
                 }
             }
