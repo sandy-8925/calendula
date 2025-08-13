@@ -291,7 +291,6 @@ class ConfirmActivity : CalendulaActivity() {
         super.onCreate(savedInstanceState)
         processIntent()
         setContentView(binding.root)
-        ButterKnife.bind(this)
 
         val window = window
         window.addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD)
