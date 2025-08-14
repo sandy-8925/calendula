@@ -18,9 +18,11 @@
 package es.usc.citius.servando.calendula.activities
 
 import android.app.AlertDialog
+import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.res.ColorStateList
+import android.content.res.Resources
 import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.os.Bundle
@@ -35,7 +37,6 @@ import android.view.WindowManager
 import android.view.animation.Animation
 import android.view.animation.DecelerateInterpolator
 import android.view.animation.OvershootInterpolator
-import android.widget.ImageButton
 import android.widget.Toast
 import androidx.core.util.Pair
 import androidx.recyclerview.widget.DefaultItemAnimator
@@ -87,11 +88,9 @@ class ConfirmActivity : CalendulaActivity() {
     private var itemAdapter: ConfirmItemAdapter? = null
     private val dateFormatter: DateTimeFormatter = DateTimeFormat.forPattern("dd/MM/YYYY")
     private val timeFormatter: DateTimeFormatter = DateTimeFormat.forPattern("HH:mm")
-    private var checkedIcon: IconicsDrawable? = null
-    private var uncheckedIcon: IconicsDrawable? = null
     private var color = 0
     private var position = -1
-    private val items: MutableList<DailyScheduleItem> = ArrayList()
+    private val items = mutableListOf<DailyScheduleItem>()
     private var date: LocalDate? = null
     private var time: LocalTime? = null
     private var patient: Patient? = null
@@ -194,11 +193,10 @@ class ConfirmActivity : CalendulaActivity() {
         builder.create().show()
     }
 
-    fun getDisplayableDose(dose: Double, doseString: String, m: Medicine): String {
-        return doseString + " " + m.presentation.units(resources, dose)
-    }
-
-    fun showEnsureConfirmDialog(listener: DialogInterface.OnClickListener?, uncheck: Boolean) {
+    private fun showEnsureConfirmDialog(
+        listener: DialogInterface.OnClickListener?,
+        uncheck: Boolean
+    ) {
         val builder = AlertDialog.Builder(this)
         val t = date!!.toDateTime(time)
 
@@ -234,8 +232,7 @@ class ConfirmActivity : CalendulaActivity() {
                 ) { dialog, id -> dialog.cancel() }
         }
 
-        val alert = builder.create()
-        alert.show()
+        builder.create().show()
     }
 
     override fun onBackPressed() {
@@ -254,7 +251,7 @@ class ConfirmActivity : CalendulaActivity() {
         }
 
         if (somethingChecked) {
-            itemAdapter!!.notifyDataSetChanged()
+            itemAdapter?.notifyDataSetChanged()
             stateChanged = true
             binding.myFAB.postDelayed({ animateAllChecked() }, 100)
             onAllChecked()
@@ -401,7 +398,7 @@ class ConfirmActivity : CalendulaActivity() {
         startActivity(intent)
     }
 
-    protected fun onDailyAgendaItemCheck(v: ImageButton?) {
+    private fun onDailyAgendaItemCheck() {
         val total = items.size
         var checked = 0
 
@@ -480,9 +477,26 @@ class ConfirmActivity : CalendulaActivity() {
         anim.setDuration(duration.toLong()).start()
     }
 
+    private val checkBtnClickListener = DSIClickListener { dailyScheduleItem ->
+            val taken = dailyScheduleItem.takenToday
+            if (isDistant) {
+                showEnsureConfirmDialog({ dialogInterface, i ->
+                    dailyScheduleItem.takenToday = !taken
+                    DB.dailyScheduleItems().saveAndUpdateStock(dailyScheduleItem, true)
+                    stateChanged = true
+                    onDailyAgendaItemCheck()
+                }, taken)
+            } else {
+                dailyScheduleItem.takenToday = !taken
+                DB.dailyScheduleItems().saveAndUpdateStock(dailyScheduleItem, true)
+                stateChanged = true
+                onDailyAgendaItemCheck()
+            }
+    }
+
     private fun setupListView() {
         loadItems()
-        itemAdapter = ConfirmItemAdapter()
+        itemAdapter = ConfirmItemAdapter(checkBtnClickListener, items)
         val llm = LinearLayoutManager(this)
         binding.listView.layoutManager = llm
         binding.listView.adapter = itemAdapter
@@ -553,10 +567,97 @@ class ConfirmActivity : CalendulaActivity() {
         }
     }
 
-    private fun getCheckedIcon(color: Int): Drawable? {
+    class ConfirmStateChangeEvent(position: Int) {
+        var position: Int = -1
+
+        init {
+            this.position = position
+        }
+    }
+
+
+    companion object {
+        private const val DEFAULT_CHECK_MARGIN = 3
+        private const val TAG = "ConfirmActivity"
+    }
+}
+
+private class ConfirmItemAdapter(
+    private val checkBtnClickListener: DSIClickListener,
+    private val items: List<DailyScheduleItem>
+) :
+    RecyclerView.Adapter<ConfirmItemViewHolder>() {
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ConfirmItemViewHolder {
+        val inflater = LayoutInflater.from(parent.context)
+        val binding = ConfirmActivityListItemBinding.inflate(inflater, parent, false)
+        return ConfirmItemViewHolder(binding)
+    }
+
+    override fun onBindViewHolder(holder: ConfirmItemViewHolder, position: Int) {
+        val context = holder.itemView.context
+        val i = items[position]
+        val si = i.scheduleItem
+        val sid: Long = if (i.boundToSchedule()) i.schedule.id else si.schedule.id
+        val s = DB.schedules().findById(sid)
+        val m: Medicine = s.medicine()
+        val p = m.presentation
+
+        var status = context.getString(R.string.med_not_taken)
+        if (i.timeTaken != null) {
+            status =
+                (if (i.takenToday) context.getString(R.string.med_taken_at) else context.getString(R.string.med_cancelled_at)) + " " + i.timeTaken.toString(
+                    "HH:mm"
+                ) + "h"
+        }
+
+        holder.binding.medItemName.text = m.name
+        holder.binding.medItemDose.text = getDisplayableDose(
+            context.resources,
+            (if (i.boundToSchedule()) s.dose() else si.dose).toDouble(),
+            if (i.boundToSchedule()) s.displayDose() else si.displayDose(),
+            m
+        )
+        holder.binding.medItemStatus.text = status
+        holder.dailyScheduleItem = i
+        holder.binding.checkButton.setOnClickListener {
+            checkBtnClickListener.dsiClick(holder.dailyScheduleItem)
+            notifyItemChanged(holder.adapterPosition)
+        }
+        updateCheckedStatus(context, p, i, holder)
+    }
+
+    override fun getItemCount(): Int {
+        return items.size
+    }
+
+    private fun updateCheckedStatus(
+        context: Context,
+        p: Presentation,
+        i: DailyScheduleItem,
+        h: ConfirmItemViewHolder
+    ) {
+        val medDrawable: Drawable = IconicsDrawable(context)
+            .icon(p.icon())
+            .color(if (i.takenToday) Color.parseColor("#81c784") else Color.parseColor("#11000000"))
+            .sizeDp(36)
+            .paddingDp(0)
+
+        val checkDrawable = if (i.takenToday) getCheckedIcon(context, Color.parseColor("#81c784"))
+        else getUncheckedIcon(context, Color.parseColor("#11000000"))
+
+        h.binding.checkButton.setImageDrawable(checkDrawable)
+        h.binding.imageView.setImageDrawable(medDrawable)
+    }
+
+    private fun getDisplayableDose(resources: Resources, dose: Double, doseString: String, m: Medicine): String {
+        return doseString + " " + m.presentation.units(resources, dose)
+    }
+
+    private fun getCheckedIcon(context: Context, color: Int): Drawable? {
         if (checkedIcon == null) {
             checkedIcon = IconicsDrawable(
-                this,
+                context,
                 CommunityMaterial.Icon.cmd_checkbox_marked_circle_outline
             ) //cmd_checkbox_marked_outline
                 .sizeDp(30)
@@ -566,10 +667,10 @@ class ConfirmActivity : CalendulaActivity() {
         return checkedIcon
     }
 
-    private fun getUncheckedIcon(color: Int): Drawable? {
+    private fun getUncheckedIcon(context: Context, color: Int): Drawable? {
         if (uncheckedIcon == null) {
             uncheckedIcon = IconicsDrawable(
-                this,
+                context,
                 CommunityMaterial.Icon.cmd_checkbox_blank_circle_outline
             ) //cmd_checkbox_blank_outline
                 .sizeDp(30)
@@ -579,103 +680,14 @@ class ConfirmActivity : CalendulaActivity() {
         return uncheckedIcon
     }
 
-    class ConfirmStateChangeEvent(position: Int) {
-        var position: Int = -1
+    private var checkedIcon: IconicsDrawable? = null
+    private var uncheckedIcon: IconicsDrawable? = null
+}
 
-        init {
-            this.position = position
-        }
-    }
+private class ConfirmItemViewHolder(val binding: ConfirmActivityListItemBinding) : RecyclerView.ViewHolder(binding.root) {
+    lateinit var dailyScheduleItem: DailyScheduleItem
+}
 
-    internal inner class ConfirmItemAdapter :
-        RecyclerView.Adapter<ConfirmItemAdapter.ConfirmItemViewHolder>() {
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ConfirmItemViewHolder {
-            val inflater = LayoutInflater.from(parent.context)
-            val binding = ConfirmActivityListItemBinding.inflate(inflater, parent, false)
-            return ConfirmItemViewHolder(binding)
-        }
-
-        override fun onBindViewHolder(holder: ConfirmItemViewHolder, position: Int) {
-            val i = items[position]
-            val si = i.scheduleItem
-            val sid: Long = if (i.boundToSchedule()) i.schedule.id else si.schedule.id
-            val s = DB.schedules().findById(sid)
-            val m: Medicine = s.medicine()
-            val p = m.presentation
-
-            var status = getString(R.string.med_not_taken)
-            if (i.timeTaken != null) {
-                status =
-                    (if (i.takenToday) getString(R.string.med_taken_at) else getString(R.string.med_cancelled_at)) + " " + i.timeTaken.toString(
-                        "HH:mm"
-                    ) + "h"
-            }
-
-            holder.binding.medItemName.text = m.name
-            holder.binding.medItemDose.text = getDisplayableDose(
-                (if (i.boundToSchedule()) s.dose() else si.dose).toDouble(),
-                if (i.boundToSchedule()) s.displayDose() else si.displayDose(),
-                m
-            )
-            holder.binding.medItemStatus.text = status
-            holder.dailyScheduleItem = i
-            updateCheckedStatus(p, i, holder)
-        }
-
-        override fun getItemCount(): Int {
-            return items.size
-        }
-
-        private fun updateCheckedStatus(
-            p: Presentation,
-            i: DailyScheduleItem,
-            h: ConfirmItemViewHolder
-        ) {
-            val medDrawable: Drawable = IconicsDrawable(this@ConfirmActivity)
-                .icon(p.icon())
-                .color(if (i.takenToday) Color.parseColor("#81c784") else Color.parseColor("#11000000"))
-                .sizeDp(36)
-                .paddingDp(0)
-
-            val checkDrawable = if (i.takenToday) getCheckedIcon(Color.parseColor("#81c784"))
-            else getUncheckedIcon(Color.parseColor("#11000000"))
-
-            h.binding.checkButton.setImageDrawable(checkDrawable)
-            h.binding.imageView.setImageDrawable(medDrawable)
-        }
-
-        internal inner class ConfirmItemViewHolder(val binding: ConfirmActivityListItemBinding) : RecyclerView.ViewHolder(binding.root), View.OnClickListener {
-            lateinit var dailyScheduleItem: DailyScheduleItem
-
-            init {
-                binding.checkButton.setOnClickListener(this)
-            }
-
-            override fun onClick(view: View) {
-                val taken = dailyScheduleItem.takenToday
-                if (isDistant) {
-                    showEnsureConfirmDialog({ dialogInterface, i ->
-                        dailyScheduleItem.takenToday = !taken
-                        DB.dailyScheduleItems().saveAndUpdateStock(dailyScheduleItem, true)
-                        stateChanged = true
-                        onDailyAgendaItemCheck(binding.checkButton)
-                        notifyItemChanged(adapterPosition)
-                    }, taken)
-                } else {
-                    dailyScheduleItem.takenToday = !taken
-                    DB.dailyScheduleItems().saveAndUpdateStock(dailyScheduleItem, true)
-                    stateChanged = true
-                    onDailyAgendaItemCheck(binding.checkButton)
-                    notifyItemChanged(adapterPosition)
-                }
-            }
-        }
-    }
-
-
-    companion object {
-        private const val DEFAULT_CHECK_MARGIN = 3
-        private const val TAG = "ConfirmActivity"
-    }
+private fun interface DSIClickListener {
+    fun dsiClick(dailyScheduleItem: DailyScheduleItem)
 }
