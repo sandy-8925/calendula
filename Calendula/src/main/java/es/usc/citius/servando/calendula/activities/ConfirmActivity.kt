@@ -91,7 +91,7 @@ class ConfirmActivity : CalendulaActivity() {
     private var color = 0
     private var position = -1
     private val items = mutableListOf<DailyScheduleItem>()
-    private var date: LocalDate? = null
+    private lateinit var date: LocalDate
     private var time: LocalTime? = null
     private var patient: Patient? = null
     private var routine: Routine? = null
@@ -198,10 +198,10 @@ class ConfirmActivity : CalendulaActivity() {
         uncheck: Boolean
     ) {
         val builder = AlertDialog.Builder(this)
-        val t = date!!.toDateTime(time)
+        val t = date.toDateTime(time)
 
         val title =
-            if (t.isAfterNow) getString(R.string.intake_not_available) else getString(R.string.meds_from) + " " + date!!.toString(
+            if (t.isAfterNow) getString(R.string.intake_not_available) else getString(R.string.meds_from) + " " + date.toString(
                 "EEEE dd"
             ) + " " + getString(
                 R.string.at_time_connector
@@ -290,29 +290,31 @@ class ConfirmActivity : CalendulaActivity() {
 
         this.window.addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD)
 
-        isToday = LocalDate.now() == date
-        isInWindow = AlarmScheduler.isWithinDefaultMargins(date!!.toDateTime(time))
+        val dt = date.toDateTime(time)
 
-        val dt = date!!.toDateTime(time)
+        isToday = LocalDate.now() == date
+        isInWindow = AlarmScheduler.isWithinDefaultMargins(dt)
+
         val now = DateTime.now()
         val interval = getCheckMarginInterval(dt)
         isDistant = !Interval(interval.first, interval.second).contains(now)
 
-        color = AvatarMgr.colorsFor(resources, patient!!.avatar)[0]
+        color = AvatarMgr.colorsFor(resources, patient?.avatar)[0]
         color = Color.parseColor("#263238")
 
         setupStatusBar(Color.TRANSPARENT)
         setupToolbar("", Color.TRANSPARENT, Color.WHITE)
-        toolbar!!.setTitleTextColor(Color.WHITE)
+        toolbar?.setTitleTextColor(Color.WHITE)
 
-        binding.patientAvatar.setImageResource(AvatarMgr.res(patient!!.avatar))
-        binding.patientAvatarTitle.setImageResource(AvatarMgr.res(patient!!.avatar))
-        binding.routineNameTitle.text = patient!!.name
-        binding.routineName.text = if (isRoutine) routine!!.name else schedule!!.toReadableString(this)
+        binding.patientAvatar.setImageResource(AvatarMgr.res(patient?.avatar))
+        binding.patientAvatarTitle.setImageResource(AvatarMgr.res(patient?.avatar))
+        patient?.let { binding.routineNameTitle.text = it.name }
+        binding.routineName.text = if (isRoutine) routine?.name else schedule?.toReadableString(this)
         binding.textView3.text =
-            if (isInWindow) getString(R.string.agenda_zoom_meds_time) else getString(
-                R.string.meds_from
-            ) + " " + date!!.toString("EEEE dd")
+            if (isInWindow) getString(R.string.agenda_zoom_meds_time)
+            else {
+                "${getString(R.string.meds_from)} ${date.toString("EEEE dd")}"
+            }
 
         relativeTime = DateUtils.getRelativeTimeSpanString(
             dt.millis,
@@ -321,13 +323,9 @@ class ConfirmActivity : CalendulaActivity() {
             DateUtils.FORMAT_ABBREV_ALL
         ).toString()
 
-        binding.routinesListItemHour.text = time!!.toString("HH:")
-        binding.routinesListItemMinute.text = time!!.toString("mm")
-        binding.userFriendlyTime.text = String.format(
-            "%s%s",
-            relativeTime.substring(0, 1).uppercase(Locale.getDefault()),
-            relativeTime.substring(1)
-        )
+        binding.routinesListItemHour.text = time?.toString("HH:")
+        binding.routinesListItemMinute.text = time?.toString("mm")
+        binding.userFriendlyTime.text = String.format("%s%s", relativeTime.substring(0, 1).uppercase(Locale.getDefault()), relativeTime.substring(1))
 
         if (isDistant) {
             binding.myFAB.backgroundTintList =
@@ -375,17 +373,13 @@ class ConfirmActivity : CalendulaActivity() {
         setupListView()
 
         if ("delay" == action) {
-            if (isRoutine && routine != null) {
+            if (isRoutine) {
+                routine?.let {
+                    ReminderNotification.cancel(this, ReminderNotification.routineNotificationId(it.id.toInt()))
+                }
+            } else schedule?.let{
                 ReminderNotification.cancel(
-                    this, ReminderNotification.routineNotificationId(
-                        routine!!.id.toInt()
-                    )
-                )
-            } else if (schedule != null) {
-                ReminderNotification.cancel(
-                    this, ReminderNotification.scheduleNotificationId(
-                        schedule!!.id.toInt()
-                    )
+                    this, ReminderNotification.scheduleNotificationId(it.id.toInt())
                 )
             }
             showDelayDialog()
