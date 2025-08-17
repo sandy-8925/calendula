@@ -283,7 +283,9 @@ class ConfirmActivity : CalendulaActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        processIntent()
+
+        if(!processIntent()) return
+
         setContentView(binding.root)
 
         this.window.addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD)
@@ -502,16 +504,14 @@ class ConfirmActivity : CalendulaActivity() {
         binding.listView.itemAnimator = DefaultItemAnimator()
     }
 
-    private fun processIntent() {
-        val i = intent
-        val routineId = i.getLongExtra(CalendulaApp.INTENT_EXTRA_ROUTINE_ID, -1)
-        val scheduleId = i.getLongExtra(CalendulaApp.INTENT_EXTRA_SCHEDULE_ID, -1)
-        val dateStr = i.getStringExtra(CalendulaApp.INTENT_EXTRA_DATE)
-        val timeStr = i.getStringExtra(CalendulaApp.INTENT_EXTRA_SCHEDULE_TIME)
+    private fun processIntent(): Boolean {
+        val routineId = intent.getLongExtra(CalendulaApp.INTENT_EXTRA_ROUTINE_ID, -1)
+        val scheduleId = intent.getLongExtra(CalendulaApp.INTENT_EXTRA_SCHEDULE_ID, -1)
+        val dateStr = intent.getStringExtra(CalendulaApp.INTENT_EXTRA_DATE)
+        val timeStr = intent.getStringExtra(CalendulaApp.INTENT_EXTRA_SCHEDULE_TIME)
 
-
-        action = i.getStringExtra(CalendulaApp.INTENT_EXTRA_ACTION)
-        position = i.getIntExtra(CalendulaApp.INTENT_EXTRA_POSITION, -1)
+        action = intent.getStringExtra(CalendulaApp.INTENT_EXTRA_ACTION)
+        position = intent.getIntExtra(CalendulaApp.INTENT_EXTRA_POSITION, -1)
 
         fromNotification = position == -1
 
@@ -523,6 +523,7 @@ class ConfirmActivity : CalendulaActivity() {
             intent.putExtra("invalid_notification_error", true)
             startActivity(intent)
             finish()
+            return false
         }
 
         LogUtil.d(TAG, "$timeStr, $dateStr, $routineId, $scheduleId, $date")
@@ -539,6 +540,8 @@ class ConfirmActivity : CalendulaActivity() {
                 patient = it.patient()
             }
         }
+
+        return true
     }
 
     private fun loadItems() {
