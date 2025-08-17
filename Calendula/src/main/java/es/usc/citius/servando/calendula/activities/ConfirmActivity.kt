@@ -286,8 +286,7 @@ class ConfirmActivity : CalendulaActivity() {
         processIntent()
         setContentView(binding.root)
 
-        val window = window
-        window.addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD)
+        this.window.addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD)
 
         isToday = LocalDate.now() == date
         isInWindow = AlarmScheduler.isWithinDefaultMargins(date!!.toDateTime(time))
